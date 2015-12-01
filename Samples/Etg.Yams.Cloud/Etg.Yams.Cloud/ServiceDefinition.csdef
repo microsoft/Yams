@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="Etg.Yams.Cloud" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2014-06.2.4" upgradeDomainCount="5">
+  <WorkerRole name="Etg.Yams.WorkerRole" vmsize="ExtraLarge" >
+    <Runtime executionContext="elevated" />
+    <Imports>
+      <Import moduleName="RemoteAccess" />
+      <Import moduleName="RemoteForwarder" />
+    </Imports>
+    <ConfigurationSettings>
+      <Setting name="StorageDataConnectionString" />
+      <Setting name="UpdateFrequencyInSeconds" />
+      <Setting name="ApplicationRestartCount" />
+    </ConfigurationSettings>
+
+    <Endpoints>
+      <InputEndpoint name="HttpsIn" protocol="https" port="443" certificate="MY_CERTIFICATE"/>
+      <InputEndpoint name="HttpIn" protocol="http" port="80"/>
+      <InternalEndpoint name="TcpEndpoints" protocol="tcp">
+        <FixedPortRange min="81" max="400"/>
+      </InternalEndpoint>
+    </Endpoints>
+
+    <LocalResources>
+      <LocalStorage name="LocalStoreDirectory" cleanOnRoleRecycle="false" />
+    </LocalResources>
+    <Certificates>
+      <Certificate name="MY_CERTIFICATE" storeLocation="LocalMachine" storeName="MY_STORE_NAME" />
+    </Certificates>
+    <Startup>
+      <Task commandLine="ServerGC.cmd" executionContext="elevated" taskType="simple">
+        <Environment>
+          <Variable name="UseServerGC" value="True" />
+          <Variable name="UseBackgroundGC" value="True" />
+        </Environment>
+      </Task>
+    </Startup>
+  </WorkerRole>
+</ServiceDefinition>
