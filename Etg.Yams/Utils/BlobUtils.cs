@@ -46,7 +46,7 @@ namespace Etg.Yams.Utils
 
         private static string GetRelativePath(ICloudBlob blob, dynamic blobDirectory)
         {
-            return blob.Uri.LocalPath.Remove(0, blobDirectory.Uri.LocalPath.Length).Replace('/', '\\');
+            return blob.Uri.LocalPath.Remove(0, blobDirectory.Uri.LocalPath.Length).Replace('/', '\\').TrimStart('\\');
         }
 
         public static async Task CreateEmptyBlob(ICloudBlob blob)
