@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Etg.Yams</id>
+    <version>1.0.10</version>
+    <title>YAMS</title>
+    <authors>Nehme Bilal,Remus Radu</authors>
+    <owners>Microsoft Studios (BigPark)</owners>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>YAMS is a framework for deploying and hosting microservices that allows quick deployments of Azure services (~1minute), sharing infrastructure (multiple services on the same VM), versioning and more.</description>
+    <copyright>Copyright (c) Microsoft Corporation</copyright>
+  </metadata>
+</package>

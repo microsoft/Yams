@@ -1,0 +1,5 @@
+﻿{
+    "DeploymentIds": [ "deploymentId1", "deploymentId2" ],
+    "ExeName": "TestProcess.exe",
+    "ExeArgs": "foo3 foo4" 
+}

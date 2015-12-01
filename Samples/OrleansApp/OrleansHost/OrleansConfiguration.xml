@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<OrleansConfiguration xmlns="urn:orleans">
+  <Globals>
+    <SystemStore SystemStoreType="AzureTable" DeploymentId="" DataConnectionString="MY_DATA_CONNECTION_STRING"/>
+    <Liveness LivenessType="AzureTable" ProbeTimeout="3s" TableRefreshTimeout="3s" DeathVoteExpirationTimeout="120s" NumMissedProbesLimit="3" NumProbedSilos="3" NumVotesForDeathDeclaration="2"/>
+    <StorageProviders>
+      <Provider Type="Orleans.Storage.MemoryStorage" Name="MemoryStore" />
+      <Provider Type="Orleans.Storage.AzureTableStorage"
+                      Name="AzureStore"
+                      DataConnectionString="MY_DATA_CONNECTION_STRING" />
+    </StorageProviders>
+  </Globals>
+  <Defaults>
+    <Networking Address="" Port="100"/>
+    <ProxyingGateway Address="" Port="101"/>
+    <Statistics MetricsTableWriteInterval="30s" PerfCounterWriteInterval="30s" LogWriteInterval="300s" WriteLogStatisticsToTable="true"/>
+    <Tracing DefaultTraceLevel="Error" TraceToConsole="true" TraceToFile="trace.log">
+    </Tracing>
+  </Defaults>
+</OrleansConfiguration>

@@ -1,0 +1,4 @@
+﻿{
+    "ExeName": "TestProcess.exe",
+    "ExeArgs": "foo1 foo2" 
+}

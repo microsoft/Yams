@@ -1,0 +1,4 @@
+﻿{ 
+    "ExeName": "HelloApp.exe", 
+    "ExeArgs": "${Id}_${Version.Major}.${Version.Minor}_${InstanceId} OrleansConfiguration.xml deploymentId=${Id}_${Version.Major}.${Version.Minor}_${DeploymentId}"  
+}
