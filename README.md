@@ -1,11 +1,12 @@
 YAMS
 =======
 **YAMS** (Yet Another Microservices Solution) is a library that can be used to deploy and host microservices in Azure. It offers the following features:
-* Quick deployments of Azure services (~1minute). 
-* Sharing infrastructure (multiple microservices can be deployed to the same cloud service). 
-* Versioning of microservices, quick updates, reverts, etc. 
+* **Quick deployments** of Azure services (~1minute). 
+* **Sharing infrastructure** (multiple microservices can be deployed to the same cloud service). 
+* **Versioning** of microservices, quick **updates**, **reverts**, etc. 
+* Microservices can be developed in **any programming language** and deployed with YAMS (as long as your service can be started with an exe).
 
-As long as your service can be started with an **exe**, you can deploy it with YAMS (see the documentation to learn how you can pass arguments to your *exe*).
+YAMS relies on Azure **blob storage** to deploy applications. To deploy an application to a YAMS cluster, simply drop the binaries of the application in blob storage. The binaries are then picked-up by YAMS, deployed to all VMs in the cluster and then launched.
 
 Please read the documentation below for more information.
 
