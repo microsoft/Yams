@@ -61,9 +61,9 @@ Yams can be deployed to Azure like any typical cloud service. The [Deploy YAMS t
 ## Scanning blob storage
 When a Yams cluster is deployed to a cloud service, each instance in the cluster reads the `DeploymentConfig.json` file and deploy all apps that have the corresponding `DeploymentId` (the deployment id of the cloud service where the Yams cluster is deployed). Then, periodically, each Yams instance scans the `DeploymentConfig.json` file for changes and takes the appropriate actions. There are three types of changes that can occur:
 
-1. **[An application is added]** 
-2. **[An application is removed]**
-3. **[An application is updated]**
+1. **An application is added** 
+2. **An application is removed**
+3. **An application is updated**
 
 ### Adding an application
 This occurs when a new application or a new version of an application is added to the `DeploymentConfig.json` file. Each Yams instance downloads the app's binaries to the VM where it's running and starts the application using the exe available with the binaries. In fact, each Yams application (i.e. microservice) contains an `AppConfig.json` file that describes how the application can be started. The `AppConfig.json` file has the following structure:
@@ -92,6 +92,8 @@ This occurs when an application or a version of an application is removed from t
 This occurs when the version of an existing application has changed in the `DeploymentConfig.json` file (this includes upgrades and downgrades). Each Yams instance removes the old version of the application and then adds the new version.
 
 Yams supports **Azure Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates. In fact, each Yams instance (VM) in the Yams cluster is associated with an **upgrade domain** and only VMs with the same upgrade domain can be updated simultaneously. When a Yams instance attempts to update an application, it checks first if the application is being updated on another Yams instance with a different upgrade domain. If that's the case, the Yams instance discards the update and attempts again at the next blob storage scan; until it eventually performs the update.
+
+Note that if an update fails, Yams will not try to revert back to the old version. However, Yams will keep trying to perform the update at every cycle (every time it checks for updates) and log errors if the installation fails.
 
 ## Sharing infrastructure
 One of the main goals of Yams is sharing infrastructure to reduce cost. In fact, some microservices consume little resources and can be deployed alongside other microservices. In addition, sharing infrastructure reduces the cost of over-provisioning resources. To illustrate this, consider an application composed of two microservices. Each microservice requires 2 VMs at normal operation load and 4 VMs at peak time. If each microservice is deployed separately, 8 VMs are needed in total (4 VMs per microservice). However, in practice, the peak time resources are over estimated and the peak time of one microservice does not necessarily overlap with the peak time of another microservice. If the same VMs are shared by both microservices and peak times are not likely to overlap, 6 VMs can be sufficient for both microservices (which saves us 2 VMs). In fact, this strategy works better for a large number of microservices where the probability of all microservices peaking at the same time decreases with the number of microservices and as a result, sharing infrastructure can result in large savings.
