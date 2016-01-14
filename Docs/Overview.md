@@ -1,6 +1,6 @@
 # YAMS Overview
 
-The Azure **cloud services** platform allows developers to deploy and host highly available, reliable and scalable cloud applications in the cloud. The platform handles creating and managing VMs, load balancing, scaling (and auto-scaling), Virtual IP (VIP) swap and more.
+The [Microsoft Azure cloud services](https://azure.microsoft.com/en-us/services/cloud-services/) platform allows developers to deploy and host highly available, reliable and scalable cloud applications in the cloud. The platform handles creating and managing VMs, load balancing, scaling (and auto-scaling), Virtual IP (VIP) swap and more.
 
 Typically, an application is first deployed to a staging environment for testing. If testing is successful, the application is promoted to the production environment by performing a VIP swap. With each environment (e.g. staging and production) is associated at least one VM where the application will be running. For real world applications, several VMs are usually needed to handle traffic.
 
@@ -93,7 +93,9 @@ This occurs when the version of an existing application has changed in the `Depl
 
 Yams supports **Azure Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates. In fact, each Yams instance (VM) in the Yams cluster is associated with an **upgrade domain** and only VMs with the same upgrade domain can be updated simultaneously. When a Yams instance attempts to update an application, it checks first if the application is being updated on another Yams instance with a different upgrade domain. If that's the case, the Yams instance discards the update and attempts again at the next blob storage scan; until it eventually performs the update.
 
-Note that if an update fails, Yams will not try to revert back to the old version. However, Yams will keep trying to perform the update at every cycle (every time it checks for updates) and log errors if the installation fails.
+Note that if an update fails, Yams will not try to revert back to the old version. However, Yams will keep trying to perform the update at every cycle (every time it checks for updates) and will log errors if the installation fails. Yams uses `System.Diagnostics.Trace` to log errors which can be re-routed to blob storage or other locations by configuring the appropriate trace listener.
+
+To revert a deployment, simply edit the `DeploymentConfig.json` file and replace the current version of the app (the version to be reverted) with the old version (the version to revert to).
 
 ## Sharing infrastructure
 One of the main goals of Yams is sharing infrastructure to reduce cost. In fact, some microservices consume little resources and can be deployed alongside other microservices. In addition, sharing infrastructure reduces the cost of over-provisioning resources. To illustrate this, consider an application composed of two microservices. Each microservice requires 2 VMs at normal operation load and 4 VMs at peak time. If each microservice is deployed separately, 8 VMs are needed in total (4 VMs per microservice). However, in practice, the peak time resources are over estimated and the peak time of one microservice does not necessarily overlap with the peak time of another microservice. If the same VMs are shared by both microservices and peak times are not likely to overlap, 6 VMs can be sufficient for both microservices (which saves us 2 VMs). In fact, this strategy works better for a large number of microservices where the probability of all microservices peaking at the same time decreases with the number of microservices and as a result, sharing infrastructure can result in large savings.
