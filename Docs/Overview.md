@@ -150,5 +150,3 @@ To address this issue, microservices can be deployed to different Yams clusters 
 
 In the above case, CPU resources needed for `Microservice2` and `Microservice3` are scaled together (by scaling the number of VMs in cluster 2) while `Microservice1` is scaled independently (cluster 1). 
 
-Note that it's not possible to scale microservices independently within the same cluster (via VM affinity or VM count) because the load balancer of the cluster (i.e. the corresponding Azure cloud-service) would not be aware of what microservices are deployed on what VMs. In fact, the load balancer will forward requests to any VM in the cluster which may or may not contain the appropriate microservice. As a result, using different clusters is currently the only way to scale microservices independently.
-
