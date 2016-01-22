@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
-using Etg.Yams.IO;
-using Etg.Yams.Test.IO;
+using Etg.Yams.Storage;
+using Etg.Yams.Test.Storage;
 using Etg.Yams.Test.Utils;
 using Etg.Yams.Update;
 using Etg.Yams.Update.Fakes;
@@ -41,9 +41,9 @@ namespace Etg.Yams.Test
 
             // Replace the IRemoteDirectory default implementation (which uses Azure) with a LocalDirectory implementation
             // so we can use local test data.
-            _diContainer.RegisterType<IRemoteDirectory>(new ContainerControlledLifetimeManager(),
+            _diContainer.RegisterType<IYamsRepository>(new ContainerControlledLifetimeManager(),
                 new InjectionFactory(
-                    c => new LocalDirectory(_deploymentDirPath)));
+                    c => new LocalYamsRepository(_deploymentDirPath)));
 
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
             {

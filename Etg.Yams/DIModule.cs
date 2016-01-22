@@ -4,8 +4,8 @@ using Etg.Yams.Deploy;
 using Etg.Yams.Download;
 using Etg.Yams.Process;
 using Etg.Yams.Install;
-using Etg.Yams.IO;
 using Etg.Yams.Lease;
+using Etg.Yams.Storage;
 using Etg.Yams.Update;
 using Etg.Yams.Watcher;
 using Microsoft.Practices.Unity;
@@ -60,7 +60,23 @@ namespace Etg.Yams
 
             RegisterDeploymentWatcher(container);
 
-            RegisterRemoteDirectory(container);
+			RegisterYamsRepository(container);
+        }
+
+        private static void RegisterYamsRepository(IUnityContainer container)
+        {
+            container.RegisterType<IYamsRepository>(new ContainerControlledLifetimeManager(), new InjectionFactory(
+                c =>
+                {
+                    CloudBlobClient blobClient = c.Resolve<CloudBlobClient>();
+                    CloudBlobContainer blobContainer =
+                        blobClient.GetContainerReference(Constants.ApplicationsRootFolderName);
+                    if (!blobContainer.Exists())
+                    {
+                        blobContainer.Create();
+                    }
+                    return new YamsRepository(blobContainer);
+                }));
         }
 
         private static void RegisterUpdateSessionManager(IUnityContainer container)
@@ -141,7 +157,7 @@ namespace Etg.Yams
                 c =>
                 {
                     var config = c.Resolve<YamsConfig>();
-                    return new ApplicationDownloader(config.ApplicationInstallDirectory, c.Resolve<IRemoteDirectory>());
+                    return new ApplicationDownloader(config.ApplicationInstallDirectory, c.Resolve<IYamsRepository>());
                 }));
         }
 
@@ -219,22 +235,7 @@ namespace Etg.Yams
         private static void RegisterApplicationDeploymentDirectory(IUnityContainer container)
         {
             container.RegisterType<IApplicationDeploymentDirectory>(new ContainerControlledLifetimeManager(), new InjectionFactory(
-                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IRemoteDirectory>())));
-        }
-
-        private static void RegisterRemoteDirectory(IUnityContainer container)
-        {
-            container.RegisterType<IRemoteDirectory>(new ContainerControlledLifetimeManager(), new InjectionFactory(
-                c =>
-                {
-                    CloudBlobClient blobClient = container.Resolve<CloudBlobClient>();
-                    CloudBlobContainer storageContainer = blobClient.GetContainerReference(Constants.ApplicationsRootFolderName);
-                    if (!storageContainer.Exists())
-                    {
-                        storageContainer.Create();
-                    }
-                    return new AzureBlobContainer(storageContainer);
-                }));
+                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IYamsRepository>())));
         }
     }
 }
