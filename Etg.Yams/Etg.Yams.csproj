@@ -130,11 +130,9 @@
     <Compile Include="Utils\DictionaryUtils.cs" />
     <Compile Include="Storage\Config\VersionDeploymentConfig.cs" />
     <Compile Include="Storage\DuplicateBinariesException.cs" />
-    <Compile Include="Storage\IYamsRepository.cs" />
-    <Compile Include="Storage\IYamsRepositoryFactory.cs" />
-    <Compile Include="Storage\FileMode.cs" />
-    <Compile Include="Storage\YamsRepository.cs" />
-    <Compile Include="Storage\YamsRepositoryFactory.cs" />
+    <Compile Include="Storage\IDeploymentRepository.cs" />
+    <Compile Include="Storage\ConflictResolutionMode.cs" />
+    <Compile Include="Storage\BlobStorageDeploymentRepository.cs" />
     <Compile Include="Update\UpdateSessionManagerConfig.cs" />
     <Compile Include="Utils\ApplicationUtils.cs" />
     <Compile Include="Utils\AzureUtils.cs" />

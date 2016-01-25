@@ -60,12 +60,12 @@ namespace Etg.Yams
 
             RegisterDeploymentWatcher(container);
 
-			RegisterYamsRepository(container);
+			RegisterDeploymentRepository(container);
         }
 
-        private static void RegisterYamsRepository(IUnityContainer container)
+        private static void RegisterDeploymentRepository(IUnityContainer container)
         {
-            container.RegisterType<IYamsRepository>(new ContainerControlledLifetimeManager(), new InjectionFactory(
+            container.RegisterType<IDeploymentRepository>(new ContainerControlledLifetimeManager(), new InjectionFactory(
                 c =>
                 {
                     CloudBlobClient blobClient = c.Resolve<CloudBlobClient>();
@@ -75,7 +75,7 @@ namespace Etg.Yams
                     {
                         blobContainer.Create();
                     }
-                    return new YamsRepository(blobContainer);
+                    return new BlobStorageDeploymentRepository(blobContainer);
                 }));
         }
 
@@ -157,7 +157,7 @@ namespace Etg.Yams
                 c =>
                 {
                     var config = c.Resolve<YamsConfig>();
-                    return new ApplicationDownloader(config.ApplicationInstallDirectory, c.Resolve<IYamsRepository>());
+                    return new ApplicationDownloader(config.ApplicationInstallDirectory, c.Resolve<IDeploymentRepository>());
                 }));
         }
 
@@ -235,7 +235,7 @@ namespace Etg.Yams
         private static void RegisterApplicationDeploymentDirectory(IUnityContainer container)
         {
             container.RegisterType<IApplicationDeploymentDirectory>(new ContainerControlledLifetimeManager(), new InjectionFactory(
-                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IYamsRepository>())));
+                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentRepository>())));
         }
     }
 }

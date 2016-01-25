@@ -41,9 +41,9 @@ namespace Etg.Yams.Test
 
             // Replace the IRemoteDirectory default implementation (which uses Azure) with a LocalDirectory implementation
             // so we can use local test data.
-            _diContainer.RegisterType<IYamsRepository>(new ContainerControlledLifetimeManager(),
+            _diContainer.RegisterType<IDeploymentRepository>(new ContainerControlledLifetimeManager(),
                 new InjectionFactory(
-                    c => new LocalYamsRepository(_deploymentDirPath)));
+                    c => new LocalDeploymentRepository(_deploymentDirPath)));
 
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
             {

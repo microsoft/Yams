@@ -4,24 +4,23 @@ using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Storage;
 using Etg.Yams.Utils;
-using FileMode = Etg.Yams.Storage.FileMode;
 
 namespace Etg.Yams.Download
 {
     public class ApplicationDownloader : IApplicationDownloader
     {
         private readonly string _applicationRootPath;
-        private readonly IYamsRepository _yamsRepository;
+        private readonly IDeploymentRepository _deploymentRepository;
 
         /// <summary>
         /// Downloads application from the remote directory to the local file system.
         /// </summary>
         /// <param name="applicationRootPath">The target path where the applications will be downloaded</param>
-        /// <param name="yamsRepository"></param>
-        public ApplicationDownloader(string applicationRootPath, IYamsRepository yamsRepository)
+        /// <param name="deploymentRepository"></param>
+        public ApplicationDownloader(string applicationRootPath, IDeploymentRepository deploymentRepository)
         {
             _applicationRootPath = applicationRootPath;
-            _yamsRepository = yamsRepository;
+            _deploymentRepository = deploymentRepository;
         }
 
         public async Task DownloadApplication(AppIdentity appIdentity)
@@ -31,8 +30,8 @@ namespace Etg.Yams.Download
                 string destPath = Path.Combine(_applicationRootPath,
                     ApplicationUtils.GetApplicationRelativePath(appIdentity));
                 await
-                    _yamsRepository.DownloadApplicationBinaries(appIdentity, destPath,
-                        FileMode.OverwriteExistingBinaries);
+                    _deploymentRepository.DownloadApplicationBinaries(appIdentity, destPath,
+                        ConflictResolutionMode.OverwriteExistingBinaries);
             }
             catch (BinariesNotFoundException)
             {

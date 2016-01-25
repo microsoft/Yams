@@ -4,16 +4,15 @@ using Etg.Yams.Application;
 using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Utils;
-using FileMode = Etg.Yams.Storage.FileMode;
 
 namespace Etg.Yams.Test.Storage
 {
-    public class LocalYamsRepository : IYamsRepository
+    public class LocalDeploymentRepository : IDeploymentRepository
     {
         private readonly string _path;
         private readonly string _deploymentConfigPath;
 
-        public LocalYamsRepository(string path)
+        public LocalDeploymentRepository(string path)
         {
             _path = path;
             _deploymentConfigPath = Path.Combine(_path, Constants.DeploymentConfigFileName);
@@ -31,7 +30,7 @@ namespace Etg.Yams.Test.Storage
             return Task.CompletedTask;
         }
 
-        public Task UploadApplicationBinaries(AppIdentity appIdentity, string localPath, FileMode fileMode)
+        public Task UploadApplicationBinaries(AppIdentity appIdentity, string localPath, ConflictResolutionMode conflictResolutionMode)
         {
             if (FileUtils.DirectoryDoesntExistOrEmpty(localPath))
             {
@@ -43,11 +42,11 @@ namespace Etg.Yams.Test.Storage
             bool binariesExist = FileUtils.DirectoryDoesntExistOrEmpty(destPath);
             if (binariesExist)
             {
-                if (fileMode == FileMode.DoNothingIfBinariesExist)
+                if (conflictResolutionMode == ConflictResolutionMode.DoNothingIfBinariesExist)
                 {
                     return Task.CompletedTask;
                 }
-                if (fileMode == FileMode.FailIfBinariesExist)
+                if (conflictResolutionMode == ConflictResolutionMode.FailIfBinariesExist)
                 {
                     throw new DuplicateBinariesException();
                 }
@@ -83,16 +82,16 @@ namespace Etg.Yams.Test.Storage
             return Task.FromResult(!FileUtils.DirectoryDoesntExistOrEmpty(path));
         }
 
-        public async Task DownloadApplicationBinaries(AppIdentity appIdentity, string localPath, FileMode fileMode)
+        public async Task DownloadApplicationBinaries(AppIdentity appIdentity, string localPath, ConflictResolutionMode conflictResolutionMode)
         {
             bool exists = !FileUtils.DirectoryDoesntExistOrEmpty(localPath);
             if (exists)
             {
-                if (fileMode == FileMode.DoNothingIfBinariesExist)
+                if (conflictResolutionMode == ConflictResolutionMode.DoNothingIfBinariesExist)
                 {
                     return;
                 }
-                if (fileMode == FileMode.FailIfBinariesExist)
+                if (conflictResolutionMode == ConflictResolutionMode.FailIfBinariesExist)
                 {
                     throw new DuplicateBinariesException(
                         $"Cannot download the binaries because the destination directory {localPath} contains files");

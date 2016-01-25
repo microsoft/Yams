@@ -7,13 +7,28 @@ using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Etg.Yams.Storage
 {
-    public class YamsRepository : IYamsRepository
+    public class BlobStorageDeploymentRepository : IDeploymentRepository
     {
         private readonly CloudBlobContainer _blobContainer;
 
-        public YamsRepository(CloudBlobContainer blobContainer)
+        public BlobStorageDeploymentRepository(CloudBlobContainer blobContainer)
         {
             _blobContainer = blobContainer;
+        }
+
+        public BlobStorageDeploymentRepository(string connectionString) : this(GetApplicationsContainerReference(connectionString))
+        {
+        }
+
+        private static CloudBlobContainer GetApplicationsContainerReference(string connectionString)
+        {
+            CloudBlobContainer blobContainer = BlobUtils.GetBlobContainer(connectionString,
+                Constants.ApplicationsRootFolderName);
+            if (!blobContainer.Exists())
+            {
+                blobContainer.Create();
+            }
+            return blobContainer;
         }
 
         public async Task DeleteApplicationBinaries(AppIdentity appIdentity)
@@ -45,16 +60,17 @@ namespace Etg.Yams.Storage
             return GetBlobDirectory(appIdentity).ExistsAsync();
         }
 
-        public async Task DownloadApplicationBinaries(AppIdentity appIdentity, string localPath, FileMode fileMode)
+        public async Task DownloadApplicationBinaries(AppIdentity appIdentity, string localPath,
+            ConflictResolutionMode conflictResolutionMode)
         {
             bool exists = !FileUtils.DirectoryDoesntExistOrEmpty(localPath);
             if (exists)
             {
-                if (fileMode == FileMode.DoNothingIfBinariesExist)
+                if (conflictResolutionMode == ConflictResolutionMode.DoNothingIfBinariesExist)
                 {
                     return;
                 }
-                if (fileMode == FileMode.FailIfBinariesExist)
+                if (conflictResolutionMode == ConflictResolutionMode.FailIfBinariesExist)
                 {
                     throw new DuplicateBinariesException(
                         $"Cannot download the binaries because the destination directory {localPath} contains files");
@@ -74,7 +90,8 @@ namespace Etg.Yams.Storage
             return blob.UploadTextAsync(deploymentConfig.RawData());
         }
 
-        public async Task UploadApplicationBinaries(AppIdentity appIdentity, string localPath, FileMode fileMode)
+        public async Task UploadApplicationBinaries(AppIdentity appIdentity, string localPath,
+            ConflictResolutionMode conflictResolutionMode)
         {
             if (FileUtils.DirectoryDoesntExistOrEmpty(localPath))
             {
@@ -82,7 +99,7 @@ namespace Etg.Yams.Storage
                     $"Binaries were not be uploaded because they were not found at the given path {localPath}");
             }
 
-            if (fileMode == FileMode.OverwriteExistingBinaries)
+            if (conflictResolutionMode == ConflictResolutionMode.OverwriteExistingBinaries)
             {
                 await DeleteApplicationBinaries(appIdentity);
             }
@@ -92,15 +109,15 @@ namespace Etg.Yams.Storage
 
                 if (exists)
                 {
-                    if (fileMode == FileMode.DoNothingIfBinariesExist)
+                    if (conflictResolutionMode == ConflictResolutionMode.DoNothingIfBinariesExist)
                     {
                         return;
                     }
 
-                    if (fileMode == FileMode.FailIfBinariesExist)
+                    if (conflictResolutionMode == ConflictResolutionMode.FailIfBinariesExist)
                     {
                         throw new DuplicateBinariesException(
-                            $"Cannot override binaries when flag {FileMode.FailIfBinariesExist} is used");
+                            $"Cannot override binaries when flag {ConflictResolutionMode.FailIfBinariesExist} is used");
                     }
                 }
             }

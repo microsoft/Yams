@@ -12,7 +12,6 @@ using Etg.Yams.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using FileMode = Etg.Yams.Storage.FileMode;
 
 namespace Etg.Yams.Test.Storage
 {
@@ -31,7 +30,7 @@ namespace Etg.Yams.Test.Storage
         private static CloudStorageAccount _account;
         private static CloudBlobClient _blobClient;
         private static StorageEmulatorProxy _storageEmulatorProxy;
-        private static IYamsRepository _yamsRepository;
+        private static IDeploymentRepository _deploymentRepository;
 
         [ClassInitialize]
         public static void StartAndCleanStorage(TestContext cont)
@@ -53,15 +52,13 @@ namespace Etg.Yams.Test.Storage
         public void TestInitialize()
         {
             _storageEmulatorProxy.ClearBlobStorage();
-
-            IYamsRepositoryFactory yamsRepositoryFactory = new YamsRepositoryFactory();
-            _yamsRepository = yamsRepositoryFactory.CreateRepository(Constants.EmulatorDataConnectionString);
+            _deploymentRepository = new BlobStorageDeploymentRepository(Constants.EmulatorDataConnectionString);
         }
 
         [TestMethod]
         public async Task TestGetDeploymentConfigWhenTheFileIsNotThere()
         {
-            DeploymentConfig deploymentConfig = await _yamsRepository.FetchDeploymentConfig();
+            DeploymentConfig deploymentConfig = await _deploymentRepository.FetchDeploymentConfig();
             Assert.IsFalse(deploymentConfig.ListApplications().Any());
         }
 
@@ -70,8 +67,8 @@ namespace Etg.Yams.Test.Storage
         {
             string data = File.ReadAllText(_deploymentConfigFilePath);
             DeploymentConfig deploymentConfig = new DeploymentConfig(data);
-            await _yamsRepository.PublishDeploymentConfig(deploymentConfig);
-            DeploymentConfig newDeploymentConfig = await _yamsRepository.FetchDeploymentConfig();
+            await _deploymentRepository.PublishDeploymentConfig(deploymentConfig);
+            DeploymentConfig newDeploymentConfig = await _deploymentRepository.FetchDeploymentConfig();
             Assert.AreEqual(deploymentConfig.RawData(), newDeploymentConfig.RawData());
         }
 
@@ -79,7 +76,7 @@ namespace Etg.Yams.Test.Storage
         public async Task TestUploadApplicationBinaries()
         {
             const string someJsonContent = "some json content";
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, someJsonContent);
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, someJsonContent);
             await VerifyBlobStorageContent(someJsonContent);
         }
 
@@ -87,8 +84,8 @@ namespace Etg.Yams.Test.Storage
         public async Task TestUploadApplicationBinaries_FailIfBinariesExistMode()
         {
             const string originalJsonContent = "some json content";
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, originalJsonContent);
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, "different content");
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, originalJsonContent);
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, "different content");
             await VerifyBlobStorageContent(originalJsonContent);
         }
 
@@ -96,8 +93,8 @@ namespace Etg.Yams.Test.Storage
         public async Task TestUploadApplicationBinaries_DoNothingBinariesExistMode()
         {
             const string originalJsonContent = "some json content";
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, originalJsonContent);
-            await UploadTestApplicationBinaries(FileMode.DoNothingIfBinariesExist, "different content");
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, originalJsonContent);
+            await UploadTestApplicationBinaries(ConflictResolutionMode.DoNothingIfBinariesExist, "different content");
             await VerifyBlobStorageContent(originalJsonContent);
         }
 
@@ -105,9 +102,9 @@ namespace Etg.Yams.Test.Storage
         public async Task TestUploadApplicationBinaries_OverwriteExistingBinariesMode()
         {
             const string originalJsonContent = "some json content";
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, originalJsonContent);
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, originalJsonContent);
             const string newContent = "different content";
-            await UploadTestApplicationBinaries(FileMode.OverwriteExistingBinaries, newContent);
+            await UploadTestApplicationBinaries(ConflictResolutionMode.OverwriteExistingBinaries, newContent);
             await VerifyBlobStorageContent(newContent);
         }
 
@@ -117,7 +114,7 @@ namespace Etg.Yams.Test.Storage
             const string testName = nameof(TestUploadApplicationBinaries_EmptyBinariesDir);
             string localPath = await CreateTestTempDirectory(testName);
             await
-                _yamsRepository.UploadApplicationBinaries(TestAppIdentity, localPath, FileMode.OverwriteExistingBinaries);
+                _deploymentRepository.UploadApplicationBinaries(TestAppIdentity, localPath, ConflictResolutionMode.OverwriteExistingBinaries);
         }
 
         [TestMethod, ExpectedException(typeof (BinariesNotFoundException))]
@@ -127,22 +124,22 @@ namespace Etg.Yams.Test.Storage
             string localPath = Path.Combine(Path.GetTempPath(), testName);
             await FileUtils.DeleteDirectoryIfAny(localPath);
             await
-                _yamsRepository.UploadApplicationBinaries(TestAppIdentity, localPath, FileMode.OverwriteExistingBinaries);
+                _deploymentRepository.UploadApplicationBinaries(TestAppIdentity, localPath, ConflictResolutionMode.OverwriteExistingBinaries);
         }
 
         [TestMethod]
         public async Task TestHasBinaries()
         {
-            Assert.IsFalse(await _yamsRepository.HasApplicationBinaries(TestAppIdentity));
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, "some json");
-            Assert.IsTrue(await _yamsRepository.HasApplicationBinaries(TestAppIdentity));
+            Assert.IsFalse(await _deploymentRepository.HasApplicationBinaries(TestAppIdentity));
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, "some json");
+            Assert.IsTrue(await _deploymentRepository.HasApplicationBinaries(TestAppIdentity));
         }
 
         [TestMethod]
         public async Task TestDeleteApplicationBinaries()
         {
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, "some json");
-            await _yamsRepository.DeleteApplicationBinaries(TestAppIdentity);
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, "some json");
+            await _deploymentRepository.DeleteApplicationBinaries(TestAppIdentity);
             CloudBlobContainer applicationsContainer =
                 _blobClient.GetContainerReference(Constants.ApplicationsRootFolderName);
             Assert.IsFalse(await applicationsContainer.GetDirectoryReference(TestAppId).ExistsAsync());
@@ -151,7 +148,7 @@ namespace Etg.Yams.Test.Storage
         [TestMethod, ExpectedException(typeof (BinariesNotFoundException))]
         public async Task TestDeleteNonExistingApplicationBinaries()
         {
-            await _yamsRepository.DeleteApplicationBinaries(TestAppIdentity);
+            await _deploymentRepository.DeleteApplicationBinaries(TestAppIdentity);
         }
 
         [TestMethod]
@@ -159,36 +156,36 @@ namespace Etg.Yams.Test.Storage
         {
             const string testName = nameof(TestDownloadApplicationBinaries);
             const string testFileContent = "some content";
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, testFileContent);
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, testFileContent);
             string localPath = await CreateTestTempDirectory(testName);
-            await _yamsRepository.DownloadApplicationBinaries(TestAppIdentity, localPath, FileMode.FailIfBinariesExist);
+            await _deploymentRepository.DownloadApplicationBinaries(TestAppIdentity, localPath, ConflictResolutionMode.FailIfBinariesExist);
             VerifyBinariesExist(localPath, testFileContent);
         }
 
         [TestMethod]
-        public async Task TestDownloadApplicationBinaries_FileMode()
+        public async Task TestDownloadApplicationBinaries_ConflictResolutionMode()
         {
             // setup
-            const string testName = nameof(TestDownloadApplicationBinaries_FileMode);
+            const string testName = nameof(ConflictResolutionMode);
             string localPath = await CreateTestTempDirectory(testName);
             CreateTestFile(localPath, "original content");
             VerifyBinariesExist(localPath, "original content");
 
-            await UploadTestApplicationBinaries(FileMode.FailIfBinariesExist, "new content");
+            await UploadTestApplicationBinaries(ConflictResolutionMode.FailIfBinariesExist, "new content");
             await
-                _yamsRepository.DownloadApplicationBinaries(TestAppIdentity, localPath,
-                    FileMode.DoNothingIfBinariesExist);
+                _deploymentRepository.DownloadApplicationBinaries(TestAppIdentity, localPath,
+                    ConflictResolutionMode.DoNothingIfBinariesExist);
             VerifyBinariesExist(localPath, "original content");
 
             await
-                _yamsRepository.DownloadApplicationBinaries(TestAppIdentity, localPath,
-                    FileMode.OverwriteExistingBinaries);
+                _deploymentRepository.DownloadApplicationBinaries(TestAppIdentity, localPath,
+                    ConflictResolutionMode.OverwriteExistingBinaries);
             VerifyBinariesExist(localPath, "new content");
 
             try
             {
                 await
-                    _yamsRepository.DownloadApplicationBinaries(TestAppIdentity, localPath, FileMode.FailIfBinariesExist);
+                    _deploymentRepository.DownloadApplicationBinaries(TestAppIdentity, localPath, ConflictResolutionMode.FailIfBinariesExist);
                 Assert.Fail($"A {nameof(DuplicateBinariesException)} was expected");
             }
             catch (DuplicateBinariesException)
@@ -202,8 +199,8 @@ namespace Etg.Yams.Test.Storage
             const string testName = nameof(TestDownloadNonExistingApplicationBinaries);
             string localPath = await CreateTestTempDirectory(testName);
             await
-                _yamsRepository.DownloadApplicationBinaries(TestAppIdentity, localPath,
-                    FileMode.OverwriteExistingBinaries);
+                _deploymentRepository.DownloadApplicationBinaries(TestAppIdentity, localPath,
+                    ConflictResolutionMode.OverwriteExistingBinaries);
         }
 
         private static async Task VerifyBlobStorageContent(string someJsonContent)
@@ -230,12 +227,12 @@ namespace Etg.Yams.Test.Storage
             Assert.AreEqual(testFileContent, File.ReadAllText(Path.Combine(path, TestAppFileName)));
         }
 
-        private static async Task UploadTestApplicationBinaries(FileMode fileMode, string testFileContent)
+        private static async Task UploadTestApplicationBinaries(ConflictResolutionMode conflictResolutionMode, string testFileContent)
         {
             string testDir = await CreateTestTempDirectory(nameof(UploadTestApplicationBinaries));
             CreateTestFile(testDir, testFileContent);
 
-            await _yamsRepository.UploadApplicationBinaries(TestAppIdentity, testDir, fileMode);
+            await _deploymentRepository.UploadApplicationBinaries(TestAppIdentity, testDir, conflictResolutionMode);
         }
 
         private static void CreateTestFile(string testDir, string testFileContent)

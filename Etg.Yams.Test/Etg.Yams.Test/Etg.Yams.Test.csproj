@@ -118,7 +118,7 @@
     <Compile Include="Process\SelfRestartingProcessTest.cs" />
     <Compile Include="Process\ProcessTest.cs" />
     <Compile Include="Storage\DeploymentConfigTest.cs" />
-    <Compile Include="Storage\LocalYamsRepository.cs" />
+    <Compile Include="Storage\LocalDeploymentRepository.cs" />
     <Compile Include="Storage\YamsRepositoryTest.cs" />
     <Compile Include="stubs\ApplicationFactoryStub.cs" />
     <Compile Include="stubs\ApplicationPoolStub.cs" />

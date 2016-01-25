@@ -1,23 +1,22 @@
 # YAMS Storage Tutorial
 
-This tutorial demonstrates the use of the `IYamsStorageRepository` Api which can be used to fully control the Yams Storage. It provides capabilities such as downloading and uploading of application binaries, and the manipulation of the `DeploymentConfig.json` file. In fact, the Api completely decouples users from Blob storage and from the `DeploymentConfig.json` content and format.
+This tutorial demonstrates the use of the `IDeploymentRepository` Api which can be used to fully control the Yams Storage. It provides capabilities such as downloading and uploading of application binaries, and the manipulation of the `DeploymentConfig.json` file. In fact, the Api completely decouples users from Blob storage and from the `DeploymentConfig.json` content and format.
 
 * Create a proxy to the Yams storage
 ```csharp
-    IYamsRepositoryFactory factory = new YamsRepositoryFactory();
-    IYamsRepository yamsRepository = factory.CreateRepository("my_data_connection_string");
+    IDeploymentRepository deploymentRepository = new BlobStorageDeploymentRepository("my_data_connection_string");
 ```
 
 * Deploy a new application
 ```csharp
     // Upload the application binaries
 	AppIdentity appIdentity = new AppIdentity("AppId", "1.0.0");
-    await yamsRepository.UploadApplicationBinaries(appIdentity, localBinariesDirPath, FileMode.FailIfBinariesExist);
+    await deploymentRepository.UploadApplicationBinaries(appIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
 
 	// Update the DeploymentConfig. Note that the DeploymentConfig class is immutable
-	DeploymentConfig deploymentConfig = await yamsRepository.FetchDeploymentConfig();
+	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
     deploymentConfig = deploymentConfig.AddApplication(appIdentity, "cloudservice_deployment_id");
-	await yamsRepository.PublishDeploymentConfig(deploymentConfig);
+	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 ```
 
 * Update an application
@@ -25,31 +24,31 @@ This tutorial demonstrates the use of the `IYamsStorageRepository` Api which can
 ```csharp
 	AppIdentity oldAppIdentity = new AppIdentity("AppId", "1.0.0");
 	AppIdentity newAppIdentity = new AppIdentity("AppId", "1.0.1");
-	await yamsRepository.UploadApplicationBinaries(oldAppIdentity, localBinariesDirPath, FileMode.FailIfBinariesExist);
+	await deploymentRepository.UploadApplicationBinaries(oldAppIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
 
 	// update the DeploymentConfig
-	DeploymentConfig deploymentConfig = await yamsRepository.FetchDeploymentConfig();
+	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
     deploymentConfig = deploymentConfig.RemoveApplication(oldAppIdentity, "cloudservice_deployment_id");
 	deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, "cloudservice_deployment_id");
-	await yamsRepository.PublishDeploymentConfig(deploymentConfig);
+	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 
 	// You can also cleanup the old binaries if you're not planing to revert back to it in the future.
-    await yamsRepository.DeleteApplicationBinaries(oldAppIdentity);
+    await deploymentRepository.DeleteApplicationBinaries(oldAppIdentity);
 ```
 
 * Remove an application
 ```csharp
 	AppIdentity appIdentity = new AppIdentity("AppId", "1.0.0");
-	await yamsRepository.UploadApplicationBinaries(oldAppIdentity, localBinariesDirPath, FileMode.FailIfBinariesExist);
+	await deploymentRepository.UploadApplicationBinaries(oldAppIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
 
 	// update the DeploymentConfig
-	DeploymentConfig deploymentConfig = await yamsRepository.FetchDeploymentConfig();
+	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
     deploymentConfig = deploymentConfig.RemoveApplication(oldAppIdentity, "cloudservice_deployment_id");
 	deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, "cloudservice_deployment_id");
-	await yamsRepository.PublishDeploymentConfig(deploymentConfig);
+	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 
 	// You can also cleanup the old binaries if you're not planing to revert back to it in the future.
-    await yamsRepository.DeleteApplicationBinaries(oldAppIdentity);
+    await deploymentRepository.DeleteApplicationBinaries(oldAppIdentity);
 ```
 
 * Other DeploymentConfig Apis

@@ -13,7 +13,6 @@ using System.Windows.Data;
 using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Utils;
-using FileMode = Etg.Yams.Storage.FileMode;
 
 namespace YamsStudio
 {
@@ -25,15 +24,15 @@ namespace YamsStudio
         private const string SettingsFilePath = "settings.json";
         private const string DeploymentsConfigsDirPath = "DeploymentsConfigs";
         private readonly List<StorageAccountConnectionInfo> _storageAccountConnections = new List<StorageAccountConnectionInfo>();
-        private readonly YamsStorageConnectionsManager _yamsStorageConnectionsManager;
+        private readonly DeploymentRepositoryManager _deploymentRepositoryManager;
         private DeploymentConfig _deploymentConfig;
         private readonly FileSystemWatcher _deploymentConfigFileWatcher;
         public MainWindow()
         {
             InitializeComponent();
             ConnectionsListView.ItemsSource = _storageAccountConnections;
-            IYamsRepositoryFactory yamsRepositoryFactory = new YamsRepositoryFactory();
-            _yamsStorageConnectionsManager = new YamsStorageConnectionsManager(yamsRepositoryFactory);
+            IDeploymentRepositoryFactory deploymentRepositoryFactory = new DeploymentRepositoryFactory();
+            _deploymentRepositoryManager = new DeploymentRepositoryManager(deploymentRepositoryFactory);
             if (File.Exists(SettingsFilePath))
             {
                 string json = File.ReadAllText(SettingsFilePath);
@@ -100,10 +99,10 @@ namespace YamsStudio
         private async Task AddApplication(AppIdentity appIdentity, string deploymentId, string binariesPath)
         {
             StorageAccountConnectionInfo connectionInfo = GetCurrentConnection();
-            IYamsRepository connection = _yamsStorageConnectionsManager.GetConnection(connectionInfo);
+            IDeploymentRepository repository = _deploymentRepositoryManager.GetRepository(connectionInfo);
             BusyWindow busyWindow = new BusyWindow{Message = "Please wait..\n\n" + "The binaries are being uploaded to blob storage"};
             busyWindow.Show();
-            await connection.UploadApplicationBinaries(appIdentity, binariesPath, FileMode.DoNothingIfBinariesExist);
+            await repository.UploadApplicationBinaries(appIdentity, binariesPath, ConflictResolutionMode.DoNothingIfBinariesExist);
             busyWindow.Close();
             _deploymentConfig = _deploymentConfig.AddApplication(appIdentity, deploymentId);
             SaveLocalDeploymentConfig(connectionInfo);
@@ -232,7 +231,7 @@ namespace YamsStudio
             BusyWindow busyWindow = new BusyWindow{Message = "Please wait..\n\n" + "The DeploymentConfig.json file is being uploaded to blob storage"};
             busyWindow.Show();
             StorageAccountConnectionInfo connectionInfo = GetCurrentConnection();
-            IYamsRepository connection = _yamsStorageConnectionsManager.GetConnection(connectionInfo);
+            IDeploymentRepository connection = _deploymentRepositoryManager.GetRepository(connectionInfo);
             await connection.PublishDeploymentConfig(_deploymentConfig);
             busyWindow.Close();
         }
@@ -244,7 +243,7 @@ namespace YamsStudio
             if (res == MessageBoxResult.Yes)
             {
                 StorageAccountConnectionInfo connectionInfo = GetCurrentConnection();
-                IYamsRepository connection = _yamsStorageConnectionsManager.GetConnection(connectionInfo);
+                IDeploymentRepository connection = _deploymentRepositoryManager.GetRepository(connectionInfo);
                 DeploymentConfig deploymentConfig = await connection.FetchDeploymentConfig();
                 SaveLocalDeploymentConfig(connectionInfo, deploymentConfig.RawData());
             }
@@ -300,7 +299,7 @@ namespace YamsStudio
             {
                 return new DeploymentConfig(File.ReadAllText(path));
             }
-	        IYamsRepository connection = _yamsStorageConnectionsManager.GetConnection(connectionInfo);
+	        IDeploymentRepository connection = _deploymentRepositoryManager.GetRepository(connectionInfo);
 	        DeploymentConfig deploymentConfig = await connection.FetchDeploymentConfig();
 			SaveLocalDeploymentConfig(connectionInfo, deploymentConfig.RawData());
 	        return deploymentConfig;

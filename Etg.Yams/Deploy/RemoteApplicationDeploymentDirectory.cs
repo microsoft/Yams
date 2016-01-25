@@ -14,18 +14,18 @@ namespace Etg.Yams.Deploy
     /// </summary>
     public class RemoteApplicationDeploymentDirectory : IApplicationDeploymentDirectory
     {
-        private readonly IYamsRepository _yamsRepository;
+        private readonly IDeploymentRepository _deploymentRepository;
 
-        public RemoteApplicationDeploymentDirectory(IYamsRepository yamsRepository)
+        public RemoteApplicationDeploymentDirectory(IDeploymentRepository deploymentRepository)
         {
-            _yamsRepository = yamsRepository;
+            _deploymentRepository = deploymentRepository;
         }
 
         public async Task<IEnumerable<AppIdentity>> FetchDeployments(string deploymentId)
         {
             var apps = new HashSet<AppIdentity>();
 
-            DeploymentConfig deploymentConfig = await _yamsRepository.FetchDeploymentConfig();
+            DeploymentConfig deploymentConfig = await _deploymentRepository.FetchDeploymentConfig();
             foreach (string appId in deploymentConfig.ListApplications(deploymentId))
             {
                 foreach (string version in deploymentConfig.ListVersions(appId, deploymentId))
@@ -33,7 +33,7 @@ namespace Etg.Yams.Deploy
                     AppIdentity appIdentity = new AppIdentity(appId, version);
                     try
                     {
-                        if (!await _yamsRepository.HasApplicationBinaries(appIdentity))
+                        if (!await _deploymentRepository.HasApplicationBinaries(appIdentity))
                         {
                             Trace.TraceError($"Could not binaries for application {appIdentity} in the yams repository");
                             continue;
