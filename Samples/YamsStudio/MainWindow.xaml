@@ -1,0 +1,163 @@
+﻿<Window x:Class="YamsStudio.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YamsStudio"
+        mc:Ignorable="d"
+        Title="YAMS Studio" Height="350" Width="525">
+    <ScrollViewer>
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top" x:Name="ActionsPanel" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                <Button x:Name="AddConnectionButton" Content="Add New Connection" Click="OnAddNewConnection" Width="120" HorizontalAlignment="Left"></Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <ListView x:Name="ConnectionsListView" Margin="5" SelectionMode="Single" SelectionChanged="OnConnectionSelected" Background="{x:Null}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Connections" DisplayMemberBinding="{Binding AccountName}" />
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Add Application">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnAddApplication"/>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                        <MenuItem Header="Publish to blob">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnPublishToBlob"/>
+                                                </Style>
+                                            </MenuItem.Style>                                              
+                                        </MenuItem>  
+                                        <MenuItem Header="Sync from blob">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnSyncFromBlob"/>
+                                                </Style>
+                                            </MenuItem.Style>                                              
+                                        </MenuItem>      
+                                        <MenuItem Header="Delete Connection" >
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnDeleteConnection"/>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>  
+                                        <MenuItem Header="Edit DeploymentConfig.json" >
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnEditDeploymentConfig"/>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>                                          
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+                <ListView x:Name="AppsListView" Margin="5" SelectionMode="Single" SelectionChanged="OnAppSelected">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Applications" />
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Add new version">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnAddNewVersion"/>
+                                                </Style>
+                                            </MenuItem.Style>                                              
+                                        </MenuItem>
+                                        <MenuItem Header="Remove Application">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnRemoveApplication"/>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>                    
+                </ListView>
+                <ListView x:Name="VersionsListView" Margin="5" SelectionMode="Single"  SelectionChanged="OnVersionSelected">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Versions" DisplayMemberBinding="{Binding Version}" />
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Add Deployment">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnVersionAddDeployment"/>
+                                                </Style>
+                                            </MenuItem.Style>                                              
+                                        </MenuItem>                                        
+                                        <MenuItem Header="Upgrade/Downgrade">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnUpdateVersion"/>
+                                                </Style>
+                                            </MenuItem.Style>                                              
+                                        </MenuItem>
+                                        <MenuItem Header="Remove Version">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnRemoveVersion"/>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>                      
+                </ListView>
+                <ListView x:Name="deploymentIdsListView" Margin="5" SelectionMode="Single">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="DeploymentIds" DisplayMemberBinding="{Binding DeploymentId}" />
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Remove Deployment">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem">
+                                                    <EventSetter Event="Click" Handler="OnRemoveDeployment"/>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>   
+                </ListView>
+            </StackPanel>
+        </DockPanel>
+    </ScrollViewer>
+</Window>

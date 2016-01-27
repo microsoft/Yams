@@ -18,7 +18,13 @@ namespace Etg.Yams.Application
             _version = version;
         }
 
-        public override string ToString()
+		public AppIdentity(string id, string version)
+		{
+			_id = id;
+			_version = Version.Parse(version);
+		}
+
+		public override string ToString()
         {
             return string.Format("Id: {0}, Version: {1}", Id, Version);
         }

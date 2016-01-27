@@ -10,13 +10,23 @@ namespace Etg.Yams.Utils
         {
             using (StreamReader r = new StreamReader(path))
             {
-                return await ParseData<T>(await r.ReadToEndAsync());
+                return await DeserializeAsync<T>(await r.ReadToEndAsync());
             }
         }
 
-        public static Task<T> ParseData<T>(string data)
+        public static Task<T> DeserializeAsync<T>(string data)
         {
-            return Task.Run(() => JsonConvert.DeserializeObject<T>(data));
+            return Task.Run(() => Deserialize<T>(data));
+        }
+
+        public static T Deserialize<T>(string data)
+        {
+            return JsonConvert.DeserializeObject<T>(data);
+        }
+
+        public static string Serialize(object data)
+        {
+            return JsonConvert.SerializeObject(data, Formatting.Indented);
         }
     }
 }
