@@ -2,44 +2,20 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AzureTestUtils;
 using Etg.Yams.Utils;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using System;
+using Etg.Yams.Test.Fixtures;
 using Xunit;
 
 namespace Etg.Yams.Test.Utils
 {
-
-    public class BlobUtilsTestFixture : IDisposable
+    public class BlobUtilsTest : IClassFixture<StorageEmulatorTestFixture>
     {
-        private CloudStorageAccount _account;
-        public CloudBlobClient BlobClient;
-        public StorageEmulatorProxy StorageEmulatorProxy;
+        private readonly CloudBlobClient _blobClient;
 
-        public BlobUtilsTestFixture()
+        public BlobUtilsTest(StorageEmulatorTestFixture fixture)
         {
-            _account = CloudStorageAccount.DevelopmentStorageAccount;
-            BlobClient = _account.CreateCloudBlobClient();
-
-            StorageEmulatorProxy = new StorageEmulatorProxy();
-            StorageEmulatorProxy.StartEmulator();
-        }
-
-        public void Dispose()
-        {
-            StorageEmulatorProxy.StopEmulator();
-        }
-    }
-
-    public class BlobUtilsTest : IClassFixture<BlobUtilsTestFixture>
-    {
-        private CloudBlobClient _blobClient;
-
-        public BlobUtilsTest(BlobUtilsTestFixture fixture)
-        {
-            fixture.StorageEmulatorProxy.ClearBlobStorage();
+            fixture.ClearBlobStorage();
             _blobClient = fixture.BlobClient;
         }
 

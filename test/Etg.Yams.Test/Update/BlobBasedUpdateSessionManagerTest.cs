@@ -5,49 +5,40 @@ using Etg.Yams.Update;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
+using Etg.Yams.Test.Fixtures;
 using Xunit;
 
 namespace Etg.Yams.Test.Update
 {
-    public class BlobBasedUpdateSessionManagerTestFixture : IDisposable
+    public class BlobBasedUpdateSessionManagerTestFixture : StorageEmulatorTestFixture
     {
-        private static CloudStorageAccount _account;
-        public CloudBlobClient BlobClient { get; private set; }
-        private static StorageEmulatorProxy _storageEmulatorProxy;
         public string StorageContainerName { get; private set; }
 
         public BlobLeaseFactory BlobLeaseFactory { get; private set; }
 
         public BlobBasedUpdateSessionManagerTestFixture()
         {
-            _account = CloudStorageAccount.DevelopmentStorageAccount;
-            BlobClient = _account.CreateCloudBlobClient();
-
-            _storageEmulatorProxy = new StorageEmulatorProxy();
-            _storageEmulatorProxy.StartEmulator();
-
             StorageContainerName = Constants.ApplicationsRootFolderName;
-
             BlobLeaseFactory = new BlobLeaseFactory(60);
-        }
-
-        public void Dispose()
-        {
-            _storageEmulatorProxy.StopEmulator();
         }
     }
 
     public class BlobBasedUpdateSessionManagerTest : IClassFixture<BlobBasedUpdateSessionManagerTestFixture>
     {
-        private CloudBlobClient _blobClient;
-        private string _storageContainerName;
-        private BlobLeaseFactory _blobLeaseFactory;
+        private readonly CloudBlobClient _blobClient;
+        private readonly string _storageContainerName;
+        private readonly BlobLeaseFactory _blobLeaseFactory;
 
         public BlobBasedUpdateSessionManagerTest(BlobBasedUpdateSessionManagerTestFixture fixture)
         {
             _blobClient = fixture.BlobClient;
             _blobLeaseFactory = fixture.BlobLeaseFactory;
             _storageContainerName = fixture.StorageContainerName;
+
+            fixture.ClearBlobStorage();
+            _blobClient = fixture.BlobClient;
+            CloudBlobContainer container = _blobClient.GetContainerReference(_storageContainerName);
+            container.CreateIfNotExists();
         }
 
         [Fact]

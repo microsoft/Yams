@@ -15,9 +15,9 @@ namespace Etg.Yams.Test.Install
     {
         private ApplicationInstaller _applicationInstaller;
         private ApplicationPoolStub _applicationPool;
-        private string _applicationsRoot;
+        private readonly string _applicationsRoot;
         
-        public void Initialize()
+        public ApplicationInstallerTest()
         {
             _applicationsRoot = Path.Combine(Directory.GetCurrentDirectory(), "ApplicationInstallerTest");
         }

@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Etg.Yams.Application;
 using Etg.Yams.Storage.Config;
-using Etg.Yams.Tools.Test.Utils;
+using Etg.Yams.Test.Utils;
 using Xunit;
 using Newtonsoft.Json.Linq;
 

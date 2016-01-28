@@ -4,39 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using AzureTestUtils;
 using Etg.Yams.Application;
 using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
+using Etg.Yams.Test.Fixtures;
 using Etg.Yams.Utils;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Xunit;
 
 namespace Etg.Yams.Test.Storage
 {
-    public class YamsRepositoryTestFixture : IDisposable
-    {
-        private CloudStorageAccount _account;
-        public CloudBlobClient BlobClient;
-        public StorageEmulatorProxy StorageEmulatorProxy;
-
-        public YamsRepositoryTestFixture()
-        {
-            _account = CloudStorageAccount.DevelopmentStorageAccount;
-            BlobClient = _account.CreateCloudBlobClient();
-
-            StorageEmulatorProxy = new StorageEmulatorProxy();
-            StorageEmulatorProxy.StartEmulator();
-        }
-
-        public void Dispose()
-        {
-            StorageEmulatorProxy.StopEmulator();
-        }
-    }
-
-    public class YamsRepositoryTest : IClassFixture<YamsRepositoryTestFixture>
+    public class YamsRepositoryTest : IClassFixture<StorageEmulatorTestFixture>
     {
         private const string TestAppFileName = "AppConfig.json";
         private const string TestAppBlobRelPath = "app/1.0.0";
@@ -51,9 +29,9 @@ namespace Etg.Yams.Test.Storage
         private static IDeploymentRepository _deploymentRepository;
 
 
-        public YamsRepositoryTest(YamsRepositoryTestFixture fixture)
+        public YamsRepositoryTest(StorageEmulatorTestFixture fixture)
         {
-            fixture.StorageEmulatorProxy.ClearBlobStorage();
+            fixture.ClearBlobStorage();
             _blobClient = fixture.BlobClient;
             _deploymentRepository = new BlobStorageDeploymentRepository(Constants.EmulatorDataConnectionString);
         }

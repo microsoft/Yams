@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Xunit;
 
-namespace Etg.Yams.Tools.Test.Utils
+namespace Etg.Yams.Test.Utils
 {
     public static class AssertUtils
     {

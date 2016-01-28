@@ -112,6 +112,7 @@
     <Compile Include="Application\ApplicationPoolTest.cs" />
     <Compile Include="Application\ApplicationTest.cs" />
     <Compile Include="EndToEndTest.cs" />
+    <Compile Include="Fixtures\StorageEmulatorTestFixture.cs" />
     <Compile Include="Install\ApplicationInstallerTest.cs" />
     <Compile Include="Process\ProcessStopperTest.cs" />
     <Compile Include="Process\ProcessTest.cs" />
@@ -120,11 +121,11 @@
     <Compile Include="Storage\DeploymentConfigTest.cs" />
     <Compile Include="Storage\LocalDeploymentRepository.cs" />
     <Compile Include="Storage\YamsRepositoryTest.cs" />
-    <Compile Include="stubs\ApplicationFactoryStub.cs" />
-    <Compile Include="stubs\ApplicationPoolStub.cs" />
-    <Compile Include="stubs\ApplicationStub.cs" />
-    <Compile Include="stubs\LockBaseUpdateSessionManager.cs" />
-    <Compile Include="stubs\ProcessStub.cs" />
+    <Compile Include="Stubs\ApplicationFactoryStub.cs" />
+    <Compile Include="Stubs\ApplicationPoolStub.cs" />
+    <Compile Include="Stubs\ApplicationStub.cs" />
+    <Compile Include="Stubs\LockBaseUpdateSessionManager.cs" />
+    <Compile Include="Stubs\ProcessStub.cs" />
     <Compile Include="Update\ApplicationUpdateManagerTest.cs" />
     <Compile Include="Update\BlobBasedUpdateSessionManagerTest.cs" />
     <Compile Include="Update\UpdateBlobWrapperTest.cs" />

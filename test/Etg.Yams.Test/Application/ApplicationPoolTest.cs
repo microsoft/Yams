@@ -11,24 +11,20 @@ using Etg.Yams.Application.Fakes;
 
 namespace Etg.Yams.Test.Application
 {
-    public class ApplicationPoolTestFixture : IDisposable
+    public class ApplicationPoolTestFixture
     {
-        public ApplicationPool ApplicationPool { get; private set; }
-
-        private string _dataRootPath;
         public string ApplicationsRootPath { get; private set; }
         public IApplicationFactory ApplicationFactory { get; private set; }
-        private string _testDirPath;
         private const string DeploymentId = "testDeploymentId";
         private const string InstanceId = "testInstanceId";
 
         public ApplicationPoolTestFixture()
         {
-            _dataRootPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "ApplicationPool");
-            _testDirPath = Path.Combine(Directory.GetCurrentDirectory(), "ApplicationPoolTest");
-            ApplicationsRootPath = Path.Combine(_testDirPath, "Applications");
+            var dataRootPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "ApplicationPool");
+            var testDirPath = Path.Combine(Directory.GetCurrentDirectory(), "ApplicationPoolTest");
+            ApplicationsRootPath = Path.Combine(testDirPath, "Applications");
 
-            FileUtils.CopyDir(_dataRootPath, ApplicationsRootPath, overwrite: true).Wait();
+            FileUtils.CopyDir(dataRootPath, ApplicationsRootPath, overwrite: true).Wait();
 
             const string exeName = "TestProcess.exe";
             string[] testAppsRelPath =
@@ -45,31 +41,28 @@ namespace Etg.Yams.Test.Application
             ApplicationFactory =
                 new ConfigurableApplicationFactory(new ApplicationConfigParser(new ApplicationConfigSymbolResolver(DeploymentId, InstanceId)),
                     new SelfRestartingProcessFactory(0), new ProcessStopper(0));
-            ApplicationPool = new ApplicationPool();
-        }
-
-        public void Dispose()
-        {
-            if (ApplicationPool != null)
-            {
-                ApplicationPool.Shutdown().Wait();
-            }
+            
         }
     }
 
     public class ApplicationPoolTest : IClassFixture<ApplicationPoolTestFixture>
     {
         private ApplicationPool _applicationPool;
-        private IApplicationFactory _applicationFactory;
-        private string _applicationsRootPath;
+        private readonly IApplicationFactory _applicationFactory;
+        private readonly string _applicationsRootPath;
 
         public ApplicationPoolTest(ApplicationPoolTestFixture fixture)
         {
-            _applicationPool = fixture.ApplicationPool;
+            _applicationPool = new ApplicationPool();
             _applicationFactory = fixture.ApplicationFactory;
             _applicationsRootPath = fixture.ApplicationsRootPath;
         }
-        
+
+        public void Dispose()
+        {
+            _applicationPool?.Shutdown().Wait();
+        }
+
         [Fact]
         public async Task TestAddApplication()
         {
