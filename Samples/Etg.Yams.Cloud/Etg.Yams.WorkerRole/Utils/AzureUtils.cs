@@ -1,6 +1,6 @@
 ﻿using Microsoft.WindowsAzure.ServiceRuntime;
 
-namespace Etg.Yams.Utils
+namespace Etg.Yams.WorkerRole.Utils
 {
     public static class AzureUtils
     {

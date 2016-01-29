@@ -130,9 +130,7 @@
     <Compile Include="Update\BlobBasedUpdateSessionManagerTest.cs" />
     <Compile Include="Update\UpdateBlobWrapperTest.cs" />
     <Compile Include="Utils\AssertUtils.cs" />
-    <Compile Include="Utils\AzureUtilsTest.cs" />
     <Compile Include="Utils\BlobUtilsTest.cs" />
-    <Compile Include="Utils\DeploymentIdUtilsTest.cs" />
     <Compile Include="Utils\TestUtils.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Permissions;
 using System.Threading.Tasks;
-using Etg.Yams.Utils;
+using Etg.Yams.WorkerRole.Utils;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace Etg.Yams.WorkerRole

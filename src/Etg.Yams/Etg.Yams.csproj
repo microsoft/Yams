@@ -67,10 +67,6 @@
       <HintPath>..\..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.1.0\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=2.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files\Microsoft SDKs\Azure\.NET SDK\v2.8\ref\Microsoft.WindowsAzure.ServiceRuntime.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Storage, Version=6.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\WindowsAzure.Storage.6.2.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
       <Private>True</Private>
@@ -135,8 +131,6 @@
     <Compile Include="Storage\BlobStorageDeploymentRepository.cs" />
     <Compile Include="Update\UpdateSessionManagerConfig.cs" />
     <Compile Include="Utils\ApplicationUtils.cs" />
-    <Compile Include="Utils\AzureUtils.cs" />
-    <Compile Include="Utils\DeploymentIdUtils.cs" />
     <Compile Include="Application\ApplicationPool.cs" />
     <Compile Include="Utils\BlobUtils.cs" />
     <Compile Include="Utils\ProcessUtils.cs" />
