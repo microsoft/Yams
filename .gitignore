@@ -198,3 +198,4 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+/test/Etg.Yams.Test/Data/Exes/*.exe
