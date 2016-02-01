@@ -9,8 +9,8 @@ using Etg.Yams.Test.Utils;
 using Etg.Yams.Update;
 using Etg.Yams.Update.Fakes;
 using Etg.Yams.Utils;
-using Microsoft.Practices.Unity;
 using Xunit;
+using Autofac;
 
 namespace Etg.Yams.Test
 {
@@ -21,7 +21,7 @@ namespace Etg.Yams.Test
         private string _applicationsInstallPath;
         private string _deploymentDirPath;
         private YamsEntryPoint _yamsEntryPoint;
-        private UnityContainer _diContainer;
+        private IContainer _diContainer;
         
         public EndToEndTest()
         {
@@ -34,14 +34,13 @@ namespace Etg.Yams.Test
 
             CopyTestProcessExeToTestApps();
 
-            _diContainer = new UnityContainer();
-            DiModule.RegisterTypes(_diContainer, new YamsConfigBuilder("UseDevelopmentStorage=true", "deploymentId1", "1", "instanceId", _applicationsInstallPath).Build());
+            var builder = new ContainerBuilder();
+            DiModule.RegisterTypes(builder, new YamsConfigBuilder("UseDevelopmentStorage=true", "deploymentId1", "1", "instanceId", _applicationsInstallPath).Build());
 
             // Replace the IRemoteDirectory default implementation (which uses Azure) with a LocalDirectory implementation
             // so we can use local test data.
-            _diContainer.RegisterType<IDeploymentRepository>(new ContainerControlledLifetimeManager(),
-                new InjectionFactory(
-                    c => new LocalDeploymentRepository(_deploymentDirPath)));
+            builder.Register<IDeploymentRepository>(
+                    c => new LocalDeploymentRepository(_deploymentDirPath)).SingleInstance();
 
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
             {
@@ -51,8 +50,9 @@ namespace Etg.Yams.Test
 
             // Replace the update session manager with a stub that always starts an update session (since we don't have multiple instances
             // updating in a test)
-            _diContainer.RegisterInstance(updateSessionManager);
+            builder.RegisterInstance(updateSessionManager);
 
+            _diContainer = builder.Build();
             // we don't start yams because that will make it update based on a timer that is hard to manage in a test. Instead, we call
             // applicationUpdateManager.CheckForUpdates() manually in a test.
             _yamsEntryPoint = new YamsEntryPoint(_diContainer);
