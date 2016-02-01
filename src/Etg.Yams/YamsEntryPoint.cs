@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Watcher;
-using Microsoft.Practices.Unity;
+using Autofac;
 
 namespace Etg.Yams
 {
@@ -12,24 +12,24 @@ namespace Etg.Yams
     {
         private readonly IDeploymentWatcher _deploymentWatcher;
         private readonly IApplicationPool _applicationPool;
-        private static IUnityContainer _unityContainer;
+        private static IContainer _container;
 
-        public YamsEntryPoint(YamsConfig config) : this(InitializeDefaultUnityContainer(config))
+        public YamsEntryPoint(YamsConfig config) : this(InitializeDefaultModules(config))
         {
         }
 
-        public YamsEntryPoint(IUnityContainer unityContainer)
+        public YamsEntryPoint(IContainer container)
         {
-            _deploymentWatcher = unityContainer.Resolve<IDeploymentWatcher>();
-            _applicationPool = unityContainer.Resolve<IApplicationPool>();
-            _unityContainer = unityContainer;
+            _deploymentWatcher = container.Resolve<IDeploymentWatcher>();
+            _applicationPool = container.Resolve<IApplicationPool>();
+            _container = container;
         }
 
-        public static IUnityContainer InitializeDefaultUnityContainer(YamsConfig config)
+        public static IContainer InitializeDefaultModules(YamsConfig config)
         {
-            _unityContainer = new UnityContainer();
-            DiModule.RegisterTypes(_unityContainer, config);
-            return _unityContainer;
+            var builder = new ContainerBuilder();
+            DiModule.RegisterTypes(builder, config);
+            return builder.Build();
         }
 
         public Task Start()

@@ -8,219 +8,204 @@ using Etg.Yams.Lease;
 using Etg.Yams.Storage;
 using Etg.Yams.Update;
 using Etg.Yams.Watcher;
-using Microsoft.Practices.Unity;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Autofac;
 
 namespace Etg.Yams
 {
     /// <summary>
     /// Class used for DI registration.
-    /// 
-    /// Note: Always use InjectionFactory when you resolve a dependency to make sure that resolutions are delayed (lazy). With this approach,
-    /// the order of registration/resolution doesn't matter; which makes DI setup a lot easier.
     /// </summary>
     public static class DiModule
     {
-        public static void RegisterTypes(IUnityContainer container, YamsConfig config)
+        public static void RegisterTypes(ContainerBuilder builder, YamsConfig config)
         {
-            RegisterConfig(container, config);
+            RegisterConfig(builder, config);
 
-            RegisterCloudStorageAccount(container);
+            RegisterCloudStorageAccount(builder);
 
-            RegisterCloudBlobClient(container);
+            RegisterCloudBlobClient(builder);
 
-            RegisterBlobLeaseFactory(container);
+            RegisterBlobLeaseFactory(builder);
 
-            RegisterBlobLeaseFactory(container);
+            RegisterBlobLeaseFactory(builder);
 
-            RegisterProcessFactory(container);
+            RegisterProcessFactory(builder);
 
-            RegisterProcessStopper(container);
+            RegisterProcessStopper(builder);
 
-            RegisterUpdateSessionManager(container);
+            RegisterUpdateSessionManager(builder);
 
-            RegisterApplicationConfigSymbolResolver(container);
+            RegisterApplicationConfigSymbolResolver(builder);
 
-            RegisterApplicationConfigParser(container);
+            RegisterApplicationConfigParser(builder);
 
-            RegisterConfigurableApplicationFactory(container);
+            RegisterConfigurableApplicationFactory(builder);
 
-            RegisterUpdateSessionManagerConfig(container);
+            RegisterUpdateSessionManagerConfig(builder);
 
-            RegisterApplicationDeploymentDirectory(container);
+            RegisterApplicationDeploymentDirectory(builder);
 
-            RegisterApplicationPool(container);
+            RegisterApplicationPool(builder);
 
-            RegisterApplicationInstaller(container);
+            RegisterApplicationInstaller(builder);
 
-            RegisterApplicationDownloader(container);
+            RegisterApplicationDownloader(builder);
 
-            RegisterApplicationUpdateManager(container);
+            RegisterApplicationUpdateManager(builder);
 
-            RegisterDeploymentWatcher(container);
+            RegisterDeploymentWatcher(builder);
 
-			RegisterDeploymentRepository(container);
+            RegisterDeploymentRepository(builder);
         }
 
-        private static void RegisterDeploymentRepository(IUnityContainer container)
+        private static void RegisterDeploymentRepository(ContainerBuilder builder)
         {
-            container.RegisterType<IDeploymentRepository>(new ContainerControlledLifetimeManager(), new InjectionFactory(
-                c =>
+            builder.Register<IDeploymentRepository>(c =>
+            {
+                CloudBlobClient blobClient = c.Resolve<CloudBlobClient>();
+                CloudBlobContainer blobContainer =
+                    blobClient.GetContainerReference(Constants.ApplicationsRootFolderName);
+                if (!blobContainer.Exists())
                 {
-                    CloudBlobClient blobClient = c.Resolve<CloudBlobClient>();
-                    CloudBlobContainer blobContainer =
-                        blobClient.GetContainerReference(Constants.ApplicationsRootFolderName);
-                    if (!blobContainer.Exists())
-                    {
-                        blobContainer.Create();
-                    }
-                    return new BlobStorageDeploymentRepository(blobContainer);
-                }));
+                    blobContainer.Create();
+                }
+                return new BlobStorageDeploymentRepository(blobContainer);
+            }).SingleInstance();
         }
 
-        private static void RegisterUpdateSessionManager(IUnityContainer container)
+        private static void RegisterUpdateSessionManager(ContainerBuilder builder)
         {
-            container.RegisterType<IUpdateSessionManager, BlobBasedUpdateSessionManager>(
-                new ContainerControlledLifetimeManager());
+            builder.RegisterType<BlobBasedUpdateSessionManager>().As<IUpdateSessionManager>().SingleInstance();
         }
 
-        private static void RegisterDeploymentWatcher(IUnityContainer container)
+        private static void RegisterDeploymentWatcher(ContainerBuilder builder)
         {
-            container.RegisterType<IDeploymentWatcher>(new ContainerControlledLifetimeManager(), new InjectionFactory(
-                c =>
-                {
-                    var config = c.Resolve<YamsConfig>();
-                    return new DeploymentWatcher(c.Resolve<IApplicationUpdateManager>(),
-                        config.CheckForUpdatesPeriodInSeconds);
-                }));
+            builder.Register<IDeploymentWatcher>(c =>
+            {
+                var config = c.Resolve<YamsConfig>();
+                return new DeploymentWatcher(c.Resolve<IApplicationUpdateManager>(),
+                    config.CheckForUpdatesPeriodInSeconds);
+            }).SingleInstance();
         }
 
-        private static void RegisterApplicationUpdateManager(IUnityContainer container)
+        private static void RegisterApplicationUpdateManager(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationUpdateManager>(new ContainerControlledLifetimeManager(), new InjectionFactory(
+            builder.Register<IApplicationUpdateManager>(
                 c =>
                 {
                     var config = c.Resolve<YamsConfig>();
                     return new ApplicationUpdateManager(config.CloudServiceDeploymentId,
                         c.Resolve<IApplicationDeploymentDirectory>(), c.Resolve<IApplicationPool>(),
                         c.Resolve<IApplicationDownloader>(), c.Resolve<IApplicationInstaller>());
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterConfigurableApplicationFactory(IUnityContainer container)
+        private static void RegisterConfigurableApplicationFactory(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationFactory>(
-                new ContainerControlledLifetimeManager(),
-                new InjectionFactory(c => new ConfigurableApplicationFactory(
-                    c.Resolve<IApplicationConfigParser>(), c.Resolve<IProcessFactory>(), c.Resolve<IProcessStopper>())));
+            builder.Register<IApplicationFactory>(c => new ConfigurableApplicationFactory(
+                    c.Resolve<IApplicationConfigParser>(), c.Resolve<IProcessFactory>(), c.Resolve<IProcessStopper>())).SingleInstance();
         }
 
-        private static void RegisterProcessStopper(IUnityContainer container)
+        private static void RegisterProcessStopper(ContainerBuilder builder)
         {
-            container.RegisterType<IProcessStopper>(new ContainerControlledLifetimeManager(), new InjectionFactory(c =>
+            builder.Register<IProcessStopper>(c =>
             {
                 var config = c.Resolve<YamsConfig>();
                 return new ProcessStopper(config.ProcessWaitForExitInSeconds);
-            }));
+            }).SingleInstance();
         }
 
-        private static void RegisterApplicationConfigParser(IUnityContainer container)
+        private static void RegisterApplicationConfigParser(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationConfigParser>(new ContainerControlledLifetimeManager(),
-                new InjectionFactory(c =>
+            builder.Register<IApplicationConfigParser>(c =>
                 {
                     IApplicationConfigSymbolResolver symbolResolver = c.Resolve<IApplicationConfigSymbolResolver>();
                     return new ApplicationConfigParser(symbolResolver);
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterApplicationConfigSymbolResolver(IUnityContainer container)
+        private static void RegisterApplicationConfigSymbolResolver(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationConfigSymbolResolver>(new ContainerControlledLifetimeManager(),
-                new InjectionFactory(c =>
+            builder.Register<IApplicationConfigSymbolResolver>(c =>
                 {
                     YamsConfig config = c.Resolve<YamsConfig>();
                     return new ApplicationConfigSymbolResolver(config.CloudServiceDeploymentId, config.RoleInstanceId);
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterApplicationPool(IUnityContainer container)
+        private static void RegisterApplicationPool(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationPool>(new ContainerControlledLifetimeManager(), 
-                new InjectionFactory(c => new ApplicationPool()));
+            builder.Register<IApplicationPool>(c => new ApplicationPool()).SingleInstance();
         }
 
-        private static void RegisterApplicationDownloader(IUnityContainer container)
+        private static void RegisterApplicationDownloader(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationDownloader>(new ContainerControlledLifetimeManager(), new InjectionFactory(
+            builder.Register<IApplicationDownloader>(
                 c =>
                 {
                     var config = c.Resolve<YamsConfig>();
                     return new ApplicationDownloader(config.ApplicationInstallDirectory, c.Resolve<IDeploymentRepository>());
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterApplicationInstaller(IUnityContainer container)
+        private static void RegisterApplicationInstaller(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationInstaller>(new ContainerControlledLifetimeManager(), new InjectionFactory(
+            builder.Register<IApplicationInstaller>(
                 c =>
                 {
                     var config = c.Resolve<YamsConfig>();
                     return new ApplicationInstaller(Path.Combine(config.ApplicationInstallDirectory),
                         c.Resolve<IUpdateSessionManager>(), c.Resolve<IApplicationFactory>(), c.Resolve<IApplicationPool>());
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterProcessFactory(IUnityContainer container)
+        private static void RegisterProcessFactory(ContainerBuilder builder)
         {
-            container.RegisterType<IProcessFactory>(new ContainerControlledLifetimeManager(),
-                new InjectionFactory(c =>
+            builder.Register<IProcessFactory>(c =>
                 {
-                    var config = container.Resolve<YamsConfig>();
+                    var config = c.Resolve<YamsConfig>();
                     return new SelfRestartingProcessFactory(config.ApplicationRestartCount);
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterBlobLeaseFactory(IUnityContainer container)
+        private static void RegisterBlobLeaseFactory(ContainerBuilder builder)
         {
-            container.RegisterType<IBlobLeaseFactory>(new ContainerControlledLifetimeManager(),
-                new InjectionFactory(c =>
+            builder.Register<IBlobLeaseFactory>(c =>
                 {
-                    var config = container.Resolve<YamsConfig>();
+                    var config = c.Resolve<YamsConfig>();
                     return new BlobLeaseFactory(config.StorageBlobLeaseRenewIntervalInSeconds);
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterCloudBlobClient(IUnityContainer container)
+        private static void RegisterCloudBlobClient(ContainerBuilder builder)
         {
-            container.RegisterType<CloudBlobClient>(new InjectionFactory(c =>
+            builder.Register(c =>
             {
-                var cloudStorageAccount = container.Resolve<CloudStorageAccount>();
+                var cloudStorageAccount = c.Resolve<CloudStorageAccount>();
                 return cloudStorageAccount.CreateCloudBlobClient();
-            }));
+            });
         }
 
-        private static void RegisterCloudStorageAccount(IUnityContainer container)
+        private static void RegisterCloudStorageAccount(ContainerBuilder builder)
         {
-            container.RegisterType<CloudStorageAccount>(new ContainerControlledLifetimeManager(),
-                new InjectionFactory(
+            builder.Register(
                 c =>
                 {
-                    var config = container.Resolve<YamsConfig>();
+                    var config = c.Resolve<YamsConfig>();
                     return CloudStorageAccount.Parse(config.StorageDataConnectionString);
-                }));
+                }).SingleInstance();
         }
 
-        private static void RegisterConfig(IUnityContainer container, YamsConfig config)
+        private static void RegisterConfig(ContainerBuilder builder, YamsConfig config)
         {
-            container.RegisterInstance(config);
+            builder.RegisterInstance(config);
         }
 
-        private static void RegisterUpdateSessionManagerConfig(IUnityContainer container)
+        private static void RegisterUpdateSessionManagerConfig(ContainerBuilder builder)
         {
-            container.RegisterType<UpdateSessionManagerConfig>(new ContainerControlledLifetimeManager(),
-                new InjectionFactory(
+            builder.Register(
                     c =>
                     {
                         var config = c.Resolve<YamsConfig>();
@@ -229,13 +214,13 @@ namespace Etg.Yams
                             instanceUpdateDomain: config.InstanceUpdateDomain,
                             instanceId: config.RoleInstanceId,
                             storageContainerName: Constants.ApplicationsRootFolderName);
-                    }));
+                    }).SingleInstance();
         }
 
-        private static void RegisterApplicationDeploymentDirectory(IUnityContainer container)
+        private static void RegisterApplicationDeploymentDirectory(ContainerBuilder builder)
         {
-            container.RegisterType<IApplicationDeploymentDirectory>(new ContainerControlledLifetimeManager(), new InjectionFactory(
-                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentRepository>())));
+            builder.Register<IApplicationDeploymentDirectory>(
+                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentRepository>())).SingleInstance();
         }
     }
 }
