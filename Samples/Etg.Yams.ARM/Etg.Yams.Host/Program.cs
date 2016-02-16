@@ -30,7 +30,7 @@ namespace Etg.Yams.Host
 
                 x.ApplyCommandLine();
 
-                x.Service<YamsEntryPoint>(s =>
+                x.Service<IYamsService>(s =>
                 {
                     s.ConstructUsing(name =>
                     {
@@ -46,9 +46,9 @@ namespace Etg.Yams.Host
                         if (string.IsNullOrWhiteSpace(_updateDomain))
                             throw new ArgumentNullException(nameof(_updateDomain));
 
+                        string blobStorageConnectionString = $"DefaultEndpointsProtocol=https;AccountName={_storageAccount};AccountKey={_storageKey}";
                         YamsConfig yamsConfig = new YamsConfigBuilder(
                             // mandatory configs
-                            $"DefaultEndpointsProtocol=https;AccountName={_storageAccount};AccountKey={_storageKey}",
                             _deploymentId,
                             _updateDomain,
                             Environment.MachineName,
@@ -58,7 +58,9 @@ namespace Etg.Yams.Host
                             .SetApplicationRestartCount(_applicationRestartCount)
                             .Build();
 
-                        return new YamsEntryPoint(yamsConfig);
+                        return YamsServiceFactory.Create(yamsConfig,
+                            deploymentRepositoryStorageConnectionString: blobStorageConnectionString,
+                            updateSessionStorageConnectionString: blobStorageConnectionString);
                     });
                     s.WhenStarted(yep => yep.Start().Wait());
                     s.WhenStopped(yep => yep.Stop().Wait());

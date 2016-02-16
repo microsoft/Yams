@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation. All Rights Reserved.
 // -------------------------------------------------------------------
 
+using Etg.Yams.Azure.Storage;
 using Etg.Yams.Storage;
 
 namespace YamsStudio

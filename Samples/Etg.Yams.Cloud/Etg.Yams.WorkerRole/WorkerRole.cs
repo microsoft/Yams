@@ -11,7 +11,7 @@ namespace Etg.Yams.WorkerRole
 {
     public class WorkerRole : RoleEntryPoint
     {
-        private YamsEntryPoint _yamsEntryPoint;
+        private IYamsService _yamsService;
 
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public override void Run()
@@ -24,7 +24,6 @@ namespace Etg.Yams.WorkerRole
             WorkerRoleConfig config = new WorkerRoleConfig();
             YamsConfig yamsConfig = new YamsConfigBuilder(
                 // mandatory configs
-                config.StorageDataConnectionString,
                 DeploymentIdUtils.CloudServiceDeploymentId,
                 RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
                 RoleEnvironment.CurrentRoleInstance.Id,
@@ -33,12 +32,14 @@ namespace Etg.Yams.WorkerRole
                 .SetCheckForUpdatesPeriodInSeconds(config.UpdateFrequencyInSeconds)
                 .SetApplicationRestartCount(config.ApplicationRestartCount)
                 .Build();
-            _yamsEntryPoint = new YamsEntryPoint(yamsConfig);
+            _yamsService = YamsServiceFactory.Create(yamsConfig,
+                deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
+                updateSessionStorageConnectionString: config.StorageDataConnectionString);
 
             try
             {
                 Trace.TraceInformation("Yams is starting");
-                await _yamsEntryPoint.Start();
+                await _yamsService.Start();
                 Trace.TraceInformation("Yams has started");
                 while (true)
                 {
@@ -70,9 +71,9 @@ namespace Etg.Yams.WorkerRole
         {
             Trace.TraceInformation("Yams WorkerRole is stopping");
             RoleEnvironment.Changing -= RoleEnvironmentChanging;
-            if (_yamsEntryPoint != null)
+            if (_yamsService != null)
             {
-                await _yamsEntryPoint.Stop();
+                await _yamsService.Stop();
             }
             base.OnStop();
             Trace.TraceInformation("Yams has stopped");
