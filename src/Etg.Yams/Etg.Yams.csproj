@@ -39,16 +39,16 @@
       <HintPath>..\..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Data.Edm, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Data.Edm.5.7.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    <Reference Include="Microsoft.Data.Edm, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Data.Edm.5.6.4\lib\net40\Microsoft.Data.Edm.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Data.OData, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Data.OData.5.7.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    <Reference Include="Microsoft.Data.OData, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Data.OData.5.6.4\lib\net40\Microsoft.Data.OData.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Data.Services.Client, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Data.Services.Client.5.7.0\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Data.Services.Client.5.6.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Storage, Version=6.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -61,20 +61,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Reactive.Core">
-      <HintPath>..\..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Interfaces">
-      <HintPath>..\..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Linq">
-      <HintPath>..\..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.PlatformServices">
-      <HintPath>..\..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Spatial, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Spatial.5.7.0\lib\net40\System.Spatial.dll</HintPath>
+    <Reference Include="System.Spatial, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml.Linq" />
@@ -84,73 +72,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Application\ApplicationConfig.cs" />
-    <Compile Include="Application\Application.cs" />
-    <Compile Include="Application\ApplicationConfigParser.cs" />
-    <Compile Include="Application\AppIdentity.cs" />
-    <Compile Include="Application\ApplicationConfigSymbolResolver.cs" />
-    <Compile Include="Application\ConfigurableApplication.cs" />
-    <Compile Include="Application\ConfigurableApplicationFactory.cs" />
-    <Compile Include="Application\IApplicationConfigParser.cs" />
-    <Compile Include="Application\IApplicationConfigSymbolResolver.cs" />
-    <Compile Include="Download\ApplicationDownloader.cs" />
-    <Compile Include="Download\IApplicationDownloader.cs" />
-    <Compile Include="DIModule.cs" />
-    <Compile Include="Process\IProcessInfo.cs" />
-    <Compile Include="Process\IProcess.cs" />
-    <Compile Include="Process\IProcessStopper.cs" />
-    <Compile Include="Process\Process.cs" />
-    <Compile Include="Lease\BlobLeaseFactory.cs" />
-    <Compile Include="Lease\IBlobLease.cs" />
-    <Compile Include="Lease\IBlobLeaseFactory.cs" />
-    <Compile Include="Process\ProcessStopper.cs" />
-    <Compile Include="Storage\BinariesNotFoundException.cs" />
-    <Compile Include="Storage\Config\AppDeploymentConfig.cs" />
-    <Compile Include="Storage\Config\DeploymentConfig.cs" />
-    <Compile Include="Utils\DictionaryUtils.cs" />
-    <Compile Include="Storage\Config\VersionDeploymentConfig.cs" />
-    <Compile Include="Storage\DuplicateBinariesException.cs" />
-    <Compile Include="Storage\IDeploymentRepository.cs" />
-    <Compile Include="Storage\ConflictResolutionMode.cs" />
-    <Compile Include="Storage\BlobStorageDeploymentRepository.cs" />
-    <Compile Include="Update\UpdateSessionManagerConfig.cs" />
-    <Compile Include="Utils\ApplicationUtils.cs" />
-    <Compile Include="Application\ApplicationPool.cs" />
-    <Compile Include="Utils\BlobUtils.cs" />
-    <Compile Include="Utils\ProcessUtils.cs" />
-    <Compile Include="Utils\TraceUtils.cs" />
-    <Compile Include="Utils\FileUtils.cs" />
-    <Compile Include="Process\SelfRestartingProcessFactory.cs" />
-    <Compile Include="Deploy\IApplicationDeploymentDirectory.cs" />
-    <Compile Include="Application\IApplicationFactory.cs" />
-    <Compile Include="Install\IApplicationInstaller.cs" />
-    <Compile Include="Deploy\RemoteApplicationDeploymentDirectory.cs" />
-    <Compile Include="Watcher\DeploymentWatcher.cs" />
-    <Compile Include="Update\ApplicationUpdateManager.cs" />
-    <Compile Include="Application\IApplicationPool.cs" />
-    <Compile Include="Utils\JsonUtils.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="Process\SelfRestartingProcess.cs" />
-    <Compile Include="Application\IApplication.cs" />
-    <Compile Include="Process\IProcessFactory.cs" />
-    <Compile Include="Update\IUpdateSessionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Lease\SelfRenewableBlobLease.cs" />
-    <Compile Include="Install\ApplicationInstaller.cs" />
-    <Compile Include="Update\UpdateBlobWrapper.cs" />
-    <Compile Include="Update\BlobBasedUpdateSessionManager.cs" />
-    <Compile Include="Update\IApplicationUpdateManager.cs" />
-    <Compile Include="Watcher\IDeploymentWatcher.cs" />
-    <Compile Include="YamsEntryPoint.cs" />
-    <Compile Include="YamsConfig.cs" />
-    <Compile Include="YamsConfigBuilder.cs" />
+    <Compile Include="YamsServiceFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Etg.Yams.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\AzureBlobStorageDeploymentRepository\AzureBlobStorageDeploymentRepository.csproj">
+      <Project>{df95a9dc-f6be-4c71-b444-4092b43eb602}</Project>
+      <Name>AzureBlobStorageDeploymentRepository</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AzureBlobStorageUpdateSession\AzureBlobStorageUpdateSession.csproj">
+      <Project>{894b7986-5aa4-42a7-8eb0-6dfd1f604505}</Project>
+      <Name>AzureBlobStorageUpdateSession</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{3e982150-5b43-44da-8d96-66cf07a9a14c}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Etg.Yams.Core\Etg.Yams.Core.csproj">
+      <Project>{7145e485-34fa-4632-89b0-bd27c96af69c}</Project>
+      <Name>Etg.Yams.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

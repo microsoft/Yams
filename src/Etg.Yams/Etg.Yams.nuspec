@@ -2,9 +2,9 @@
 <package >
   <metadata>
     <id>Etg.Yams</id>
-    <version>1.0.11-beta</version>
+    <version>1.0.12-beta</version>
     <title>YAMS</title>
-    <authors>Nehme Bilal,Remus Radu</authors>
+    <authors>Microsoft Studios (BigPark)</authors>
     <owners>Microsoft Studios (BigPark)</owners>
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
