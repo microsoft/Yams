@@ -31,7 +31,7 @@
         <Label Grid.Row="3" Grid.Column="0" x:Name="lbl_DeploymentIds" Content="DeploymentIds"></Label>
         <ListView Grid.Row="3" Grid.Column="1" x:Name="lv_DeploymentIds"></ListView>
         <Label Grid.Row="4" Grid.Column="0" Content="Binaries Path"></Label>
-        <controls:SelectDirectoryControl Grid.Row="4" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"></controls:SelectDirectoryControl>
+        <controls:SelectDirectoryControl x:Name="uc_SelectBinaries" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"></controls:SelectDirectoryControl>
         <WrapPanel Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right">
             <Button IsDefault="True" Name="btn_DialogOk" Click="OnOk" MinWidth="60" Margin="0,0,10,0">_Ok</Button>
             <Button IsCancel="True" MinWidth="60">_Cancel</Button>
