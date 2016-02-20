@@ -167,7 +167,7 @@ namespace YamsStudio
             }
         }
 
-        private void OnUpdateVersion(object sender, RoutedEventArgs e)
+        private async void OnUpdateVersion(object sender, RoutedEventArgs e)
         {
             StorageAccountConnectionInfo connectionInfo = GetCurrentConnection();
             string appId = GetSelectedAppId();
@@ -178,11 +178,12 @@ namespace YamsStudio
             if (dialog.ShowDialog() == true)
             {
                 string newVersion = dialog.NewVersion;
+                AppIdentity newAppIdentity = new AppIdentity(appIdentity.Id, newVersion);
                 IEnumerable<string> selectedDeploymentIds = dialog.SelectedDeploymentIds;
                 foreach (string deploymentId in selectedDeploymentIds)
                 {
-					_deploymentConfig = _deploymentConfig.RemoveApplication(appIdentity, deploymentId);
-					_deploymentConfig = _deploymentConfig.AddApplication(appIdentity, deploymentId);
+                    await AddApplication(newAppIdentity, deploymentId, dialog.BinariesPath);
+                    _deploymentConfig = _deploymentConfig.RemoveApplication(appIdentity, deploymentId);
                 }
 
                 SaveLocalDeploymentConfig(connectionInfo);

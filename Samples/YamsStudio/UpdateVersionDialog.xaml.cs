@@ -43,6 +43,8 @@ namespace YamsStudio
             }
         }
 
+        public string BinariesPath => uc_SelectBinaries.DirPath;
+
         private void OnOk(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
