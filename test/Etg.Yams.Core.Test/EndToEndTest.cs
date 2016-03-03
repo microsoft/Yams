@@ -6,7 +6,6 @@ using Etg.Yams.Application;
 using Etg.Yams.Test.Storage;
 using Etg.Yams.Test.Utils;
 using Etg.Yams.Update;
-using Etg.Yams.Update.Fakes;
 using Etg.Yams.Utils;
 using Xunit;
 using Autofac;
@@ -38,8 +37,8 @@ namespace Etg.Yams.Test
 
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
             {
-                TryStartUpdateSessionString = applicationId => Task.FromResult(true),
-                EndUpdateSessionString = applicationId => Task.FromResult(true)
+                TryStartUpdateSession_String = applicationId => Task.FromResult(true),
+                EndUpdateSession_String = applicationId => Task.FromResult(true)
             };
 
             _yamsDiModule = new YamsDiModule(yamsConfig, new LocalDeploymentRepository(_deploymentDirPath), updateSessionManager);

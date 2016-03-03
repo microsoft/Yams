@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Etg.Yams.Azure.Lease;
 using Etg.Yams.Azure.UpdateSession;
-using Etg.Yams.AzureTestUtils.Fixtures;
-using Moq;
+using Etg.Yams.TestUtils;
 using Xunit;
 
 namespace Etg.Yams.Azure.Test.UpdateSession
@@ -13,22 +11,35 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         [Fact]
         public async Task TestThatStartUpdateSessionThrowsIfBlobCannotBeLocked()
         {
-
-            var updateBlobFactoryMock = new Mock<IUpdateBlobFactory>();
-            updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob("app1"))
-                .ThrowsAsync(new UpdateBlobUnavailableException());
-            BlobBasedUpdateSessionManager updateSessionManager = new BlobBasedUpdateSessionManager(updateBlobFactoryMock.Object, "instanceId1", "1");
+            string appId = null;
+            var updateBlobFactoryStub = new StubIUpdateBlobFactory
+            {
+                TryLockUpdateBlob_String = id =>
+                {
+                    appId = id;
+                    return AsyncUtils.AsyncTaskThatThrows<IUpdateBlob>(new UpdateBlobUnavailableException());
+                }
+            };
+            BlobBasedUpdateSessionManager updateSessionManager = new BlobBasedUpdateSessionManager(updateBlobFactoryStub, "instanceId1", "1");
             await Assert.ThrowsAsync<UpdateBlobUnavailableException>(async () => await updateSessionManager.TryStartUpdateSession("app1"));
+            Assert.Equal("app1", appId);
         }
 
         [Fact]
         public async Task TestThatEndUpdateSessionThrowsIfBlobCannotBeLocked()
         {
-            var updateBlobFactoryMock = new Mock<IUpdateBlobFactory>();
-            updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob("app1"))
-                .ThrowsAsync(new UpdateBlobUnavailableException());
-            BlobBasedUpdateSessionManager updateSessionManager = new BlobBasedUpdateSessionManager(updateBlobFactoryMock.Object, "instanceId1", "1");
+            string appId = null;
+            var updateBlobFactoryStub = new StubIUpdateBlobFactory
+            {
+                TryLockUpdateBlob_String = id =>
+                {
+                    appId = id;
+                    return AsyncUtils.AsyncTaskThatThrows<IUpdateBlob>(new UpdateBlobUnavailableException());
+                }
+            };
+            BlobBasedUpdateSessionManager updateSessionManager = new BlobBasedUpdateSessionManager(updateBlobFactoryStub, "instanceId1", "1");
             await Assert.ThrowsAnyAsync<Exception>(async () => await updateSessionManager.EndUpdateSession("app1"));
+            Assert.Equal("app1", appId);
         }
     }
 }

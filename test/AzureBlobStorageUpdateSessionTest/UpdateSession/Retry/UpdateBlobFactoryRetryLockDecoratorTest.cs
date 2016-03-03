@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Etg.SimpleStubs;
 using Etg.Yams.Azure.UpdateSession;
 using Etg.Yams.Azure.UpdateSession.Retry;
+using Etg.Yams.TestUtils;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
-using Moq;
 using Xunit;
 
 namespace Etg.Yams.Azure.Test.UpdateSession.Retry
@@ -14,17 +15,18 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestSuccessfullRetry()
         {
             string appId = "appId";
-            IUpdateBlob updateBlob = new Mock<IUpdateBlob>().Object;
-            var updateBlobFactoryMock = new Mock<IUpdateBlobFactory>();
-            updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId))
-                .ThrowsAsync(new UpdateBlobUnavailableException())
-                .Callback(() => updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId))
-                    .ThrowsAsync(new UpdateBlobUnavailableException())
-                    .Callback(() => updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId))
-                        .ReturnsAsync(updateBlob)));
+            IUpdateBlob updateBlob = new StubIUpdateBlob();
+
+            var sequence = StubsUtils.Sequence<StubIUpdateBlobFactory.TryLockUpdateBlob_String_Delegate>()
+                .Twice(id => AsyncUtils.AsyncTaskThatThrows<IUpdateBlob>(new UpdateBlobUnavailableException()))
+                .Once(id => AsyncUtils.AsyncTaskWithResult(updateBlob));
+            var updateBlobFactoryStub = new StubIUpdateBlobFactory
+            {
+                TryLockUpdateBlob_String = id => sequence.Next(appId)
+            };
 
             UpdateBlobFactoryRetryLockDecorator retryDecorator =
-                new UpdateBlobFactoryRetryLockDecorator(updateBlobFactoryMock.Object,
+                new UpdateBlobFactoryRetryLockDecorator(updateBlobFactoryStub,
                     new FixedInterval(2, TimeSpan.Zero));
             Assert.Equal(updateBlob, await retryDecorator.TryLockUpdateBlob(appId));
         }
@@ -33,18 +35,18 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestThatExceptionIsThrownIfMaxRetryCountIsReached()
         {
             string appId = "appId";
-            IUpdateBlob updateBlob = new Mock<IUpdateBlob>().Object;
-            var updateBlobFactoryMock = new Mock<IUpdateBlobFactory>();
-            updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId))
-                .ThrowsAsync(new UpdateBlobUnavailableException())
-                .Callback(() => updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId))
-                    .ThrowsAsync(new UpdateBlobUnavailableException())
-                    .Callback(() => updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId))
-                        .ReturnsAsync(updateBlob)));
+            IUpdateBlob updateBlob = new StubIUpdateBlob();
+
+            var sequence = StubsUtils.Sequence<StubIUpdateBlobFactory.TryLockUpdateBlob_String_Delegate>()
+                .Twice(id => AsyncUtils.AsyncTaskThatThrows<IUpdateBlob>(new UpdateBlobUnavailableException()))
+                .Once(id => AsyncUtils.AsyncTaskWithResult(updateBlob));
+            var updateBlobFactoryStub = new StubIUpdateBlobFactory
+            {
+                TryLockUpdateBlob_String = id => sequence.Next(appId)
+            };
 
             UpdateBlobFactoryRetryLockDecorator retryDecorator =
-                new UpdateBlobFactoryRetryLockDecorator(updateBlobFactoryMock.Object,
-                    new FixedInterval(1, TimeSpan.Zero));
+                new UpdateBlobFactoryRetryLockDecorator(updateBlobFactoryStub, new FixedInterval(1, TimeSpan.Zero));
             await
                 Assert.ThrowsAsync<UpdateBlobUnavailableException>(
                     async () => await retryDecorator.TryLockUpdateBlob(appId));
@@ -54,15 +56,18 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestThatNotAllExceptionsAreRetried()
         {
             string appId = "appId";
-            var updateBlobFactoryMock = new Mock<IUpdateBlobFactory>();
-            updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId))
-                .ThrowsAsync(new InvalidOperationException());
+
+            var sequence = StubsUtils.Sequence<StubIUpdateBlobFactory.TryLockUpdateBlob_String_Delegate>()
+                .Twice(id => AsyncUtils.AsyncTaskThatThrows<IUpdateBlob>(new Exception()));
+            var updateBlobFactoryStub = new StubIUpdateBlobFactory
+            {
+                TryLockUpdateBlob_String = id => sequence.Next(appId)
+            };
 
             UpdateBlobFactoryRetryLockDecorator retryDecorator =
-                new UpdateBlobFactoryRetryLockDecorator(updateBlobFactoryMock.Object,
-                    new FixedInterval(1, TimeSpan.Zero));
+                new UpdateBlobFactoryRetryLockDecorator(updateBlobFactoryStub, new FixedInterval(1, TimeSpan.Zero));
             await
-                Assert.ThrowsAsync<InvalidOperationException>(async () => await retryDecorator.TryLockUpdateBlob(appId));
+                Assert.ThrowsAsync<Exception>(async () => await retryDecorator.TryLockUpdateBlob(appId));
         }
     }
 }

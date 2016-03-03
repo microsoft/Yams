@@ -5,11 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Deploy;
-using Etg.Yams.Deploy.Fakes;
 using Etg.Yams.Download;
-using Etg.Yams.Download.Fakes;
 using Etg.Yams.Install;
-using Etg.Yams.Install.Fakes;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Update;
 using Xunit;
@@ -38,7 +35,7 @@ namespace Etg.Yams.Test.Update
 
             IApplicationDeploymentDirectory applicationDeploymentDirectory = new StubIApplicationDeploymentDirectory
             {
-                FetchDeploymentsString = (deploymentId) => Task.FromResult(appsToDeploy)
+                FetchDeployments_String = (deploymentId) => Task.FromResult(appsToDeploy)
             };
 
             IApplicationPool applicationPool = new ApplicationPoolStub();
@@ -50,7 +47,7 @@ namespace Etg.Yams.Test.Update
             var downloadedApps = new List<AppIdentity>();
             IApplicationDownloader applicationDownloader = new StubIApplicationDownloader
             {
-                DownloadApplicationAppIdentity = (appIdentity) =>
+                DownloadApplication_AppIdentity = (appIdentity) =>
                 {
                     downloadedApps.Add(appIdentity);
                     return Task.FromResult(true);
@@ -64,17 +61,17 @@ namespace Etg.Yams.Test.Update
             IEnumerable<Version> versionsAdded = null;
             IApplicationInstaller applicationInstaller = new StubIApplicationInstaller
             {
-                InstallAppIdentity = (appIdentity) =>
+                Install_AppIdentity = (appIdentity) =>
                 {
                     installedApps.Add(appIdentity);
                     return Task.FromResult(true);
                 },
-                UnInstallAppIdentity = (appIdentity) =>
+                UnInstall_AppIdentity = (appIdentity) =>
                 {
                     uninstalledApps.Add(appIdentity);
                     return Task.FromResult(true);
                 },
-                UpdateStringIEnumerableOfVersionIEnumerableOfVersion = (appId, versionsToRemove, versionToDeploy) =>
+                Update_String_IEnumerableOfVersion_IEnumerableOfVersion = (appId, versionsToRemove, versionToDeploy) =>
                 {
                     updatedAppId = appId;
                     versionsRemoved = versionsToRemove;
