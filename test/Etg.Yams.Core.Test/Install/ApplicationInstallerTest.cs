@@ -6,7 +6,6 @@ using Etg.Yams.Application;
 using Etg.Yams.Install;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Update;
-using Etg.Yams.Update.Fakes;
 using Xunit;
 
 namespace Etg.Yams.Test.Install
@@ -63,12 +62,12 @@ namespace Etg.Yams.Test.Install
             string updateSessionId = null;
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
             {
-                TryStartUpdateSessionString = id =>
+                TryStartUpdateSession_String = id =>
                 {
                     updateSessionId = id;
                     return Task.FromResult(true);
                 },
-                EndUpdateSessionString = id => Task.FromResult(true)
+                EndUpdateSession_String = id => Task.FromResult(true)
             };
 
             IApplicationPool applicationPool = new ApplicationPoolStub();
@@ -109,7 +108,7 @@ namespace Etg.Yams.Test.Install
         {
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
             {
-                TryStartUpdateSessionString = id => Task.FromResult(false)
+                TryStartUpdateSession_String = id => Task.FromResult(false)
             };
 
             IApplicationPool applicationPool = new ApplicationPoolStub();

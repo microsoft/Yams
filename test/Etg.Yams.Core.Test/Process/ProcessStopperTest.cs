@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Etg.Yams.Process;
-using Etg.Yams.Process.Fakes;
 using Xunit;
 
 namespace Etg.Yams.Test.Process
@@ -22,9 +21,9 @@ namespace Etg.Yams.Test.Process
                 {
                     throw new Exception("Kill should not be called if the process has exited gracefully");
                 },
-                HasExitedGet = () => true,
-                ExePathGet = () => "exePath",
-                ExeArgsGet = () => "exeArgs",
+                HasExited_Get = () => true,
+                IProcessInfo_ExePath_Get= () => "exePath",
+                IProcessInfo_ExeArgs_Get = () => "exeArgs",
                 ReleaseResources = () =>
                 {
                     resourcesReleased = true;
@@ -54,9 +53,9 @@ namespace Etg.Yams.Test.Process
                 {
                     throw new Exception("Kill should not be called if the process has exited gracefully");
                 },
-                HasExitedGet = () => hasExited,
-                ExePathGet = () => "exePath",
-                ExeArgsGet = () => "exeArgs",
+                HasExited_Get = () => hasExited,
+                IProcessInfo_ExePath_Get = () => "exePath",
+                IProcessInfo_ExeArgs_Get = () => "exeArgs",
                 ReleaseResources = () =>
                 {
                     resourcesReleased = true;
@@ -84,9 +83,9 @@ namespace Etg.Yams.Test.Process
                     hasExited = true;
                     return Task.FromResult(true);
                 },
-                HasExitedGet = () => hasExited,
-                ExePathGet = () => "exePath",
-                ExeArgsGet = () => "exeArgs",
+                HasExited_Get = () => hasExited,
+                IProcessInfo_ExePath_Get = () => "exePath",
+                IProcessInfo_ExeArgs_Get = () => "exeArgs",
                 ReleaseResources = () =>
                 {
                     resourcesReleased = true;
@@ -111,9 +110,9 @@ namespace Etg.Yams.Test.Process
                 {
                     throw new Exception("Process would not die!");
                 },
-                HasExitedGet = () => false,
-                ExePathGet = () => "exePath",
-                ExeArgsGet = () => "exeArgs",
+                HasExited_Get = () => false,
+                IProcessInfo_ExePath_Get = () => "exePath",
+                IProcessInfo_ExeArgs_Get = () => "exeArgs",
             };
 
             IProcessStopper processStopper = new ProcessStopper(0);

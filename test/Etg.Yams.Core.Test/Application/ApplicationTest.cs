@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Process;
-using Etg.Yams.Process.Fakes;
 using Etg.Yams.Test.stubs;
 using Xunit;
 
@@ -54,7 +53,8 @@ namespace Etg.Yams.Test.Application
 
             IProcessFactory processFactory = new StubIProcessFactory()
             {
-                CreateProcessStringString = (path, args) =>
+                
+                CreateProcess_String_String = (path, args) =>
                 {
                     exePath = path;
                     exeArgs = args;
@@ -64,7 +64,7 @@ namespace Etg.Yams.Test.Application
 
             IProcessStopper processStopper = new StubIProcessStopper
             {
-                StopProcessIProcess = (p) =>
+                StopProcess_IProcess = (p) =>
                 {
                     ++stopCallCount;
                     return Task.FromResult(true);
@@ -93,7 +93,7 @@ namespace Etg.Yams.Test.Application
 
             IProcessFactory processFactory = new StubIProcessFactory()
             {
-                CreateProcessStringString = (path, args) => process
+                CreateProcess_String_String = (path, args) => process
             };
 
             IProcessStopper processStopper = new StubIProcessStopper();
@@ -113,7 +113,7 @@ namespace Etg.Yams.Test.Application
 
             IProcessStopper processStopper = new StubIProcessStopper
             {
-                StopProcessIProcess = (p) =>
+                StopProcess_IProcess = (p) =>
                 {
                     ++stopCallCount;
                     return Task.FromResult(true);
@@ -122,7 +122,7 @@ namespace Etg.Yams.Test.Application
 
             IProcessFactory processFactory = new StubIProcessFactory()
             {
-                CreateProcessStringString = (path, args) => process
+                CreateProcess_String_String = (path, args) => process
             };
             ConfigurableApplication application = new ConfigurableApplication(ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
             await application.Start();
@@ -137,7 +137,7 @@ namespace Etg.Yams.Test.Application
             ProcessStub process = new ProcessStub("", "");
             IProcessFactory processFactory = new StubIProcessFactory()
             {
-                CreateProcessStringString = (path, args) => process
+                CreateProcess_String_String = (path, args) => process
             };
 
             ConfigurableApplication application = new ConfigurableApplication(ApplicationTestFixture.AppPath, _appConfig, processFactory, new StubIProcessStopper());

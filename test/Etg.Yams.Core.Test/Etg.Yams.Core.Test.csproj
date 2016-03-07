@@ -38,8 +38,9 @@
       <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Etg.Yams.Core.Fakes">
-      <HintPath>FakesAssemblies\Etg.Yams.Core.Fakes.dll</HintPath>
+    <Reference Include="Etg.SimpleStubs, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Etg.SimpleStubs.0.0.1-alpha\lib\net46\Etg.SimpleStubs.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Data.Edm, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Data.Edm.5.7.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
@@ -99,6 +100,7 @@
     <Compile Include="Process\ProcessTest.cs" />
     <Compile Include="Process\SelfRestartingProcessTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\SimpleStubs.generated.cs" />
     <Compile Include="Storage\DeploymentConfigTest.cs" />
     <Compile Include="Storage\LocalDeploymentRepository.cs" />
     <Compile Include="Stubs\ApplicationFactoryStub.cs" />
@@ -154,8 +156,10 @@
     <None Include="Etg.Yams.Test.xunit.runner.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Fakes Include="Fakes\Etg.Yams.Core.fakes" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="SimpleStubs.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\Exes\HangingProcess.exe">
@@ -211,7 +215,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props'))" />
+    <Error Condition="!Exists('..\..\packages\Etg.SimpleStubs.0.0.1-alpha\build\Etg.SimpleStubs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Etg.SimpleStubs.0.0.1-alpha\build\Etg.SimpleStubs.targets'))" />
   </Target>
+  <Import Project="..\..\packages\Etg.SimpleStubs.0.0.1-alpha\build\Etg.SimpleStubs.targets" Condition="Exists('..\..\packages\Etg.SimpleStubs.0.0.1-alpha\build\Etg.SimpleStubs.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -7,7 +7,6 @@ using Etg.Yams.AzureTestUtils.Fixtures;
 using Etg.Yams.TestUtils;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Moq;
 using Xunit;
 
 namespace Etg.Yams.Azure.Test.UpdateSession
@@ -40,7 +39,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession
 
             await updateBlob.TryLock();
             Assert.Equal(updateDomain, updateBlob.GetUpdateDomain());
-            AssertUtils.ContainsSameElementsInAnyOrder(new [] {instanceId}, updateBlob.GetInstanceIds());
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { instanceId }, updateBlob.GetInstanceIds());
         }
 
         [Fact]
@@ -132,28 +131,35 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         [Fact]
         public async Task TestThatLockFailsIfBlobLeaseReturnsNull()
         {
-            var blobLeaseMock = new Mock<IBlobLease>();
-            blobLeaseMock.Setup(lease => lease.TryAcquireLease()).ReturnsAsync(null);
-            await TestThatLockFailsIfBlobLeaseCantBeAcquired(blobLeaseMock);
+            var blobLeaseStub = new StubIBlobLease
+            {
+                TryAcquireLease = () => AsyncUtils.AsyncTaskWithResult<string>(null),
+                IDisposable_Dispose = () => { }
+            };
+            await TestThatLockFailsIfBlobLeaseCantBeAcquired(blobLeaseStub);
         }
 
         [Fact]
         public async Task TestThatLockFailsIfBlobLeaseThrowsStorageException()
         {
-            var blobLeaseMock = new Mock<IBlobLease>();
-            blobLeaseMock.Setup(lease => lease.TryAcquireLease()).ThrowsAsync(new StorageException());
-            await TestThatLockFailsIfBlobLeaseCantBeAcquired(blobLeaseMock);
+            var blobLeaseStub = new StubIBlobLease
+            {
+                TryAcquireLease = () => AsyncUtils.AsyncTaskThatThrows<string>(new StorageException()),
+                IDisposable_Dispose = () => { }
+            };
+            await TestThatLockFailsIfBlobLeaseCantBeAcquired(blobLeaseStub);
         }
 
-        private async Task TestThatLockFailsIfBlobLeaseCantBeAcquired(Mock<IBlobLease> blobLeaseMock)
+        private async Task TestThatLockFailsIfBlobLeaseCantBeAcquired(IBlobLease blobLeaseStub)
         {
-            
-            var leaseFactoryMock = new Mock<IBlobLeaseFactory>();
-            leaseFactoryMock.Setup(factory => factory.CreateLease(It.IsAny<CloudBlockBlob>()))
-                .Returns(blobLeaseMock.Object);
+
+            var leaseFactoryMock = new StubIBlobLeaseFactory
+            {
+                CreateLease_ICloudBlob = blob => blobLeaseStub
+            };
             var testBlob = _container.GetBlockBlobReference("testBlob");
             await BlobUtils.CreateEmptyBlob(testBlob);
-            UpdateBlob updateBlob = new UpdateBlob(testBlob, leaseFactoryMock.Object);
+            UpdateBlob updateBlob = new UpdateBlob(testBlob, leaseFactoryMock);
             Assert.False(await updateBlob.TryLock());
         }
     }

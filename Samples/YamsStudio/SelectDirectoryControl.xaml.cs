@@ -8,6 +8,8 @@ namespace YamsStudio
     /// </summary>
     public partial class SelectDirectoryControl : System.Windows.Controls.UserControl
     {
+	    private static string _selectedPath;
+
         public SelectDirectoryControl()
         {
             InitializeComponent();
@@ -16,10 +18,11 @@ namespace YamsStudio
         private void OnBrowse(object sender, RoutedEventArgs e)
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
-            if (dialog.ShowDialog() == DialogResult.OK)
+	        dialog.SelectedPath = _selectedPath;
+			if (dialog.ShowDialog() == DialogResult.OK)
             {
-                string path = dialog.SelectedPath;
-                txt_DirPath.Text = path;
+                _selectedPath = dialog.SelectedPath;
+                txt_DirPath.Text = _selectedPath;
             }
         }
 

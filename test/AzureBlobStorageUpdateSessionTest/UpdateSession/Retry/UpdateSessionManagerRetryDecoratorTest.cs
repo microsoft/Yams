@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Etg.SimpleStubs;
 using Etg.Yams.Azure.UpdateSession.Retry;
+using Etg.Yams.TestUtils;
 using Etg.Yams.Update;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using Microsoft.WindowsAzure.Storage;
-using Moq;
 using Xunit;
 
 namespace Etg.Yams.Azure.Test.UpdateSession.Retry
@@ -15,14 +16,18 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestThatStartUpdateSessionIsRetried()
         {
             string appId = "appId";
-            var updateSessionMock = new Mock<IUpdateSessionManager>();
-            updateSessionMock.Setup(manager => manager.TryStartUpdateSession(appId))
-                .ThrowsAsync(new StorageException())
-                .Callback(() => updateSessionMock.Setup(manager => manager.TryStartUpdateSession(appId))
-                .ReturnsAsync(true));
+
+            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.TryStartUpdateSession_String_Delegate>()
+                .Once(id => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
+                .Once(id => AsyncUtils.AsyncTaskWithResult(true));
+
+            var updateSessionStub = new StubIUpdateSessionManager
+            {
+                TryStartUpdateSession_String = id => sequence.Next(id)
+            };
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
-                updateSessionMock.Object,
+                updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
             Assert.True(await retryDecorator.TryStartUpdateSession(appId));
@@ -32,13 +37,17 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestThatEndUpdateSessionIsRetried()
         {
             string appId = "appId";
-            var updateSessionMock = new Mock<IUpdateSessionManager>();
-            updateSessionMock.SetupSequence(manager => manager.EndUpdateSession(appId))
-                .Throws(new StorageException())
-                .Returns(Task.CompletedTask);
+            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.EndUpdateSession_String_Delegate>()
+                .Once(id => AsyncUtils.AsyncTaskThatThrows(new StorageException()))
+                .Once(id => Task.CompletedTask);
+
+            var updateSessionStub = new StubIUpdateSessionManager
+            {
+                EndUpdateSession_String = id => sequence.Next(id)
+            };
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
-                updateSessionMock.Object,
+                updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
             await retryDecorator.EndUpdateSession(appId);
@@ -48,16 +57,18 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestThatExceptionIsThrownIfMaxRetryCountIsReached()
         {
             string appId = "appId";
-            var updateSessionMock = new Mock<IUpdateSessionManager>();
-            updateSessionMock.Setup(manager => manager.TryStartUpdateSession(appId))
-                .ThrowsAsync(new StorageException())
-                .Callback(() => updateSessionMock.Setup(manager => manager.TryStartUpdateSession(appId))
-                .ThrowsAsync(new StorageException())
-                .Callback(() => updateSessionMock.Setup(manager => manager.TryStartUpdateSession(appId))
-                .ReturnsAsync(true)));
+
+            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.TryStartUpdateSession_String_Delegate>()
+                .Twice(id => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
+                .Once(id => AsyncUtils.AsyncTaskWithResult(true));
+
+            var updateSessionStub = new StubIUpdateSessionManager
+            {
+                TryStartUpdateSession_String = id => sequence.Next(id)
+            };
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
-                updateSessionMock.Object,
+                updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
             await Assert.ThrowsAsync<StorageException>(async () => await retryDecorator.TryStartUpdateSession(appId));
@@ -67,15 +78,16 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestThatNotAllExceptionsAreRetried()
         {
             string appId = "appId";
-            var updateSessionMock = new Mock<IUpdateSessionManager>();
-            updateSessionMock.Setup(manager => manager.TryStartUpdateSession(appId))
-                .ThrowsAsync(new InvalidOperationException());
+            var updateSessionStub = new StubIUpdateSessionManager
+            {
+                TryStartUpdateSession_String = id => AsyncUtils.AsyncTaskThatThrows<bool>(new Exception())
+            };
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
-                updateSessionMock.Object,
+                updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
-            await Assert.ThrowsAsync<InvalidOperationException>(async () => await retryDecorator.TryStartUpdateSession(appId));
+            await Assert.ThrowsAsync<Exception>(async () => await retryDecorator.TryStartUpdateSession(appId));
         }
     }
 }

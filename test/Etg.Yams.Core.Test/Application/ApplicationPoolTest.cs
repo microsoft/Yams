@@ -7,7 +7,6 @@ using Etg.Yams.Test.stubs;
 using Etg.Yams.Test.Utils;
 using Etg.Yams.Utils;
 using Xunit;
-using Etg.Yams.Application.Fakes;
 
 namespace Etg.Yams.Test.Application
 {
@@ -119,7 +118,7 @@ namespace Etg.Yams.Test.Application
                     stopCallCount++;
                     return Task.FromResult(true);
                 },
-                IdentityGet = () => appIdentity
+                Identity_Get = () => appIdentity
             };
 
             _applicationPool = new ApplicationPool();
@@ -141,7 +140,7 @@ namespace Etg.Yams.Test.Application
                 IApplication application = new StubIApplication
                 {
                     Start = () => Task.FromResult(false),
-                    IdentityGet = () => new AppIdentity("test.myapp", new Version(1, 0, 0)),
+                    Identity_Get = () => new AppIdentity("test.myapp", new Version(1, 0, 0)),
                 };
                 await _applicationPool.AddApplication(application);
             });            

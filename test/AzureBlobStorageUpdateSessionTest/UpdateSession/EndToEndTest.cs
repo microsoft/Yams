@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Runtime.Remoting.Messaging;
+using System.Threading.Tasks;
 using Autofac;
+using Etg.SimpleStubs;
 using Etg.Yams.Azure.UpdateSession;
 using Etg.Yams.AzureTestUtils.Fixtures;
+using Etg.Yams.TestUtils;
 using Etg.Yams.Update;
 using Microsoft.WindowsAzure.Storage;
-using Moq;
 using Xunit;
 
 namespace Etg.Yams.Azure.Test.UpdateSession
@@ -75,26 +78,39 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         public async Task TestThatStorageExceptionsAreRetried()
         {
             string appId = "appId";
-            var updateBlobMock = new Mock<IUpdateBlob>();
-            updateBlobMock.SetupSequence(blob => blob.FlushAndRelease())
-                .Throws(new StorageException())
-                .Returns(Task.CompletedTask);
-            var updateBlobFactoryMock = new Mock<IUpdateBlobFactory>();
-            updateBlobFactoryMock.Setup(factory => factory.TryLockUpdateBlob(appId)).ReturnsAsync(updateBlobMock.Object);
+
+            var flushAndReleaseSequence = StubsUtils.Sequence<Func<Task>>()
+                .Once(() => AsyncUtils.AsyncTaskThatThrows(new StorageException()))
+                .Once(() => Task.CompletedTask)
+                .Once(() => AsyncUtils.AsyncTaskThatThrows(new StorageException()))
+                .Once(() => Task.CompletedTask);
+
+            IUpdateBlob updateBlobStub = new StubIUpdateBlob
+            {
+                FlushAndRelease = () => flushAndReleaseSequence.Next(),
+                IDisposable_Dispose = () => { },
+                GetUpdateDomain = () => "1",
+                SetUpdateDomain_String = domain => { },
+                AddInstance_String = id => { },
+                RemoveInstance_String = id => { }
+            };
+
+            var updateBlobFactoryStub = new StubIUpdateBlobFactory
+            {
+                TryLockUpdateBlob_String = id => AsyncUtils.AsyncTaskWithResult(updateBlobStub)
+            };
+
 
             ContainerBuilder builder = AzureBlobStorageUpdateSessionDiModule.RegisterTypes("deploymentId",
                 "instanceId", "1",
                 EmulatorConnectionString);
-            builder.RegisterInstance(updateBlobFactoryMock.Object);
+            builder.RegisterInstance(updateBlobFactoryStub).As<IUpdateBlobFactory>();
             IUpdateSessionManager updateSessionManager = new AzureBlobStorageUpdateSessionDiModule(builder.Build()).UpdateSessionManager;
             Assert.True(await updateSessionManager.TryStartUpdateSession(appId));
-
-            updateBlobMock.SetupSequence(blob => blob.FlushAndRelease())
-                .Throws(new StorageException())
-                .Returns(Task.CompletedTask);
+            
             await updateSessionManager.EndUpdateSession(appId);
 
-            updateBlobMock.Verify(blob => blob.FlushAndRelease(), Times.Exactly(4));
+            Assert.Equal(4, flushAndReleaseSequence.CallCount);
         }
     }
 }
