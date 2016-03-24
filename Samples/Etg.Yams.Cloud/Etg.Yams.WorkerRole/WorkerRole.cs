@@ -40,7 +40,7 @@ namespace Etg.Yams.WorkerRole
             {
                 Trace.TraceInformation("Yams is starting");
                 await _yamsService.Start();
-                Trace.TraceInformation("Yams has started");
+                Trace.TraceInformation("Yams has started. Looking for apps with deploymentId:" + yamsConfig.ClusterDeploymentId);
                 while (true)
                 {
                     await Task.Delay(1000);
