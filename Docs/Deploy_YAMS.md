@@ -10,8 +10,9 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
 ```csharp
     public class WorkerRole : RoleEntryPoint
     {
-        private YamsEntryPoint _yamsEntryPoint;
-        
+        private IYamsService _yamsService;
+
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public override void Run()
         {
             RunAsync().Wait();
@@ -19,19 +20,35 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
 
         public async Task RunAsync()
         {
+            WorkerRoleConfig config = new WorkerRoleConfig();
             YamsConfig yamsConfig = new YamsConfigBuilder(
                 // mandatory configs
-                RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString"),
-                RoleEnvironment.DeploymentId,
+                DeploymentIdUtils.CloudServiceDeploymentId,
                 RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
-                RoleEnvironment.CurrentRoleInstance.Id, 
-                RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath)
-                // optional configs (there are other optional configs in YamsConfigBuilder)
-                .SetCheckForUpdatesPeriodInSeconds(10) // check for apps every 10 seconds
-                .SetApplicationRestartCount(5)
+                RoleEnvironment.CurrentRoleInstance.Id,
+                config.CurrentRoleInstanceLocalStoreDirectory)
+                // optional configs
+                .SetCheckForUpdatesPeriodInSeconds(config.UpdateFrequencyInSeconds)
+                .SetApplicationRestartCount(config.ApplicationRestartCount)
                 .Build();
-            _yamsEntryPoint = new YamsEntryPoint(yamsConfig);
-            await _yamsEntryPoint.Start();
+            _yamsService = YamsServiceFactory.Create(yamsConfig,
+                deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
+                updateSessionStorageConnectionString: config.StorageDataConnectionString);
+
+            try
+            {
+                Trace.TraceInformation("Yams is starting");
+                await _yamsService.Start();
+                Trace.TraceInformation("Yams has started. Looking for apps with deploymentId:" + yamsConfig.ClusterDeploymentId);
+                while (true)
+                {
+                    await Task.Delay(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.ToString());
+            }
         }
         
         public override void OnStop()
@@ -42,7 +59,10 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
         
         public async Task StopAsync()
         {
-            await _yamsEntryPoint.Stop();
+            if (_yamsService != null)
+            {
+                await _yamsService.Stop();
+            }
         }        
 ```
 
