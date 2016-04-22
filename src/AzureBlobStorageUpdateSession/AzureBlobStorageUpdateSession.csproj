@@ -111,9 +111,6 @@
     <Compile Include="UpdateSession\Retry\UpdateSessionManagerRetryDecorator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\AzureUtils\AzureUtils.csproj">
       <Project>{1c890e49-5a9b-4eab-9f69-6a6e78d82610}</Project>
       <Name>AzureUtils</Name>
@@ -122,6 +119,9 @@
       <Project>{7145e485-34fa-4632-89b0-bd27c96af69c}</Project>
       <Name>Etg.Yams.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

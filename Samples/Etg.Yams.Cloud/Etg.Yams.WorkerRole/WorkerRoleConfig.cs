@@ -5,37 +5,20 @@ namespace Etg.Yams.WorkerRole
 {
     public class WorkerRoleConfig
     {
-        private readonly string _storageDataConnectionString;
-        private readonly string _currentRoleInstanceLocalStoreDirectory;
-        private readonly int _updateFrequencyInSeconds;
-        private readonly int _applicationRestartCount;
-
         public WorkerRoleConfig()
         {
-            _updateFrequencyInSeconds = Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
-            _applicationRestartCount = Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
-            _storageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
-            _currentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
+            UpdateFrequencyInSeconds = Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
+            ApplicationRestartCount = Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
+            StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
+            CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
         }
 
-        public string StorageDataConnectionString
-        {
-            get { return _storageDataConnectionString; }
-        }
+        public string StorageDataConnectionString { get; }
 
-        public string CurrentRoleInstanceLocalStoreDirectory
-        {
-            get { return _currentRoleInstanceLocalStoreDirectory; }
-        }
+        public string CurrentRoleInstanceLocalStoreDirectory { get; }
 
-        public int UpdateFrequencyInSeconds
-        {
-            get { return _updateFrequencyInSeconds; }
-        }
+        public int UpdateFrequencyInSeconds { get; }
 
-        public int ApplicationRestartCount
-        {
-            get { return _applicationRestartCount; }
-        }
+        public int ApplicationRestartCount { get; }
     }
 }
