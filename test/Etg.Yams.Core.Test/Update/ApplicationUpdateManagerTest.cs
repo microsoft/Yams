@@ -33,10 +33,8 @@ namespace Etg.Yams.Test.Update
 
             IEnumerable<AppIdentity> appsToDeploy = new[] {app1v3, app1v4, app1v5};
 
-            IApplicationDeploymentDirectory applicationDeploymentDirectory = new StubIApplicationDeploymentDirectory
-            {
-                FetchDeployments_String = (deploymentId) => Task.FromResult(appsToDeploy)
-            };
+	        IApplicationDeploymentDirectory applicationDeploymentDirectory = new StubIApplicationDeploymentDirectory()
+		        .FetchDeployments(deploymentId => Task.FromResult(appsToDeploy));
 
             IApplicationPool applicationPool = new ApplicationPoolStub();
             string path = Path.GetTempPath();
@@ -45,40 +43,38 @@ namespace Etg.Yams.Test.Update
             await applicationPool.AddApplication(new ApplicationStub(app1v3, path));
 
             var downloadedApps = new List<AppIdentity>();
-            IApplicationDownloader applicationDownloader = new StubIApplicationDownloader
-            {
-                DownloadApplication_AppIdentity = (appIdentity) =>
+            IApplicationDownloader applicationDownloader = new StubIApplicationDownloader()
+                .DownloadApplication(appIdentity =>
                 {
                     downloadedApps.Add(appIdentity);
                     return Task.FromResult(true);
                 }
-            };
+            );
 
             var installedApps = new List<AppIdentity>();
             var uninstalledApps = new List<AppIdentity>();
             string updatedAppId = null;
             IEnumerable<Version> versionsRemoved = null;
             IEnumerable<Version> versionsAdded = null;
-            IApplicationInstaller applicationInstaller = new StubIApplicationInstaller
-            {
-                Install_AppIdentity = (appIdentity) =>
+            IApplicationInstaller applicationInstaller = new StubIApplicationInstaller()
+                .Install(appIdentity =>
                 {
                     installedApps.Add(appIdentity);
                     return Task.FromResult(true);
-                },
-                UnInstall_AppIdentity = (appIdentity) =>
+                })
+                .UnInstall(appIdentity =>
                 {
                     uninstalledApps.Add(appIdentity);
                     return Task.FromResult(true);
-                },
-                Update_String_IEnumerableOfVersion_IEnumerableOfVersion = (appId, versionsToRemove, versionToDeploy) =>
+                })
+                .Update((appId, versionsToRemove, versionToDeploy) =>
                 {
-                    updatedAppId = appId;
-                    versionsRemoved = versionsToRemove;
-                    versionsAdded = versionToDeploy;
-                    return Task.FromResult(true);
+	                updatedAppId = appId;
+	                versionsRemoved = versionsToRemove;
+	                versionsAdded = versionToDeploy;
+	                return Task.FromResult(true);
                 }
-            };
+            );
 
             ApplicationUpdateManager applicationUpdateManager = new ApplicationUpdateManager("deploymentId", applicationDeploymentDirectory, applicationPool, applicationDownloader, applicationInstaller);
             await applicationUpdateManager.CheckForUpdates();

@@ -107,19 +107,17 @@ namespace Etg.Yams.Test.Application
             int stopCallCount = 0;
             AppIdentity appIdentity = new AppIdentity("test.myapp", new Version(1, 0, 0));
             IApplication application = new StubIApplication()
-            {
-                Start = () =>
+                .Start(() =>
                 {
                     startCallCount++;
                     return Task.FromResult(true);
-                },
-                Stop = () =>
+                })
+                .Stop(() =>
                 {
                     stopCallCount++;
                     return Task.FromResult(true);
-                },
-                Identity_Get = () => appIdentity
-            };
+                })
+                .Identity_Get(() => appIdentity);
 
             _applicationPool = new ApplicationPool();
 
@@ -136,12 +134,11 @@ namespace Etg.Yams.Test.Application
         [Fact]
         public async Task TestThatAnExceptionIsThrownIfApplicationFailsToStart()
         {
-            await Assert.ThrowsAsync<Exception>(async () => {
-                IApplication application = new StubIApplication
-                {
-                    Start = () => Task.FromResult(false),
-                    Identity_Get = () => new AppIdentity("test.myapp", new Version(1, 0, 0)),
-                };
+            await Assert.ThrowsAsync<Exception>(async () =>
+            {
+	            IApplication application = new StubIApplication()
+		            .Start(() => Task.FromResult(false))
+		            .Identity_Get(() => new AppIdentity("test.myapp", new Version(1, 0, 0)));
                 await _applicationPool.AddApplication(application);
             });            
         }

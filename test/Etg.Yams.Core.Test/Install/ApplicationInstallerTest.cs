@@ -60,15 +60,13 @@ namespace Etg.Yams.Test.Install
         public async Task TestUpdateApplication()
         {
             string updateSessionId = null;
-            IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
-            {
-                TryStartUpdateSession_String = id =>
-                {
-                    updateSessionId = id;
-                    return Task.FromResult(true);
-                },
-                EndUpdateSession_String = id => Task.FromResult(true)
-            };
+	        IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
+		        .TryStartUpdateSession(id =>
+		        {
+			        updateSessionId = id;
+			        return Task.FromResult(true);
+		        })
+		        .EndUpdateSession(id => Task.FromResult(true));
 
             IApplicationPool applicationPool = new ApplicationPoolStub();
             IApplicationInstaller applicationInstaller = new ApplicationInstaller(_applicationsRoot, updateSessionManager, new ApplicationFactoryStub(), applicationPool);
@@ -106,10 +104,8 @@ namespace Etg.Yams.Test.Install
         [Fact]
         public async Task TestThatUpdateReturnsIfCannotStartUpdateSession()
         {
-            IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
-            {
-                TryStartUpdateSession_String = id => Task.FromResult(false)
-            };
+	        IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
+		        .TryStartUpdateSession(id => Task.FromResult(false));
 
             IApplicationPool applicationPool = new ApplicationPoolStub();
             IApplicationInstaller applicationInstaller = new ApplicationInstaller(_applicationsRoot, updateSessionManager, new ApplicationFactoryStub(), applicationPool);

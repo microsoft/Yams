@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 using Autofac;
 using Etg.SimpleStubs;
@@ -85,20 +84,16 @@ namespace Etg.Yams.Azure.Test.UpdateSession
                 .Once(() => AsyncUtils.AsyncTaskThatThrows(new StorageException()))
                 .Once(() => Task.CompletedTask);
 
-            IUpdateBlob updateBlobStub = new StubIUpdateBlob
-            {
-                FlushAndRelease = () => flushAndReleaseSequence.Next(),
-                IDisposable_Dispose = () => { },
-                GetUpdateDomain = () => "1",
-                SetUpdateDomain_String = domain => { },
-                AddInstance_String = id => { },
-                RemoveInstance_String = id => { }
-            };
+	        IUpdateBlob updateBlobStub = new StubIUpdateBlob()
+		        .FlushAndRelease(() => flushAndReleaseSequence.Next())
+		        .Dispose(() => { })
+		        .GetUpdateDomain(() => "1")
+		        .SetUpdateDomain(domain => { })
+		        .AddInstance(id => { })
+		        .RemoveInstance(id => { });
 
-            var updateBlobFactoryStub = new StubIUpdateBlobFactory
-            {
-                TryLockUpdateBlob_String = id => AsyncUtils.AsyncTaskWithResult(updateBlobStub)
-            };
+	        var updateBlobFactoryStub = new StubIUpdateBlobFactory()
+		        .TryLockUpdateBlob(id => AsyncUtils.AsyncTaskWithResult(updateBlobStub));
 
 
             ContainerBuilder builder = AzureBlobStorageUpdateSessionDiModule.RegisterTypes("deploymentId",

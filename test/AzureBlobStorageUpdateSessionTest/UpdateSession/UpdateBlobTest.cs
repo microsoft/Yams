@@ -131,32 +131,29 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         [Fact]
         public async Task TestThatLockFailsIfBlobLeaseReturnsNull()
         {
-            var blobLeaseStub = new StubIBlobLease
-            {
-                TryAcquireLease = () => AsyncUtils.AsyncTaskWithResult<string>(null),
-                IDisposable_Dispose = () => { }
-            };
+            var blobLeaseStub = new StubIBlobLease()
+                .TryAcquireLease(() => AsyncUtils.AsyncTaskWithResult<string>(null))
+                .Dispose(() => { }
+            );
             await TestThatLockFailsIfBlobLeaseCantBeAcquired(blobLeaseStub);
         }
 
         [Fact]
         public async Task TestThatLockFailsIfBlobLeaseThrowsStorageException()
         {
-            var blobLeaseStub = new StubIBlobLease
-            {
-                TryAcquireLease = () => AsyncUtils.AsyncTaskThatThrows<string>(new StorageException()),
-                IDisposable_Dispose = () => { }
-            };
+            var blobLeaseStub = new StubIBlobLease()
+                .TryAcquireLease (() => AsyncUtils.AsyncTaskThatThrows<string>(new StorageException()))
+                .Dispose(() => { }
+            );
             await TestThatLockFailsIfBlobLeaseCantBeAcquired(blobLeaseStub);
         }
 
         private async Task TestThatLockFailsIfBlobLeaseCantBeAcquired(IBlobLease blobLeaseStub)
         {
 
-            var leaseFactoryMock = new StubIBlobLeaseFactory
-            {
-                CreateLease_ICloudBlob = blob => blobLeaseStub
-            };
+	        var leaseFactoryMock = new StubIBlobLeaseFactory()
+		        .CreateLease(blob => blobLeaseStub);
+
             var testBlob = _container.GetBlockBlobReference("testBlob");
             await BlobUtils.CreateEmptyBlob(testBlob);
             UpdateBlob updateBlob = new UpdateBlob(testBlob, leaseFactoryMock);

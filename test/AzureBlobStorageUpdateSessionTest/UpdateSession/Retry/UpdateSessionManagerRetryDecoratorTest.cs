@@ -21,10 +21,8 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
                 .Once(id => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
                 .Once(id => AsyncUtils.AsyncTaskWithResult(true));
 
-            var updateSessionStub = new StubIUpdateSessionManager
-            {
-                TryStartUpdateSession_String = id => sequence.Next(id)
-            };
+	        var updateSessionStub = new StubIUpdateSessionManager()
+		        .TryStartUpdateSession(id => sequence.Next(id));
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
                 updateSessionStub,
@@ -41,10 +39,8 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
                 .Once(id => AsyncUtils.AsyncTaskThatThrows(new StorageException()))
                 .Once(id => Task.CompletedTask);
 
-            var updateSessionStub = new StubIUpdateSessionManager
-            {
-                EndUpdateSession_String = id => sequence.Next(id)
-            };
+	        var updateSessionStub = new StubIUpdateSessionManager()
+		        .EndUpdateSession(id => sequence.Next(id));
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
                 updateSessionStub,
@@ -62,10 +58,8 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
                 .Twice(id => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
                 .Once(id => AsyncUtils.AsyncTaskWithResult(true));
 
-            var updateSessionStub = new StubIUpdateSessionManager
-            {
-                TryStartUpdateSession_String = id => sequence.Next(id)
-            };
+	        var updateSessionStub = new StubIUpdateSessionManager()
+		        .TryStartUpdateSession(id => sequence.Next(id));
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
                 updateSessionStub,
@@ -78,10 +72,8 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         public async Task TestThatNotAllExceptionsAreRetried()
         {
             string appId = "appId";
-            var updateSessionStub = new StubIUpdateSessionManager
-            {
-                TryStartUpdateSession_String = id => AsyncUtils.AsyncTaskThatThrows<bool>(new Exception())
-            };
+	        var updateSessionStub = new StubIUpdateSessionManager()
+		        .TryStartUpdateSession(id => AsyncUtils.AsyncTaskThatThrows<bool>(new Exception()));
 
             IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
                 updateSessionStub,

@@ -19,7 +19,7 @@ namespace Etg.Yams.Test
         private readonly string _applicationsInstallPath;
         private readonly string _deploymentDirPath;
         private readonly IYamsService _yamsService;
-        private YamsDiModule _yamsDiModule;
+        private readonly YamsDiModule _yamsDiModule;
 
         public EndToEndTest()
         {
@@ -35,11 +35,9 @@ namespace Etg.Yams.Test
             var yamsConfig = new YamsConfigBuilder("deploymentId1", "1", "instanceId",
                 _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
 
-            IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager
-            {
-                TryStartUpdateSession_String = applicationId => Task.FromResult(true),
-                EndUpdateSession_String = applicationId => Task.FromResult(true)
-            };
+            IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
+                .TryStartUpdateSession(applicationId => Task.FromResult(true))
+                .EndUpdateSession(applicationId => Task.FromResult(true));
 
             _yamsDiModule = new YamsDiModule(yamsConfig, new LocalDeploymentRepository(_deploymentDirPath), updateSessionManager);
             _yamsService = _yamsDiModule.YamsService;
@@ -66,7 +64,6 @@ namespace Etg.Yams.Test
                 TestUtils.CopyExe(exeName, Path.Combine(_deploymentDirPath, testAppRelPath));
             }
         }
-
         
         public void Dispose()
         {

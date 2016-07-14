@@ -12,22 +12,21 @@ namespace Etg.Yams.Test.Application
     {
         public const string ExeName = "exeName";
         public ApplicationConfig AppConfig { get; set; }
-        private AppIdentity _appIdentity;
-        public const string AppPath = "path";
+	    public const string AppPath = "path";
         public const string TestExeArgs = "arg1, arg2";
 
         public ApplicationTestFixture()
         {
-            _appIdentity = new AppIdentity("id", new Version("1.0.0"));
-            AppConfig = new ApplicationConfig(_appIdentity, ExeName, TestExeArgs);
+	        var appIdentity = new AppIdentity("id", new Version("1.0.0"));
+	        AppConfig = new ApplicationConfig(appIdentity, ExeName, TestExeArgs);
         }
 
-        public void Dispose() { }
+	    public void Dispose() { }
     }
 
     public class ApplicationTest : IClassFixture<ApplicationTestFixture>
     {
-        private ApplicationConfig _appConfig;
+        private readonly ApplicationConfig _appConfig;
 
         public ApplicationTest(ApplicationTestFixture fixture)
         {
@@ -40,38 +39,35 @@ namespace Etg.Yams.Test.Application
             int startCallCount = 0;
             int stopCallCount = 0;
             IProcess process = new StubIProcess()
-            {
-                Start = () =>
+                .Start(() =>
                 {
                     startCallCount++;
                     return Task.FromResult(true);
                 }
-            };
+            );
 
             string exePath = "";
             string exeArgs = "";
 
             IProcessFactory processFactory = new StubIProcessFactory()
-            {
-                
-                CreateProcess_String_String = (path, args) =>
+                .CreateProcess((path, args) =>
                 {
                     exePath = path;
                     exeArgs = args;
                     return process;
                 }
-            };
+            );
 
-            IProcessStopper processStopper = new StubIProcessStopper
-            {
-                StopProcess_IProcess = (p) =>
+            IProcessStopper processStopper = new StubIProcessStopper()
+                .StopProcess(p =>
                 {
                     ++stopCallCount;
                     return Task.FromResult(true);
                 }
-            };
+            );
 
-            ConfigurableApplication application = new ConfigurableApplication(ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
+            ConfigurableApplication application = new ConfigurableApplication(
+				ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
             await application.Start();
 
             Assert.Equal(1, startCallCount);
@@ -84,21 +80,15 @@ namespace Etg.Yams.Test.Application
         public async Task TestThatStartFailsIfProcessFailsToStart()
         {
             IProcess process = new StubIProcess()
-            {
-                Start = () =>
-                {
-                    throw new Exception("Process failed to start");
-                }
-            };
+                .Start(() => { throw new Exception("Process failed to start"); });
 
             IProcessFactory processFactory = new StubIProcessFactory()
-            {
-                CreateProcess_String_String = (path, args) => process
-            };
+                .CreateProcess((path, args) => process);
 
             IProcessStopper processStopper = new StubIProcessStopper();
 
-            ConfigurableApplication application = new ConfigurableApplication(ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
+            ConfigurableApplication application = new ConfigurableApplication(
+				ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
             Assert.False(await application.Start());
         }
 
@@ -106,25 +96,20 @@ namespace Etg.Yams.Test.Application
         public async Task TestThatStopStopsTheProcess()
         {
             int stopCallCount = 0;
-            IProcess process = new StubIProcess()
-            {
-                Start = () => Task.FromResult(true)
-            };
+	        IProcess process = new StubIProcess().Start(() => Task.FromResult(true));
 
-            IProcessStopper processStopper = new StubIProcessStopper
-            {
-                StopProcess_IProcess = (p) =>
+            IProcessStopper processStopper = new StubIProcessStopper()
+                .StopProcess(p =>
                 {
                     ++stopCallCount;
                     return Task.FromResult(true);
                 }
-            };
+            );
 
             IProcessFactory processFactory = new StubIProcessFactory()
-            {
-                CreateProcess_String_String = (path, args) => process
-            };
-            ConfigurableApplication application = new ConfigurableApplication(ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
+                .CreateProcess((path, args) => process);
+            ConfigurableApplication application = new ConfigurableApplication(
+				ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
             await application.Start();
             await application.Stop();
 
@@ -135,10 +120,8 @@ namespace Etg.Yams.Test.Application
         public async Task TestThatExitedEventIsEmittedWhenProcessFails()
         {
             ProcessStub process = new ProcessStub("", "");
-            IProcessFactory processFactory = new StubIProcessFactory()
-            {
-                CreateProcess_String_String = (path, args) => process
-            };
+	        IProcessFactory processFactory = new StubIProcessFactory()
+		        .CreateProcess((path, args) => process);
 
             ConfigurableApplication application = new ConfigurableApplication(ApplicationTestFixture.AppPath, _appConfig, processFactory, new StubIProcessStopper());
             ApplicationExitedArgs appExitedArgs = null;
