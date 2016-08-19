@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>2.8</ProductVersion>
+    <ProductVersion>2.9</ProductVersion>
     <ProjectGuid>f9c2b6e8-6d14-4201-956a-a2e93073cbbc</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -43,37 +43,44 @@
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="BackendContent\" />
+    <Folder Include="FrontendContent\" />
     <Folder Include="Profiles" />
-    <Folder Include="Etg.Yams.WorkerRoleContent" />
   </ItemGroup>
   <ItemGroup>
-    <DiagnosticsConfiguration Include="Etg.Yams.WorkerRoleContent\diagnostics.wadcfgx" />
+    <DiagnosticsConfiguration Include="BackendContent\diagnostics.wadcfgx" />
+    <DiagnosticsConfiguration Include="FrontendContent\diagnostics.wadcfgx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Etg.Yams.WorkerRoleContent\GCSettingsManagement.ps1">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Etg.Yams.WorkerRoleContent\ServerGC.cmd">
-      <SubType>Content</SubType>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <PublishProfile Include="Profiles\bpetg-yams-scusProduction.azurePubxml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Etg.Yams.WorkerRole\Etg.Yams.WorkerRole.csproj">
-      <Name>Etg.Yams.WorkerRole</Name>
-      <Project>{b38d7d2a-bdc1-49fe-b0dd-d799e3e746ad}</Project>
+    <ProjectReference Include="..\Backend\Backend.csproj">
+      <Name>Backend</Name>
+      <Project>{d6eb9dd4-4dc6-4cf1-888b-4a4a548e3fd1}</Project>
       <Private>True</Private>
       <RoleType>Worker</RoleType>
-      <RoleName>Etg.Yams.WorkerRole</RoleName>
+      <RoleName>Backend</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
+    <ProjectReference Include="..\Frontend\Frontend.csproj">
+      <Name>Frontend</Name>
+      <Project>{c80821c2-215c-429e-a6a3-bfb132b5c1f4}</Project>
+      <Private>True</Private>
+      <RoleType>Worker</RoleType>
+      <RoleName>Frontend</RoleName>
+      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="BackendContent\GCSettingsManagement.ps1">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="BackendContent\ServerGC.cmd">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
-    <CloudExtensionsDir Condition=" '$(CloudExtensionsDir)' == '' ">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Windows Azure Tools\2.8\</CloudExtensionsDir>
+    <CloudExtensionsDir Condition=" '$(CloudExtensionsDir)' == '' ">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Windows Azure Tools\2.9\</CloudExtensionsDir>
   </PropertyGroup>
   <Import Project="$(CloudExtensionsDir)Microsoft.WindowsAzure.targets" />
 </Project>

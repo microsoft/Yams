@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ServiceConfiguration serviceName="Etg.Yams.Cloud" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2015-04.2.6">
-  <Role name="Etg.Yams.WorkerRole">
+  <Role name="Frontend">
     <Instances count="3" />
     <ConfigurationSettings>
       <Setting name="StorageDataConnectionString" value="MY_DATA_CONNECTION_STRING_FOR_THE_BLOB_STORAGE" />
@@ -11,6 +11,26 @@
       <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="" />
       <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="" />
       <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="MY_DATA_CONNECTION_STRING_FOR_LOGS"/>
+    </ConfigurationSettings>
+    <Certificates>
+      <!--Replace thumbprints with your own-->
+      <Certificate name="MY_CERTIFICATE" thumbprintAlgorithm="sha1" thumbprint="MY_THUMBPRINT" />
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="MY_THUMBPRINT" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+  <Role name="Backend">
+    <Instances count="3" />
+    <ConfigurationSettings>
+      <Setting name="StorageDataConnectionString" value="MY_DATA_CONNECTION_STRING_FOR_THE_BLOB_STORAGE" />
+      <Setting name="UpdateFrequencyInSeconds" value="10" />
+      <Setting name="ApplicationRestartCount" value="3" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="MY_DATA_CONNECTION_STRING_FOR_LOGS"/>
     </ConfigurationSettings>
     <Certificates>
       <!--Replace thumbprints with your own-->

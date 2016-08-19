@@ -11,9 +11,9 @@ namespace WebApp
     {
         [HttpGet]
         [Route("hello")]
-        public async Task<String> SayHello()
+        public async Task<string> SayHello()
         {
-            IHelloGrain helloGrain = GrainClient.GrainFactory.GetGrain<IHelloGrain>(0);
+            var helloGrain = GrainClient.GrainFactory.GetGrain<IHelloGrain>(0);
             return await helloGrain.SayHello();
         }
     }

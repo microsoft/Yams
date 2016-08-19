@@ -10,54 +10,39 @@ Follow the *Hello World* tutorial described in Orleans [My First Orleans Applica
 
 Once you have the app ready, follow the steps below to deploy the app in YAMS:
 
-* Add a class library project (call it `OrleansHost`) to the visual studio solution.
-* Install `Microsoft.Orleans.SiloHost` NuGet package to the `OrleansHost` class library project (this will add an `OrleansHost.exe` to the build output).
-* Install `Microsoft.Orleans.OrleansAzureUtils` NuGet package to the `OrleansHost` class library project.
-* From the `OrleansHost` project, add references to both grains and grains interfaces projects.
-* Add `OrleansConfiguration.xml` to the `OrleansHost` project (it is needed to start Orleans using `OrleansHost.exe`). The content of the `OrleansConfiguration.xml` file is as follows (for more information about this file please consult Orleans documentation):
+* Go to the **SiloHost** console application project and remove any client related code from the `Program.cs` file.
+* Open the `OrleansHostWrapper.cs` file and add the following code to configure the silo:
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<OrleansConfiguration xmlns="urn:orleans">
-  <Globals>
-    <SystemStore SystemStoreType="AzureTable" DeploymentId="" DataConnectionString="MY_DATA_CONNECTION_STRING"/>
-    <Liveness LivenessType="AzureTable" ProbeTimeout="3s" TableRefreshTimeout="3s" DeathVoteExpirationTimeout="120s" NumMissedProbesLimit="3" NumProbedSilos="3" NumVotesForDeathDeclaration="2"/>
-    <StorageProviders>
-      <Provider Type="Orleans.Storage.MemoryStorage" Name="MemoryStore" />
-      <Provider Type="Orleans.Storage.AzureTableStorage"
-                      Name="AzureStore"
-                      DataConnectionString="MY_DATA_CONNECTION_STRING" />
-    </StorageProviders>
-  </Globals>
-  <Defaults>
-    <Networking Address="" Port="100"/>
-    <ProxyingGateway Address="" Port="101"/>
-    <Statistics MetricsTableWriteInterval="30s" PerfCounterWriteInterval="30s" LogWriteInterval="300s" WriteLogStatisticsToTable="true"/>
-    <Tracing DefaultTraceLevel="Error" TraceToConsole="true" TraceToFile="trace.log">
-    </Tracing>
-  </Defaults>
-</OrleansConfiguration>
+```csharp
+            var config = new ClusterConfiguration();
+            config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.AzureTable;
+            config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.AzureTable;
+            config.Globals.DataConnectionString = "MY_DATA_CONNECTION_STRING";
+            config.AddMemoryStorageProvider();
+            config.AddAzureTableStorageProvider("AzureStore");
+            config.Globals.DeploymentId = args[0];
+            config.Defaults.DefaultTraceLevel = Severity.Error;
+            config.Defaults.Port = 100;
+            config.Defaults.ProxyGatewayEndpoint = new IPEndPoint(config.Defaults.Endpoint.Address, 101);
+            siloHost = new SiloHost(siloName, config);
 ```
 
-* In the `OrleansConfiguration.xml` file properties, under "Copy to Output Directory", select either "Copy Always" or "Copy if Newer".
-* Add the YAMS `AppConfig.json` file to the **OrleansHost** project. The content of the `AppConfig.json` is as follows:
+* Add the YAMS `AppConfig.json` file to the **SiloHost** project. The content of the `AppConfig.json` file is as follows:
 
 ```json
 {
-    "ExeName": "OrleansHost.exe",
-    "ExeArgs": "${Id}_${Version.Major}.${Version.Minor}_${InstanceId} OrleansConfiguration.xml deploymentId=${Id}_${Version.Major}.${Version.Minor}_${DeploymentId}"
+    "ExeName": "SiloHost.exe",
+    "ExeArgs": "deploymentid=${Id}_${Version.Major}.${Version.Minor}_${DeploymentId}"
 }
 ```
 
-The `OrleansHost.exe` executable expects three arguments:
-1. **The silo host name**: The name of the silo to run on the current role instance. In our case, the value of this argument will be resolved to `helloworld.orleans_1_0_currentRoleInstanceId`.
-2. **Orleans configuration file name** (`OrleansConfiguration.xml` in this case).
-3. **DeploymentId**: The Orleans deployment id for this application which must be the same across all role instances in the cloud service. In our case, the value of this argument will be resolved to `helloworld.orleans_1_0_MY_DEPLOYMENT_ID`. This deploymentId is used by Orleans to communicate between silos running on different role instances. It is also used by the client app (that we will describe later in this tutorial) to connect to the Orleans cluster.
+The argument for the `SiloHost.exe` executable is the Orleans deployment id for this application which must be the same across all role instances in the cloud service. In our case, the value of this argument will be resolved to `helloworld.orleans_1_0_MY_YAMS_BACKEND_CLUSTER_ID` and `MY_YAMS_BACKEND_CLUSTER_ID` will be a combination of the Cloud Service's deployment id and the Worker Role name. This deploymentId is used by Orleans to communicate between silos running on different role instances. It is also used by the client app (that we will describe later in this tutorial) to connect to the Orleans cluster.
+
 * In the `AppConfig.json` file properties, under "Copy to Output Directory", select either "Copy Always" or "Copy if Newer".
 
 Notice that we only used the major and minor versions (not the build version) in the silo name and the deploymentId. This will allow us to perform bug fixes to the silo and re-deploy it quickly using YAMS without affecting the clients of our app.
 
-* Finally, build the project and make sure that `OrleansHost.exe`, `OrleansConfiguration.xml` and `AppConfig.json` are copied to the build output directory and have the correct content.
+* Finally, build the project and make sure that `SiloHost.exe` and `AppConfig.json` are copied to the build output directory and have the correct content.
 
 # Create the Orleans client application
 Let's now create a Web app that connects to the Orleans silo, calls the `HelloGrain.SayHello()` and prints the returned message to the output.
@@ -65,25 +50,19 @@ Let's now create a Web app that connects to the Orleans silo, calls the `HelloGr
 Follow the [Deploy and Host an App in YAMS tutorial](Deploy&Host_an_App_in_YAMS.md) to create a Web app. To connect to the Orleans app from the web app, follow the steps below:
 
 * Install `Microsoft.Orleans.Client` NuGet package to the Web app project.
-* Install `Microsoft.Orleans.OrleansAzureUtils` NuGet package to the OrleansHost class library project.
-* Add `OrleansClientConfiguration.xml` to the Web app project. The content of the `OrleansConfiguration.xml` file is as follows:
-```xml
-<?xml version="1.0" encoding="utf-8" ?>
-<ClientConfiguration xmlns="urn:orleans">
-  <SystemStore SystemStoreType="AzureTable" DeploymentId="hello.orleans_1.0_MY_DEPLOYMENT_ID" DataConnectionString="MY_DATA_CONNECTION_STRING"/>
-  <Tracing DefaultTraceLevel="Error" TraceToConsole="true" TraceToFile="trace.log" WriteTraces="false">
-    <TraceLevelOverride LogPrefix="Application" TraceLevel="Error" />
-  </Tracing>
-</ClientConfiguration>
-```
-
-It's **very important** that the `DeploymentId` and the `dataConnectionString` used above matches the ones that were used in the `helloworld.orleans` app.
-
-* In the `OrleansClientConfiguration.xml` file properties, under "Copy to Output Directory", select either "Copy Always" or "Copy if Newer".
-* Add the following to at the end of the `Main()` function (right before `Console.ReadLine()`):
+* Install `Microsoft.Orleans.OrleansAzureUtils` NuGet package to the `SiloHost` console application project.
+* Add the following at the end of the `Main()` function (right before `Console.ReadLine()`):
 ```csharp
-GrainClient.Initialize("OrleansClientConfiguration.xml");
+            var config = new ClientConfiguration();
+            config.GatewayProvider = ClientConfiguration.GatewayProviderType.AzureTable;
+            config.DeploymentId = "hello.orleans_1.0_MY_DEPLOYMENT_ID";
+            config.DataConnectionString = "MY_DATA_CONNECTION_STRING";
+            config.DefaultTraceLevel = Severity.Error;
+            GrainClient.Initialize(config);
 ```
+
+It's **very important** that the `DeploymentId` and the `DataConnectionString` used above matches the ones that were used in the `helloworld.orleans` app.
+
 * Reference the Orleans interfaces project from the **WebApp** project.
 * Create an `OrleansHelloController` (see below) and add it to the **WebApp** project.
 
@@ -114,9 +93,9 @@ namespace WebApp
 ```
 
 * In the `AppConfig.json` file properties, under "Copy to Output Directory", select either "Copy Always" or "Copy if Newer".
-* Finally, build the project and make sure that `WebApp.exe`, `OrleansClientConfiguration.xml` and `AppConfig.json` are copied to the build output directory and have the correct content.
+* Finally, build the project and make sure that `WebApp.exe` and `AppConfig.json` are copied to the build output directory and have the correct content.
 
-# Deploy the orleans app and the web app to YAMS
+# Deploy the Orleans app and the web app to YAMS
 To deploy both apps to YAMS follow the steps below:
 * Upload the build output of **OrleansHost** build output to the `applications/hello.orleans/1.0.0` blob directory.
 * Upload the build output of **WebApp** build output to the `applications/hello.webapp/1.0.0` blob directory.
@@ -129,12 +108,12 @@ To deploy both apps to YAMS follow the steps below:
 		{
 			"Id": "hello.orleans",
 			"Version": "1.0.0",
-			"DeploymentIds": [ "MY_DEPLOYMENT_ID" ]
+			"DeploymentIds": [ "MY_YAMS_BACKEND_CLUSTER_ID" ]
 		},	
 		{
 			"Id": "hello.webapp",
 			"Version": "1.0.0",
-			"DeploymentIds": [ "MY_DEPLOYMENT_ID" ]
+			"DeploymentIds": [ "MY_YAMS_FRONTEND_CLUSTER_ID" ]
 		},			
 	]
 }

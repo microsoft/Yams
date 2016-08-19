@@ -64,7 +64,64 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
                 await _yamsService.Stop();
             }
         }        
+    }
 ```
+
+4. Add a `WorkerRoleConfig` class as follows:
+
+```csharp
+    public class WorkerRoleConfig
+    {
+        public WorkerRoleConfig()
+        {
+            UpdateFrequencyInSeconds =
+                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
+            ApplicationRestartCount =
+                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
+            StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
+            CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
+        }
+
+        public string StorageDataConnectionString { get; }
+
+        public string CurrentRoleInstanceLocalStoreDirectory { get; }
+
+        public int UpdateFrequencyInSeconds { get; }
+
+        public int ApplicationRestartCount { get; }
+    }
+```
+
+5. Add a `Utils` folder to the Worker Role. Add an `AzureUtils` class and a `DeploymentIdUtils` class to the folder with the following content:
+
+```csharp
+    public static class AzureUtils
+    {
+        public static bool IsEmulator()
+        {
+            return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
+        }
+    }
+```
+
+```csharp
+    public static class DeploymentIdUtils
+    {
+        public static string CloudServiceDeploymentId
+        {
+            get
+            {
+                if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
+                {
+                    return Constants.TestDeploymentId;
+                }
+                return $"{RoleEnvironment.DeploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
+            }
+        }
+    }
+```
+
+You can create additional Worker Roles in a similar manner.
 
 YAMS relies on Azure blob storage to deploy applications. It uses the `dataConnectionString` provided in the `YamsConfig` to connect to the appropriate blob storage.
 
@@ -77,12 +134,12 @@ YAMS expects to find a Storage Container called `applications` at the root of th
         {
             "Id": "hello.webapi",
             "Version": "1.0.1",
-            "DeploymentIds": [ "MY_DEPLOYMENT_ID" ]
+            "DeploymentIds": [ "MY_YAMS_FRONTEND_CLUSTER_ID" ]
         },	
 		{
             "Id": "hello.orleans",
 			"Version": "1.0.0",
-            "DeploymentIds": [ "MY_DEPLOYMENT_ID" ]
+            "DeploymentIds": [ "MY_YAMS_BACKEND_CLUSTER_ID" ]
 		},
 	]
 }
@@ -143,6 +200,17 @@ To allow applications to access endpoints, YAMS must register those endpoints in
 
 In this case, port 443 will be available for **https** connections, port 80 will be available for **http** connections and all ports from 81 to 400 will be open for **tcp** connections.
 
+The **ServiceConfiguration.csdef** file should also contain the following configuration settings:
+
+```xml
+    <ConfigurationSettings>
+      <Setting name="StorageDataConnectionString" />
+      <Setting name="UpdateFrequencyInSeconds" />
+      <Setting name="ApplicationRestartCount" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"/>
+    </ConfigurationSettings>
+```
+
 ### Execution context
 
 Execution context should be set to elevated in order to host apps reserving incoming ports (Web API, frontend etc.). Following line should be added to worker role section in ServiceDefinition file.
@@ -156,4 +224,4 @@ A sample cloud service project that can be used to deploy YAMS is available in t
 
 # Publish the cloud service
 
-Once you're done configuring the cloud service, simply publish it to Azure and start using YAMS. You should only need to publish the cloud service hosting YAMS ones.
+Once you're done configuring the cloud service, simply publish it to Azure and start using YAMS. You should only need to publish the cloud service hosting YAMS once.

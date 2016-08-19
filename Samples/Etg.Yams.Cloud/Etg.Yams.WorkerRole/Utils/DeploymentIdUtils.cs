@@ -1,18 +1,25 @@
-﻿using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace Etg.Yams.WorkerRole.Utils
 {
     public static class DeploymentIdUtils
     {
-        public static string CloudServiceDeploymentId
+        public static string CloudServiceRoleIdentifier
         {
             get
             {
-                if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
+                if (!RoleEnvironment.IsAvailable)
                 {
                     return Constants.TestDeploymentId;
                 }
-                return RoleEnvironment.DeploymentId;
+
+                string deploymentId = RoleEnvironment.IsEmulated
+                    ? Constants.TestDeploymentId
+                    : RoleEnvironment.DeploymentId;
+
+                // This concatenates the Cloud Service deployment id and the role name so that there is a unique name for each role in the Cloud Service
+                return $"{deploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
             }
         }
     }

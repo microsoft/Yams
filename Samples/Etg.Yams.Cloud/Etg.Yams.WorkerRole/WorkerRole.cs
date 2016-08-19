@@ -9,7 +9,7 @@ using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace Etg.Yams.WorkerRole
 {
-    public class WorkerRole : RoleEntryPoint
+    public class YamsWorkerRole : RoleEntryPoint
     {
         private IYamsService _yamsService;
 
@@ -24,7 +24,7 @@ namespace Etg.Yams.WorkerRole
             WorkerRoleConfig config = new WorkerRoleConfig();
             YamsConfig yamsConfig = new YamsConfigBuilder(
                 // mandatory configs
-                DeploymentIdUtils.CloudServiceDeploymentId,
+                DeploymentIdUtils.CloudServiceRoleIdentifier,
                 RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
                 RoleEnvironment.CurrentRoleInstance.Id,
                 config.CurrentRoleInstanceLocalStoreDirectory)
