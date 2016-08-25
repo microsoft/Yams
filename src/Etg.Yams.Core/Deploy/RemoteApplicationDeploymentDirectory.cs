@@ -35,7 +35,7 @@ namespace Etg.Yams.Deploy
                     {
                         if (!await _deploymentRepository.HasApplicationBinaries(appIdentity))
                         {
-                            Trace.TraceError($"Could not binaries for application {appIdentity} in the yams repository");
+                            Trace.TraceError($"Could not find binaries for application {appIdentity} in the yams repository");
                             continue;
                         }
 
