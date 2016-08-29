@@ -143,6 +143,14 @@ To allow applications to access endpoints, YAMS must register those endpoints in
 
 In this case, port 443 will be available for **https** connections, port 80 will be available for **http** connections and all ports from 81 to 400 will be open for **tcp** connections.
 
+## Execution context
+
+Execution context should be elevated in order to host apps reserving incoming ports (Web API, frontend etc.)
+
+``` xml
+    <Runtime executionContext="elevated" />
+```
+
 # Sample project
 A sample cloud service project that can be used to deploy YAMS is available in the [Samples/Etg.Yams.Cloud](../Samples/Etg.Yams.Cloud) directory. The sample project uses an existing storage account and cloud services which you should replace with you own! 
 
