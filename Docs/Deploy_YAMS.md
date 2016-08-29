@@ -143,9 +143,9 @@ To allow applications to access endpoints, YAMS must register those endpoints in
 
 In this case, port 443 will be available for **https** connections, port 80 will be available for **http** connections and all ports from 81 to 400 will be open for **tcp** connections.
 
-## Execution context
+### Execution context
 
-Execution context should be elevated in order to host apps reserving incoming ports (Web API, frontend etc.)
+Execution context should be set to elevated in order to host apps reserving incoming ports (Web API, frontend etc.). Following line should be added to worker role section in ServiceDefinition file.
 
 ``` xml
     <Runtime executionContext="elevated" />
