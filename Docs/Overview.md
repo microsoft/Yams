@@ -1,6 +1,6 @@
 # YAMS Overview
 
-The [Microsoft Azure cloud services](https://azure.microsoft.com/en-us/services/cloud-services/) platform allows developers to deploy and host highly available, reliable and scalable cloud applications in the cloud. The platform handles creating and managing VMs, load balancing, scaling (and auto-scaling), Virtual IP (VIP) swap and more.
+The [Microsoft Azure cloud services](https://azure.microsoft.com/en-us/services/cloud-services/) platform allows developers to deploy and host highly available, reliable and scalable microservices and applications in the cloud. The platform handles creating and managing VMs, load balancing, scaling (and auto-scaling), Virtual IP (VIP) swap and more.
 
 Typically, an application is first deployed to a staging environment for testing. If testing is successful, the application is promoted to the production environment by performing a VIP swap. With each environment (e.g. staging and production) is associated at least one VM where the application will be running. For real world applications, several VMs are usually needed to handle traffic.
 
@@ -8,18 +8,20 @@ A microservices-based application is usually composed of a large number of micro
 
 To deploy such a Microservices-based application to Azure using the Azure cloud services platform, a cloud service is needed to deploy and host each microservice. Given that each cloud service requires at least one VM (usually more), the cost can quickly become unreasonable for a large number of microservices.
 
-**YAMS** (Yet Another Microservices Solution) is a library that extends the Azure cloud services platform with the following capabilities:
-* **Quick deployments** of Azure services (~1minute). 
-* **Sharing infrastructure** (multiple microservices can be deployed to the same cloud service). 
+**YAMS** (Yet Another Microservices Solution) is a library that can be used to deploy and host microservices on premises, in Azure, or on other cloud service platforms. It offers the following features:
+* **Quick deployments** of microservices to any target environment (~1 minute deployments to Azure). 
+* **Sharing infrastructure** (multiple microservices can be deployed to the same on premises or cloud service). 
 * **Scaling microservices independently**.
 * **Versioning** of microservices, quick **updates**, **reverts**, etc. 
-* Support for **Azure Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates.
+* Support for **Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates, including first-class support for **Azure Upgrade Domains**.
 * Microservices can be developed in **any programming language** and deployed with YAMS (as long as your service can be started with an exe).
 
-YAMS relies on Azure **blob storage** to deploy applications. To deploy an application to a YAMS cluster, simply drop the binaries of the application in blob storage. The binaries are then picked-up by YAMS, deployed to all VMs in the cluster and then launched.
+YAMS has first-class support for deploying applications from Azure **blob storage**, but with its pluggable storage architecture, other providers such as SQL Server or file storage can be created and plugged in as well. 
+
+To deploy an application to a YAMS cluster, simply drop the binaries of the application into YAMS storage. The binaries are then picked-up by YAMS, deployed to all VMs in the cluster, and then launched.
 
 # How does it work?
-Yams itself is deployed as a cloud service to Azure (we call it a Yams cluster). A Yams cluster is associated with a blob storage account where the binaries of microservices are deployed (note that *microservices* in Yams are often referred to as *applications* or simply *apps*). Yams periodically scans the blob storage for updates. The blob storage associated with a Yams cluster contains a storage container (named *applications*) where apps binaries are uploaded. 
+Yams itself is deployed either as a cloud service to Azure, on another cloud service platform, or on premises (we call it a Yams cluster). A Yams cluster is associated with a blob storage account where the binaries of microservices are deployed (note that *microservices* in Yams are often referred to as *applications* or simply *apps*). Yams periodically scans the blob storage for updates. The blob storage associated with a Yams cluster contains a storage container (named *applications*) where apps binaries are uploaded. 
 
 ## The storage container structure
 The *applications* storage container has the following structure:
