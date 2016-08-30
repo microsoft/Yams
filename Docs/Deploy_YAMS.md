@@ -38,6 +38,7 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
 	        }
 	    }
 	```
+	
 	```csharp
 	    public static class DeploymentIdUtils
 	    {
