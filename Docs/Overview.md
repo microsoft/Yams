@@ -21,10 +21,10 @@ YAMS has first-class support for deploying applications from Azure **blob storag
 To deploy an application to a YAMS cluster, simply drop the binaries of the application into YAMS storage. The binaries are then picked-up by YAMS, deployed to all VMs in the cluster, and then launched.
 
 # How does it work?
-Yams itself is deployed either as a cloud service to Azure, on another cloud service platform, or on premises (we call it a Yams cluster). A Yams cluster is associated with a blob storage account where the binaries of microservices are deployed (note that *microservices* in Yams are often referred to as *applications* or simply *apps*). Yams periodically scans the blob storage for updates. The blob storage associated with a Yams cluster contains a storage container (named *applications*) where apps binaries are uploaded. 
+Yams itself is deployed either as a cloud service to Azure, on another cloud service platform, or on premises (we call it a Yams cluster). A Yams cluster is associated with a deployment storage (e.g. blob storage) where the binaries of microservices are deployed (note that *microservices* in Yams are often referred to as *applications* or simply *apps*). Yams periodically scans its deployment storage for updates. 
 
-## The storage container structure
-The *applications* storage container has the following structure:
+## The deployment storage structure
+The *applications* in deployment storage can be organized with the following structure:
 
 ```
 applications
@@ -35,6 +35,8 @@ applications
 |   |___ 1.0.1
 |___ DeploymentConfig.json 
 ```
+
+Depending on what kind of storage provider is being used, these could be folders in a blob- or file-system-based deployment storage provider, columns in a relational database table, etc.
 
 The `DeploymentConfig.json` file contains information about what application should be deployed and where. It has the following structure:
 ```
