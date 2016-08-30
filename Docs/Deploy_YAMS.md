@@ -6,114 +6,114 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
 1. Create a cloud service and a Worker Role.
 2. Install the latest version of Etg.Yams from the NuGet gallery to the worker role.
 3. Add a `WorkerRoleConfig` class as follows:
-```csharp
-    public class WorkerRoleConfig
-    {
-        public WorkerRoleConfig()
-        {
-            UpdateFrequencyInSeconds =
-                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
-            ApplicationRestartCount =
-                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
-            StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
-            CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
-        }
-
-        public string StorageDataConnectionString { get; }
-
-        public string CurrentRoleInstanceLocalStoreDirectory { get; }
-
-        public int UpdateFrequencyInSeconds { get; }
-
-        public int ApplicationRestartCount { get; }
-    }
-```
+	```csharp
+	    public class WorkerRoleConfig
+	    {
+	        public WorkerRoleConfig()
+	        {
+	            UpdateFrequencyInSeconds =
+	                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
+	            ApplicationRestartCount =
+	                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
+	            StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
+	            CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
+	        }
+	
+	        public string StorageDataConnectionString { get; }
+	
+	        public string CurrentRoleInstanceLocalStoreDirectory { get; }
+	
+	        public int UpdateFrequencyInSeconds { get; }
+	
+	        public int ApplicationRestartCount { get; }
+	    }
+	```
 4. Add a `Utils` folder to the Worker Role. Add an `AzureUtils` class and a `DeploymentIdUtils` class to the folder with the following content:
-```csharp
-    public static class AzureUtils
-    {
-        public static bool IsEmulator()
-        {
-            return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
-        }
-    }
-```
-```csharp
-    public static class DeploymentIdUtils
-    {
-        public static string CloudServiceDeploymentId
-        {
-            get
-            {
-                if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
-                {
-                    return Constants.TestDeploymentId;
-                }
-                return $"{RoleEnvironment.DeploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
-            }
-        }
-    }
-```
+	```csharp
+	    public static class AzureUtils
+	    {
+	        public static bool IsEmulator()
+	        {
+	            return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
+	        }
+	    }
+	```
+	```csharp
+	    public static class DeploymentIdUtils
+	    {
+	        public static string CloudServiceDeploymentId
+	        {
+	            get
+	            {
+	                if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
+	                {
+	                    return Constants.TestDeploymentId;
+	                }
+	                return $"{RoleEnvironment.DeploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
+	            }
+	        }
+	    }
+	```
 5. Configure and start YAMS in your Worker Role as follows:
-```csharp
-    public class WorkerRole : RoleEntryPoint
-    {
-        private IYamsService _yamsService;
-
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        public override void Run()
-        {
-            RunAsync().Wait();
-        }
-
-        public async Task RunAsync()
-        {
-            WorkerRoleConfig config = new WorkerRoleConfig();
-            YamsConfig yamsConfig = new YamsConfigBuilder(
-                // mandatory configs
-                DeploymentIdUtils.CloudServiceDeploymentId,
-                RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
-                RoleEnvironment.CurrentRoleInstance.Id,
-                config.CurrentRoleInstanceLocalStoreDirectory)
-                // optional configs
-                .SetCheckForUpdatesPeriodInSeconds(config.UpdateFrequencyInSeconds)
-                .SetApplicationRestartCount(config.ApplicationRestartCount)
-                .Build();
-            _yamsService = YamsServiceFactory.Create(yamsConfig,
-                deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
-                updateSessionStorageConnectionString: config.StorageDataConnectionString);
-
-            try
-            {
-                Trace.TraceInformation("Yams is starting");
-                await _yamsService.Start();
-                Trace.TraceInformation("Yams has started. Looking for apps with deploymentId:" + yamsConfig.ClusterDeploymentId);
-                while (true)
-                {
-                    await Task.Delay(1000);
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError(ex.ToString());
-            }
-        }
-        
-        public override void OnStop()
-        {
-            StopAsync().Wait();
-            base.OnStop();
-        }        
-        
-        public async Task StopAsync()
-        {
-            if (_yamsService != null)
-            {
-                await _yamsService.Stop();
-            }
-        }        
-    }
-```
+	```csharp
+	    public class WorkerRole : RoleEntryPoint
+	    {
+	        private IYamsService _yamsService;
+	
+	        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+	        public override void Run()
+	        {
+	            RunAsync().Wait();
+	        }
+	
+	        public async Task RunAsync()
+	        {
+	            WorkerRoleConfig config = new WorkerRoleConfig();
+	            YamsConfig yamsConfig = new YamsConfigBuilder(
+	                // mandatory configs
+	                DeploymentIdUtils.CloudServiceDeploymentId,
+	                RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
+	                RoleEnvironment.CurrentRoleInstance.Id,
+	                config.CurrentRoleInstanceLocalStoreDirectory)
+	                // optional configs
+	                .SetCheckForUpdatesPeriodInSeconds(config.UpdateFrequencyInSeconds)
+	                .SetApplicationRestartCount(config.ApplicationRestartCount)
+	                .Build();
+	            _yamsService = YamsServiceFactory.Create(yamsConfig,
+	                deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
+	                updateSessionStorageConnectionString: config.StorageDataConnectionString);
+	
+	            try
+	            {
+	                Trace.TraceInformation("Yams is starting");
+	                await _yamsService.Start();
+	                Trace.TraceInformation("Yams has started. Looking for apps with deploymentId:" + yamsConfig.ClusterDeploymentId);
+	                while (true)
+	                {
+	                    await Task.Delay(1000);
+	                }
+	            }
+	            catch (Exception ex)
+	            {
+	                Trace.TraceError(ex.ToString());
+	            }
+	        }
+	        
+	        public override void OnStop()
+	        {
+	            StopAsync().Wait();
+	            base.OnStop();
+	        }        
+	        
+	        public async Task StopAsync()
+	        {
+	            if (_yamsService != null)
+	            {
+	                await _yamsService.Stop();
+	            }
+	        }        
+	    }
+	```
 
 You can create additional Worker Roles in a similar manner.
 
