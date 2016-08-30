@@ -3,14 +3,17 @@ YAMS
 
 [![Join the chat at https://gitter.im/Microsoft/Yams](https://badges.gitter.im/Microsoft/Yams.svg)](https://gitter.im/Microsoft/Yams?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-**YAMS** (Yet Another Microservices Solution) is a library that can be used to deploy and host microservices in Azure. It offers the following features:
-* **Quick deployments** of Azure services (~1minute). 
-* **Sharing infrastructure** (multiple microservices can be deployed to the same cloud service). 
+**YAMS** (Yet Another Microservices Solution) is a library that can be used to deploy and host microservices on premises, in Azure, or on other cloud service platforms. It offers the following features:
+* **Quick deployments** of microservices to any target environment (~1 minute deployments to Azure). 
+* **Sharing infrastructure** (multiple microservices can be deployed to the same on premises or cloud service). 
+* **Scaling microservices independently**.
 * **Versioning** of microservices, quick **updates**, **reverts**, etc. 
-* Support for **Azure Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates.
+* Support for **Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates, including first-class support for **Azure Upgrade Domains**.
 * Microservices can be developed in **any programming language** and deployed with YAMS (as long as your service can be started with an exe).
 
-YAMS relies on Azure **blob storage** to deploy applications. To deploy an application to a YAMS cluster, simply drop the binaries of the application in blob storage. The binaries are then picked-up by YAMS, deployed to all VMs in the cluster and then launched.
+YAMS has first-class support for deploying applications from Azure **blob storage**, but with its pluggable storage architecture, other providers such as SQL Server or file storage can be created and plugged in as well.
+
+To deploy an application to a YAMS cluster, simply drop the binaries of the application into YAMS deployment storage. The binaries are then picked-up by YAMS, deployed to all VMs in the cluster, and then launched.
 
 Please read the documentation below for more information.
 
