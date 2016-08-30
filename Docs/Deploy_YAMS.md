@@ -5,8 +5,56 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
 ## Deploy YAMS
 1. Create a cloud service and a Worker Role.
 2. Install the latest version of Etg.Yams from the NuGet gallery to the worker role.
-3. Configure and start YAMS in your Worker Role as follows:
+3. Add a `WorkerRoleConfig` class as follows:
+```csharp
+    public class WorkerRoleConfig
+    {
+        public WorkerRoleConfig()
+        {
+            UpdateFrequencyInSeconds =
+                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
+            ApplicationRestartCount =
+                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
+            StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
+            CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
+        }
 
+        public string StorageDataConnectionString { get; }
+
+        public string CurrentRoleInstanceLocalStoreDirectory { get; }
+
+        public int UpdateFrequencyInSeconds { get; }
+
+        public int ApplicationRestartCount { get; }
+    }
+```
+4. Add a `Utils` folder to the Worker Role. Add an `AzureUtils` class and a `DeploymentIdUtils` class to the folder with the following content:
+```csharp
+    public static class AzureUtils
+    {
+        public static bool IsEmulator()
+        {
+            return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
+        }
+    }
+```
+```csharp
+    public static class DeploymentIdUtils
+    {
+        public static string CloudServiceDeploymentId
+        {
+            get
+            {
+                if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
+                {
+                    return Constants.TestDeploymentId;
+                }
+                return $"{RoleEnvironment.DeploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
+            }
+        }
+    }
+```
+5. Configure and start YAMS in your Worker Role as follows:
 ```csharp
     public class WorkerRole : RoleEntryPoint
     {
@@ -64,60 +112,6 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
                 await _yamsService.Stop();
             }
         }        
-    }
-```
-
-4. Add a `WorkerRoleConfig` class as follows:
-
-```csharp
-    public class WorkerRoleConfig
-    {
-        public WorkerRoleConfig()
-        {
-            UpdateFrequencyInSeconds =
-                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
-            ApplicationRestartCount =
-                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
-            StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
-            CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
-        }
-
-        public string StorageDataConnectionString { get; }
-
-        public string CurrentRoleInstanceLocalStoreDirectory { get; }
-
-        public int UpdateFrequencyInSeconds { get; }
-
-        public int ApplicationRestartCount { get; }
-    }
-```
-
-5. Add a `Utils` folder to the Worker Role. Add an `AzureUtils` class and a `DeploymentIdUtils` class to the folder with the following content:
-
-```csharp
-    public static class AzureUtils
-    {
-        public static bool IsEmulator()
-        {
-            return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
-        }
-    }
-```
-
-```csharp
-    public static class DeploymentIdUtils
-    {
-        public static string CloudServiceDeploymentId
-        {
-            get
-            {
-                if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
-                {
-                    return Constants.TestDeploymentId;
-                }
-                return $"{RoleEnvironment.DeploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
-            }
-        }
     }
 ```
 
