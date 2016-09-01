@@ -11,20 +11,25 @@ Follow the *Hello World* tutorial described in Orleans [My First Orleans Applica
 Once you have the app ready, follow the steps below to deploy the app in YAMS:
 
 * Go to the **SiloHost** console application project and remove any client related code from the `Program.cs` file.
-* Open the `OrleansHostWrapper.cs` file and add the following code to configure the silo:
+* Open the `Program.cs` file and add the following code to configure the silo:
 
 ```csharp
+        private static int StartSilo(string[] args)
+        {
+            // define the cluster configuration
             var config = new ClusterConfiguration();
             config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.AzureTable;
             config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.AzureTable;
             config.Globals.DataConnectionString = "MY_DATA_CONNECTION_STRING";
             config.AddMemoryStorageProvider();
             config.AddAzureTableStorageProvider("AzureStore");
-            config.Globals.DeploymentId = args[0];
             config.Defaults.DefaultTraceLevel = Severity.Error;
             config.Defaults.Port = 100;
             config.Defaults.ProxyGatewayEndpoint = new IPEndPoint(config.Defaults.Endpoint.Address, 101);
-            siloHost = new SiloHost(siloName, config);
+
+            hostWrapper = new OrleansHostWrapper(config, args);
+            return hostWrapper.Run();
+        }
 ```
 
 * Add the YAMS `AppConfig.json` file to the **SiloHost** project. The content of the `AppConfig.json` file is as follows:
@@ -55,10 +60,34 @@ Follow the [Deploy and Host an App in YAMS tutorial](Deploy&Host_an_App_in_YAMS.
 ```csharp
             var config = new ClientConfiguration();
             config.GatewayProvider = ClientConfiguration.GatewayProviderType.AzureTable;
-            config.DeploymentId = "hello.orleans_1.0_MY_DEPLOYMENT_ID";
+            config.DeploymentId = "hello.orleans_1.0_MY_YAMS_BACKEND_CLUSTER_ID";
             config.DataConnectionString = "MY_DATA_CONNECTION_STRING";
             config.DefaultTraceLevel = Severity.Error;
-            GrainClient.Initialize(config);
+
+            // Attempt to connect a few times to overcome transient failures and to give the silo enough 
+            // time to start up when starting at the same time as the client (useful when deploying or during development).
+
+            const int initializeAttemptsBeforeFailing = 5;
+
+            int attempt = 0;
+            while (true)
+            {
+                try
+                {
+                    GrainClient.Initialize(config);
+                    Console.WriteLine("Client initialized");
+                    break;
+                }
+                catch (SiloUnavailableException e)
+                {
+                    attempt++;
+                    if (attempt >= initializeAttemptsBeforeFailing)
+                    {
+                        throw;
+                    }
+                    Thread.Sleep(TimeSpan.FromSeconds(2));
+                }
+            }
 ```
 
 It's **very important** that the `DeploymentId` and the `DataConnectionString` used above matches the ones that were used in the `helloworld.orleans` app.
@@ -74,9 +103,9 @@ namespace WebApp
     {
         [HttpGet]
         [Route("hello")]
-        public async Task<String> SayHello()
+        public async Task<string> SayHello()
         {
-            IHelloGrain helloGrain = GrainClient.GrainFactory.GetGrain<IHelloGrain>(0);
+            var helloGrain = GrainClient.GrainFactory.GetGrain<IHelloGrain>(0);
             return await helloGrain.SayHello();
         }
     }

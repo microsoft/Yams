@@ -6,117 +6,157 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
 1. Create a cloud service and a Worker Role.
 2. Install the latest version of Etg.Yams from the NuGet gallery to the worker role.
 3. Add a `WorkerRoleConfig` class as follows:
-	```csharp
-	    public class WorkerRoleConfig
-	    {
-	        public WorkerRoleConfig()
-	        {
-	            UpdateFrequencyInSeconds =
-	                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
-	            ApplicationRestartCount =
-	                Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
-	            StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
-	            CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
-	        }
-	
-	        public string StorageDataConnectionString { get; }
-	
-	        public string CurrentRoleInstanceLocalStoreDirectory { get; }
-	
-	        public int UpdateFrequencyInSeconds { get; }
-	
-	        public int ApplicationRestartCount { get; }
-	    }
-	```
-4. Add a `Utils` folder to the Worker Role. Add an `AzureUtils` class and a `DeploymentIdUtils` class to the folder with the following content:
-	```csharp
-	    public static class AzureUtils
-	    {
-	        public static bool IsEmulator()
-	        {
-	            return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
-	        }
-	    }
-	```
-	
-	```csharp
-	    public static class DeploymentIdUtils
-	    {
-	        public static string CloudServiceDeploymentId
-	        {
-	            get
-	            {
-	                if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
-	                {
-	                    return Constants.TestDeploymentId;
-	                }
-	                return $"{RoleEnvironment.DeploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
-	            }
-	        }
-	    }
-	```
-5. Configure and start YAMS in your Worker Role as follows:
-	```csharp
-	    public class WorkerRole : RoleEntryPoint
-	    {
-	        private IYamsService _yamsService;
-	
-	        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-	        public override void Run()
-	        {
-	            RunAsync().Wait();
-	        }
-	
-	        public async Task RunAsync()
-	        {
-	            WorkerRoleConfig config = new WorkerRoleConfig();
-	            YamsConfig yamsConfig = new YamsConfigBuilder(
-	                // mandatory configs
-	                DeploymentIdUtils.CloudServiceDeploymentId,
-	                RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
-	                RoleEnvironment.CurrentRoleInstance.Id,
-	                config.CurrentRoleInstanceLocalStoreDirectory)
-	                // optional configs
-	                .SetCheckForUpdatesPeriodInSeconds(config.UpdateFrequencyInSeconds)
-	                .SetApplicationRestartCount(config.ApplicationRestartCount)
-	                .Build();
-	            _yamsService = YamsServiceFactory.Create(yamsConfig,
-	                deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
-	                updateSessionStorageConnectionString: config.StorageDataConnectionString);
-	
-	            try
-	            {
-	                Trace.TraceInformation("Yams is starting");
-	                await _yamsService.Start();
-	                Trace.TraceInformation("Yams has started. Looking for apps with deploymentId:" + yamsConfig.ClusterDeploymentId);
-	                while (true)
-	                {
-	                    await Task.Delay(1000);
-	                }
-	            }
-	            catch (Exception ex)
-	            {
-	                Trace.TraceError(ex.ToString());
-	            }
-	        }
-	        
-	        public override void OnStop()
-	        {
-	            StopAsync().Wait();
-	            base.OnStop();
-	        }        
-	        
-	        public async Task StopAsync()
-	        {
-	            if (_yamsService != null)
-	            {
-	                await _yamsService.Stop();
-	            }
-	        }        
-	    }
-	```
 
-You can create additional Worker Roles in a similar manner.
+  ```csharp
+      public class WorkerRoleConfig
+      {
+          public WorkerRoleConfig()
+          {
+              UpdateFrequencyInSeconds =
+                  Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
+              ApplicationRestartCount =
+                  Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
+              StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
+              CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
+          }
+
+          public string StorageDataConnectionString { get; }
+
+          public string CurrentRoleInstanceLocalStoreDirectory { get; }
+
+          public int UpdateFrequencyInSeconds { get; }
+
+          public int ApplicationRestartCount { get; }
+      }
+  ```
+
+4. Add a `Utils` folder to the Worker Role. Add an `AzureUtils` class and a `DeploymentIdUtils` class to the folder with the following content:
+
+  ```csharp
+      public static class AzureUtils
+      {
+          public static bool IsEmulator()
+          {
+              return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
+          }
+      }
+  ```
+
+  ```csharp
+      public static class DeploymentIdUtils
+      {
+          public static string GetYamsClusterId(bool isSingleClusterDeployment)
+          {
+              if (!RoleEnvironment.IsAvailable)
+              {
+                  return Constants.TestDeploymentId;
+              }
+
+              string deploymentId = RoleEnvironment.IsEmulated
+                  ? Constants.TestDeploymentId
+                  : RoleEnvironment.DeploymentId;
+
+              if (isSingleClusterDeployment)
+              {
+                  return deploymentId;
+              }
+
+              // This concatenates the Cloud Service deployment id and the role name so that there is a unique name for each role in the Cloud Service
+              return $"{deploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
+          }
+      }
+  ```
+
+5. Configure and start YAMS in your Worker Role as follows:
+
+  ```csharp
+      public class YamsWorkerRole : RoleEntryPoint
+      {
+          private IYamsService _yamsService;
+
+          protected virtual bool IsSingleClusterDeployment
+          {
+              get { return true; }
+          }
+
+          [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+          public override void Run()
+          {
+              RunAsync().Wait();
+          }
+
+          public async Task RunAsync()
+          {
+              WorkerRoleConfig config = new WorkerRoleConfig();
+              YamsConfig yamsConfig = new YamsConfigBuilder(
+                  // mandatory configs
+                  DeploymentIdUtils.GetYamsClusterId(this.IsSingleClusterDeployment),
+                  RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
+                  RoleEnvironment.CurrentRoleInstance.Id,
+                  config.CurrentRoleInstanceLocalStoreDirectory)
+                  // optional configs
+                  .SetCheckForUpdatesPeriodInSeconds(config.UpdateFrequencyInSeconds)
+                  .SetApplicationRestartCount(config.ApplicationRestartCount)
+                  .Build();
+              _yamsService = YamsServiceFactory.Create(yamsConfig,
+                  deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
+                  updateSessionStorageConnectionString: config.StorageDataConnectionString);
+
+              try
+              {
+                  Trace.TraceInformation("Yams is starting");
+                  await _yamsService.Start();
+                  Trace.TraceInformation("Yams has started. Looking for apps with deploymentId:" + yamsConfig.ClusterDeploymentId);
+                  while (true)
+                  {
+                      await Task.Delay(1000);
+                  }
+              }
+              catch (Exception ex)
+              {
+                  Trace.TraceError(ex.ToString());
+              }
+          }
+
+          public override bool OnStart()
+          {
+              Trace.TraceInformation("Yams WorkerRole is starting");
+              ServicePointManager.DefaultConnectionLimit = 1000;
+              RoleEnvironment.Changing += RoleEnvironmentChanging;
+              var result = base.OnStart();
+              Trace.TraceInformation("Yams WorkerRole has started");
+              return result;
+          }
+
+          public override void OnStop()
+          {
+              StopAsync().Wait();
+          }
+
+          public async Task StopAsync()
+          {
+              Trace.TraceInformation("Yams WorkerRole is stopping");
+              RoleEnvironment.Changing -= RoleEnvironmentChanging;
+              if (_yamsService != null)
+              {
+                  await _yamsService.Stop();
+              }
+              base.OnStop();
+              Trace.TraceInformation("Yams has stopped");
+          }
+
+          private void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e)
+          {
+              // If a configuration setting is changing);
+              if (e.Changes.Any(change => change is RoleEnvironmentConfigurationSettingChange))
+              {
+                  e.Cancel = true;
+              }
+          }
+      }
+  ```
+
+You can create additional Worker Roles that inherit from this Worker Role.
 
 YAMS relies on Azure blob storage to deploy applications. It uses the `dataConnectionString` provided in the `YamsConfig` to connect to the appropriate blob storage.
 
@@ -129,24 +169,24 @@ YAMS expects to find a Storage Container called `applications` at the root of th
         {
             "Id": "hello.webapi",
             "Version": "1.0.1",
-            "DeploymentIds": [ "MY_YAMS_FRONTEND_CLUSTER_ID" ]
+            "DeploymentIds": [ "YAMS_CLUSTER_ID" ]
         },	
 		{
-            "Id": "hello.orleans",
+            "Id": "hello.backend",
 			"Version": "1.0.0",
-            "DeploymentIds": [ "MY_YAMS_BACKEND_CLUSTER_ID" ]
+            "DeploymentIds": [ "YAMS_CLUSTER_ID" ]
 		},
 	]
 }
 ```
 
-In this case, the application `hello.webapi`, version `1.0.1` will be deployed to the cloud service with deployment Id *"MY_DEPLOYMENT_ID"*. The binaries of the application should be available in the blob storage at the path `applications/hello.webapi/1.0.1`.
+In this case, the application `hello.webapi`, version `1.0.1` will be deployed to the cloud service with deployment Id *"YAMS_CLUSTER_ID"*. The binaries of the application should be available in the blob storage at the path `applications/hello.webapi/1.0.1`.
 
 The blob storage content in the example above will look as follows:
 
 ```
 applications
-|___ hello.orleans
+|___ hello.backend
 |   |___ 1.0.0
 |___ hello.webapi
 |   |___ 1.0.1

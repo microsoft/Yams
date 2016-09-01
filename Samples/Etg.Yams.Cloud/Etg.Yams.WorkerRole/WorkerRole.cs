@@ -13,6 +13,11 @@ namespace Etg.Yams.WorkerRole
     {
         private IYamsService _yamsService;
 
+        protected virtual bool IsSingleClusterDeployment
+        {
+            get { return true; }
+        }
+
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public override void Run()
         {
@@ -24,7 +29,7 @@ namespace Etg.Yams.WorkerRole
             WorkerRoleConfig config = new WorkerRoleConfig();
             YamsConfig yamsConfig = new YamsConfigBuilder(
                 // mandatory configs
-                DeploymentIdUtils.CloudServiceRoleIdentifier,
+                DeploymentIdUtils.GetYamsClusterId(this.IsSingleClusterDeployment),
                 RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
                 RoleEnvironment.CurrentRoleInstance.Id,
                 config.CurrentRoleInstanceLocalStoreDirectory)

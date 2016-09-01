@@ -1,12 +1,12 @@
 using Etg.Yams.WorkerRole;
 
-namespace Backend
+namespace SingleClusterRole
 {
     public class WorkerRole : YamsWorkerRole
     {
         protected override bool IsSingleClusterDeployment
         {
-            get { return false; }
+            get { return true; }
         }
     }
 }

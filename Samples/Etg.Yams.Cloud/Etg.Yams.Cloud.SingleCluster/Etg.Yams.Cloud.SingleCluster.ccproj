@@ -11,7 +11,7 @@
     <RootNamespace>Etg.Yams.Cloud</RootNamespace>
     <AssemblyName>Etg.Yams.Cloud</AssemblyName>
     <StartDevelopmentStorage>True</StartDevelopmentStorage>
-    <Name>Etg.Yams.Cloud</Name>
+    <Name>Etg.Yams.Cloud.SingleCluster</Name>
     <SccProjectName>SAK</SccProjectName>
     <SccProvider>SAK</SccProvider>
     <SccAuxPath>SAK</SccAuxPath>
@@ -43,37 +43,27 @@
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="BackendContent\" />
-    <Folder Include="FrontendContent\" />
     <Folder Include="Profiles" />
+    <Folder Include="SingleClusterRoleContent\" />
   </ItemGroup>
   <ItemGroup>
-    <DiagnosticsConfiguration Include="BackendContent\diagnostics.wadcfgx" />
-    <DiagnosticsConfiguration Include="FrontendContent\diagnostics.wadcfgx" />
+    <DiagnosticsConfiguration Include="SingleClusterRoleContent\diagnostics.wadcfgx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Backend\Backend.csproj">
-      <Name>Backend</Name>
+    <ProjectReference Include="..\SingleClusterRole\SingleClusterRole.csproj">
+      <Name>SingleClusterRole</Name>
       <Project>{d6eb9dd4-4dc6-4cf1-888b-4a4a548e3fd1}</Project>
       <Private>True</Private>
       <RoleType>Worker</RoleType>
-      <RoleName>Backend</RoleName>
-      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
-    </ProjectReference>
-    <ProjectReference Include="..\Frontend\Frontend.csproj">
-      <Name>Frontend</Name>
-      <Project>{c80821c2-215c-429e-a6a3-bfb132b5c1f4}</Project>
-      <Private>True</Private>
-      <RoleType>Worker</RoleType>
-      <RoleName>Frontend</RoleName>
+      <RoleName>SingleClusterRole</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="BackendContent\GCSettingsManagement.ps1">
+    <Content Include="SingleClusterRoleContent\GCSettingsManagement.ps1">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="BackendContent\ServerGC.cmd">
+    <Content Include="SingleClusterRoleContent\ServerGC.cmd">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
