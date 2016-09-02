@@ -46,24 +46,24 @@ The `DeploymentConfig.json` file contains information about what application sho
         {
             "Id": "app1",
             "Version": "1.0.0",
-            "DeploymentIds": [ "DEPLOYMENT_ID" ]
+            "DeploymentIds": [ "YAMS_CLUSTER_ID" ]
         },  
         {
             "Id": "app2",
             "Version": "1.0.1",
-            "DeploymentIds": [ "DEPLOYMENT_ID", "DEPLOYMENT_ID_OTHER" ]
+            "DeploymentIds": [ "YAMS_CLUSTER_ID", "YAMS_CLUSTER_ID_OTHER" ]
         },
     ]
 }
 ```
 
-The `DeploymentIds` field identifies the Yams clusters where an application should be deployed (it is the same deployment id of the Azure cloud service where the Yams cluster is deployed). 
+The `DeploymentIds` field identifies the Yams clusters where an application should be deployed. With a single Worker Role, it is the same deployment id of the Azure cloud service where the Yams cluster is deployed. If you have multiple Worker Roles in the same Azure cloud service, then it is a concatenation of the deployment id of the Azure cloud service and the name of the Worker Role.
 
 ## Deploying Yams to a cloud service
 Yams can be deployed to Azure like any typical cloud service. The [Deploy YAMS tutorial](Deploy_YAMS.md) explains the steps needed to deploy Yams to Azure.
 
 ## Scanning blob storage
-When a Yams cluster is deployed to a cloud service, each instance in the cluster reads the `DeploymentConfig.json` file and deploy all apps that have the corresponding `DeploymentId` (the deployment id of the cloud service where the Yams cluster is deployed). Then, periodically, each Yams instance scans the `DeploymentConfig.json` file for changes and takes the appropriate actions. There are three types of changes that can occur:
+When a Yams cluster is deployed to a cloud service, each instance in the cluster reads the `DeploymentConfig.json` file and deploy all apps that have the corresponding `DeploymentId` (typically the deployment id of the cloud service where the Yams cluster is deployed). Then, periodically, each Yams instance scans the `DeploymentConfig.json` file for changes and takes the appropriate actions. There are three types of changes that can occur:
 
 1. **An application is added** 
 2. **An application is removed**
