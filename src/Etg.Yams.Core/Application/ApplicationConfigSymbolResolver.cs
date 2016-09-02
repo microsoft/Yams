@@ -31,7 +31,10 @@ namespace Etg.Yams.Application
                     symbolValue = appIdentity.Version.Minor.ToString();
                     break;
                 case "Version.Build":
-                    symbolValue = appIdentity.Version.Build.ToString();
+                    symbolValue = appIdentity.Version.Build;
+                    break;
+                case "Version.Prerelease":
+                    symbolValue = appIdentity.Version.Prerelease;
                     break;
                 case "DeploymentId":
                     symbolValue = _deploymentId;

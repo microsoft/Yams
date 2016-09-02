@@ -6,6 +6,7 @@ using Etg.Yams.Process;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Test.Utils;
 using Etg.Yams.Utils;
+using Semver;
 using Xunit;
 
 namespace Etg.Yams.Test.Application
@@ -64,7 +65,7 @@ namespace Etg.Yams.Test.Application
         [Fact]
         public async Task TestAddApplication()
         {
-            AppIdentity appIdentity = new AppIdentity("test.myapp", new Version(1, 0, 0));
+            AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
             await AddApplication(appIdentity);
 
             Assert.NotNull(_applicationPool.GetApplication(appIdentity));
@@ -82,21 +83,21 @@ namespace Etg.Yams.Test.Application
             return Path.Combine(_applicationsRootPath, appIdentity.Id,
                 appIdentity.Version.ToString());
         }
-        
+
         [Fact]
         public async Task TestThatAddExistingApplicationThrowsAnException()
         {
             await Assert.ThrowsAsync<ArgumentException>(async () => {
-                AppIdentity appIdentity = new AppIdentity("test.myapp", new Version(1, 0, 0));
+                AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
                 await AddApplication(appIdentity);
                 await AddApplication(appIdentity);
-            });            
+            });
         }
 
         [Fact]
         public void TestThatGetApplicationReturnsNullIfApplicationDoesntExist()
         {
-            AppIdentity appIdentity = new AppIdentity("test.myapp", new Version(1, 0, 0));
+            AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
             Assert.Null(_applicationPool.GetApplication(appIdentity));
         }
 
@@ -105,7 +106,7 @@ namespace Etg.Yams.Test.Application
         {
             int startCallCount = 0;
             int stopCallCount = 0;
-            AppIdentity appIdentity = new AppIdentity("test.myapp", new Version(1, 0, 0));
+            AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
             IApplication application = new StubIApplication()
                 .Start(() =>
                 {
@@ -138,15 +139,15 @@ namespace Etg.Yams.Test.Application
             {
 	            IApplication application = new StubIApplication()
 		            .Start(() => Task.FromResult(false))
-		            .Identity_Get(() => new AppIdentity("test.myapp", new Version(1, 0, 0)));
+		            .Identity_Get(() => new AppIdentity("test.myapp", new SemVersion(1, 0, 0)));
                 await _applicationPool.AddApplication(application);
-            });            
+            });
         }
 
         [Fact]
         public async Task TestThatExitedApplicationsAreRemoved()
         {
-            AppIdentity appIdentity = new AppIdentity("test.myapp", new Version(1, 0, 0));
+            AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
             ApplicationStub application = new ApplicationStub(appIdentity, "path");
 
             await _applicationPool.AddApplication(application);
@@ -161,7 +162,7 @@ namespace Etg.Yams.Test.Application
         {
             await Assert.ThrowsAsync<ArgumentException>(async () =>
             {
-                AppIdentity appIdentity = new AppIdentity("test.myapp", new Version(1, 0, 0));
+                AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
                 await _applicationPool.RemoveApplication(appIdentity);
             });
         }

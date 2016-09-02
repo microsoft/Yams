@@ -11,6 +11,7 @@ using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Utils;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Semver;
 using Xunit;
 
 namespace Etg.Yams.Azure.Storage.Test
@@ -21,7 +22,7 @@ namespace Etg.Yams.Azure.Storage.Test
         private const string TestAppBlobRelPath = "app/1.0.0";
         private const string TestAppId = "app";
         private const string TestAppVersion = "1.0.0";
-        private static readonly AppIdentity TestAppIdentity = new AppIdentity(TestAppId, new Version(TestAppVersion));
+        private static readonly AppIdentity TestAppIdentity = new AppIdentity(TestAppId, SemVersion.Parse(TestAppVersion));
 
         private readonly string _deploymentConfigFilePath = Path.Combine("Data", "DeploymentRepository",
             "DeploymentConfig.json");

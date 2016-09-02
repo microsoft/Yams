@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Update;
 using Etg.Yams.Utils;
+using Semver;
 
 namespace Etg.Yams.Install
 {
@@ -17,7 +18,7 @@ namespace Etg.Yams.Install
         private readonly IApplicationFactory _applicationFactory;
         private readonly IApplicationPool _applicationPool;
 
-        public ApplicationInstaller(string applicationsRootPath, IUpdateSessionManager updateSessionManager, IApplicationFactory applicationFactory, 
+        public ApplicationInstaller(string applicationsRootPath, IUpdateSessionManager updateSessionManager, IApplicationFactory applicationFactory,
             IApplicationPool applicationPool)
         {
             _applicationsRootPath = applicationsRootPath;
@@ -39,7 +40,7 @@ namespace Etg.Yams.Install
             await FileUtils.DeleteDirectoryIfAny(GetApplicationAbsolutePath(appIdentity), recursive:true);
         }
 
-        public async Task<bool> Update(string appId, IEnumerable<Version> versionsToRemove, IEnumerable<Version> versionsToDeploy)
+        public async Task<bool> Update(string appId, IEnumerable<SemVersion> versionsToRemove, IEnumerable<SemVersion> versionsToDeploy)
         {
             if (!versionsToRemove.Any() || !versionsToDeploy.Any())
             {
@@ -73,7 +74,7 @@ namespace Etg.Yams.Install
             }
 
             await _updateSessionManager.EndUpdateSession(appId);
-            
+
             if(failed)
             {
                 return false;
