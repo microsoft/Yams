@@ -2,7 +2,7 @@
 In this tutorial, we will explain how to create and deploy an Orleans application in YAMS. We will also explain how to connect to the Orleans application from a Web Api application.
 
 # Prerequisites
-It's recommended that you read the [Deploy and Host an App in YAMS tutorial](Deploy&Host_an_App_in_YAMS.md) before reading this tutorial.
+You must deploy YAMS using the multiple cluster sample in order to deploy Orleans applications. One cluster will be used for the client and one cluster will be used for the silos. It's recommended that you read the [Deploy and Host an App in YAMS tutorial](Deploy&Host_an_App_in_YAMS.md) before reading this tutorial. 
 
 # Create the Orleans application
 
