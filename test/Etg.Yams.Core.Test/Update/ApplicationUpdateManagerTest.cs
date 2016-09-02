@@ -9,6 +9,7 @@ using Etg.Yams.Download;
 using Etg.Yams.Install;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Update;
+using Semver;
 using Xunit;
 
 namespace Etg.Yams.Test.Update
@@ -19,11 +20,11 @@ namespace Etg.Yams.Test.Update
         public async Task TestMultipleUpdates()
         {
             string id1 = "appId1";
-            var v1 = new Version("1.0.0");
-            var v2 = new Version("2.0.0");
-            var v3 = new Version("3.0.0");
-            var v4 = new Version("4.0.0");
-            var v5 = new Version("5.0.0");
+            var v1 = SemVersion.Parse("1.0.0");
+            var v2 = SemVersion.Parse("2.0.0");
+            var v3 = SemVersion.Parse("3.0.0");
+            var v4 = SemVersion.Parse("4.0.0");
+            var v5 = SemVersion.Parse("5.0.0");
 
             AppIdentity app1v1 = new AppIdentity(id1, v1);
             AppIdentity app1v2 = new AppIdentity(id1, v2);
@@ -54,8 +55,8 @@ namespace Etg.Yams.Test.Update
             var installedApps = new List<AppIdentity>();
             var uninstalledApps = new List<AppIdentity>();
             string updatedAppId = null;
-            IEnumerable<Version> versionsRemoved = null;
-            IEnumerable<Version> versionsAdded = null;
+            IEnumerable<SemVersion> versionsRemoved = null;
+            IEnumerable<SemVersion> versionsAdded = null;
             IApplicationInstaller applicationInstaller = new StubIApplicationInstaller()
                 .Install(appIdentity =>
                 {

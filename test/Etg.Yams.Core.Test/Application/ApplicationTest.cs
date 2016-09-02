@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Process;
 using Etg.Yams.Test.stubs;
+using Semver;
 using Xunit;
 
 namespace Etg.Yams.Test.Application
@@ -17,7 +18,7 @@ namespace Etg.Yams.Test.Application
 
         public ApplicationTestFixture()
         {
-	        var appIdentity = new AppIdentity("id", new Version("1.0.0"));
+	        var appIdentity = new AppIdentity("id", new SemVersion(1,0,0));
 	        AppConfig = new ApplicationConfig(appIdentity, ExeName, TestExeArgs);
         }
 

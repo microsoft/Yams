@@ -58,7 +58,7 @@ namespace Etg.Yams.Test.Storage
         public void TestListVersions()
         {
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.0", "1.0.1" }, _deploymentConfig.ListVersions("app1"));
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "2.0.0" }, _deploymentConfig.ListVersions("app3"));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "2.0.0-beta" }, _deploymentConfig.ListVersions("app3"));
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace Etg.Yams.Test.Storage
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid1", "deploymentid2" },
                 _deploymentConfig.ListDeploymentIds(new AppIdentity("app1", "1.0.1")));
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid3" },
-                _deploymentConfig.ListDeploymentIds(new AppIdentity("app3", "2.0.0")));
+                _deploymentConfig.ListDeploymentIds(new AppIdentity("app3", "2.0.0-beta")));
         }
 
         [Fact]
@@ -137,7 +137,7 @@ namespace Etg.Yams.Test.Storage
         public void TestAddDeploymentForExistingApp()
         {
             _deploymentConfig = _deploymentConfig.AddApplication(new AppIdentity("app3", "1.0.13"), "deploymentid13");
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.13", "2.0.0" }, _deploymentConfig.ListVersions("app3"));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.13", "2.0.0-beta" }, _deploymentConfig.ListVersions("app3"));
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid3", "deploymentid13" },
                 _deploymentConfig.ListDeploymentIds("app3"));
         }
@@ -218,7 +218,7 @@ namespace Etg.Yams.Test.Storage
         [Fact]
         public void TestThatRemoveLastDeploymentAlsoRemovesApplication()
         {
-            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app3", "2.0.0"), "deploymentid3");
+            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app3", "2.0.0-beta"), "deploymentid3");
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "app1", "app2" }, _deploymentConfig.ListApplications());
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
+using Semver;
 
 namespace Etg.Yams.Install
 {
@@ -32,6 +33,6 @@ namespace Etg.Yams.Install
         /// <param name="versionsToRemove"></param>
         /// <param name="versionsToDeploy"></param>
         /// <returns></returns>
-        Task<bool> Update(string appId, IEnumerable<Version> versionsToRemove, IEnumerable<Version> versionsToDeploy);
+        Task<bool> Update(string appId, IEnumerable<SemVersion> versionsToRemove, IEnumerable<SemVersion> versionsToDeploy);
     }
 }

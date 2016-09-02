@@ -9,6 +9,7 @@ using Etg.Yams.Update;
 using Etg.Yams.Utils;
 using Xunit;
 using Autofac;
+using Semver;
 
 namespace Etg.Yams.Test
 {
@@ -64,7 +65,7 @@ namespace Etg.Yams.Test
                 TestUtils.CopyExe(exeName, Path.Combine(_deploymentDirPath, testAppRelPath));
             }
         }
-        
+
         public void Dispose()
         {
             _yamsService.Stop().Wait();
@@ -76,13 +77,13 @@ namespace Etg.Yams.Test
         {
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
-            
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new Version(1, 0, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new Version(1, 1, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new Version(2, 0, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new Version(1, 1, 0)));
 
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app4", new Version(1, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
+
+            AssertThatApplicationIsNotRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
 
             AssertThatNumberOfApplicationsRunningIs(4);
         }
@@ -108,14 +109,14 @@ namespace Etg.Yams.Test
 
             await applicationUpdateManager.CheckForUpdates();
 
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app1", new Version(1, 0, 0)));
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new Version(1, 1, 0)));
+            AssertThatApplicationIsNotRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
+            AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
 
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new Version(1, 0, 1)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new Version(2, 0, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new Version(1, 0, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new Version(1, 1, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app4", new Version(1, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 1)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
 
             AssertThatNumberOfApplicationsRunningIs(5);
         }

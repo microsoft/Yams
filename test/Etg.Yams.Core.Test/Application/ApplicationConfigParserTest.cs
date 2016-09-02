@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
+using Semver;
 using Xunit;
 
 namespace Etg.Yams.Test.Application
@@ -14,7 +15,7 @@ namespace Etg.Yams.Test.Application
             string path = Path.Combine(Directory.GetCurrentDirectory(), "Data\\ApplicationConfigParser\\AppConfig.json");
             const string deploymentId = "deployment_id";
             const string instanceId = "instance_id";
-            AppIdentity identity = new AppIdentity("HelloApp", new Version(1,0,0));
+            AppIdentity identity = new AppIdentity("HelloApp", new SemVersion(1,0,0));
             ApplicationConfig appConfig = await new ApplicationConfigParser(new ApplicationConfigSymbolResolver(deploymentId, instanceId)).ParseFile(path, identity);
 
             Assert.Equal(identity, appConfig.Identity);

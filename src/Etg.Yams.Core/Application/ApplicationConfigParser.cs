@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Etg.Yams.Utils;
+using Semver;
 
 namespace Etg.Yams.Application
 {
@@ -32,10 +33,10 @@ namespace Etg.Yams.Application
         private async Task<ApplicationConfig> Parse(ApplicationConfigData appConfigData, AppIdentity identity)
         {
             string id = identity.Id;
-            Version version = new Version(identity.Version.ToString());
+
             string args = await SubstituteSymbols(appConfigData.ExeArgs, identity);
 
-            return new ApplicationConfig(new AppIdentity(id, version), appConfigData.ExeName, args);
+            return new ApplicationConfig(new AppIdentity(id, identity.Version), appConfigData.ExeName, args);
         }
 
         private async Task<string> SubstituteSymbols(string str, AppIdentity appIdentity)
