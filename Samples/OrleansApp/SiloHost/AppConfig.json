@@ -1,0 +1,4 @@
+﻿{
+  "ExeName": "SiloHost.exe",
+  "ExeArgs": "deploymentid=${Id}_${Version.Major}.${Version.Minor}_${DeploymentId}"
+}
