@@ -156,7 +156,7 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
       }
   ```
 
-You can create additional Worker Roles that inherit from this Worker Role.
+You can create additional Worker Roles that inherit from this Worker Role. If you create multiple Worker Roles, you must override `IsSingleClusterDeployment` and set it to be `false` in each Worker Role. This will make the YAMS cluster id a concatenation of the Azure cloud service deployment id and the Worker Role name.
 
 YAMS relies on Azure blob storage to deploy applications. It uses the `dataConnectionString` provided in the `YamsConfig` to connect to the appropriate blob storage.
 
