@@ -13,7 +13,7 @@
         },
         {
             "Id": "test.app2",
-            "Version": "2.0.0-update",
+            "Version": "2.0.0-beta",
             "DeploymentIds": [ "deploymentId1", "deploymentId2" ]
         },
         {

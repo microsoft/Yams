@@ -54,7 +54,7 @@ namespace Etg.Yams.Test
                 Path.Combine("test.app1", "1.0.0"),
                 Path.Combine("test.app1", "1.0.1"),
                 Path.Combine("test.app2", "1.1.0"),
-                Path.Combine("test.app2", "2.0.0"),
+                Path.Combine("test.app2", "2.0.0-beta"),
                 Path.Combine("test.app3", "1.0.0"),
                 Path.Combine("test.app3", "1.1.0"),
                 Path.Combine("test.app4", "1.0.0"),
@@ -80,7 +80,7 @@ namespace Etg.Yams.Test
 
             AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
             AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")));
             AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
 
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
@@ -94,7 +94,7 @@ namespace Etg.Yams.Test
         /// - test.app1.1.0.0 is removed
         /// - test.app1.1.0.1 is added
         /// - test.app2.1.1.0 deployment id is changed (i.e. the app is removed)
-        /// - test.app2.2.0.0 is still there
+        /// - test.app2.2.0.0-beta is still there
         /// - test.app3.1.0.0 is added
         /// - test.app3.1.1.0 is still there
         /// - test.app4.1.0.0 deployment id now matches the fabric deployment id (i.e. the app is added)
@@ -113,7 +113,7 @@ namespace Etg.Yams.Test
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
 
             AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 1)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")));
             AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 0, 0)));
             AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
             AssertThatApplicationIsRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
