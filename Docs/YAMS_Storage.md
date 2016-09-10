@@ -9,46 +9,50 @@ This tutorial demonstrates the use of the `IDeploymentRepository` Api which can 
 
 * Deploy a new application
 ```csharp
-    // Upload the application binaries
 	AppIdentity appIdentity = new AppIdentity("AppId", "1.0.0");
-    await deploymentRepository.UploadApplicationBinaries(appIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
+	
+	// Upload the application binaries
+	await deploymentRepository.UploadApplicationBinaries(appIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
 
 	// Update the DeploymentConfig. Note that the DeploymentConfig class is immutable
 	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
-    deploymentConfig = deploymentConfig.AddApplication(appIdentity, "cloudservice_deployment_id");
+	deploymentConfig = deploymentConfig.AddApplication(appIdentity, "cloudservice_deployment_id");
+	
+	// The application will only be deployed to the cluster when the DeploymentConfig is published
 	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 ```
 
 * Update an application
 
 ```csharp
-	AppIdentity oldAppIdentity = new AppIdentity("AppId", "1.0.0");
-	AppIdentity newAppIdentity = new AppIdentity("AppId", "1.0.1");
-	await deploymentRepository.UploadApplicationBinaries(oldAppIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
-
-	// update the DeploymentConfig
+	// Upload the new binaries
+	await deploymentRepository.UploadApplicationBinaries(newAppIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
+	
+	// Fetch and update the DeploymentConfig
 	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
-    deploymentConfig = deploymentConfig.RemoveApplication(oldAppIdentity, "cloudservice_deployment_id");
+	deploymentConfig = deploymentConfig.RemoveApplication(oldAppIdentity, "cloudservice_deployment_id");
 	deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, "cloudservice_deployment_id");
+	
+	// The update will be performed when the new DeploymentConfig is published
 	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 
 	// You can also cleanup the old binaries if you're not planing to revert back to it in the future.
-    await deploymentRepository.DeleteApplicationBinaries(oldAppIdentity);
+	await deploymentRepository.DeleteApplicationBinaries(oldAppIdentity);
 ```
 
 * Remove an application
 ```csharp
-	AppIdentity appIdentity = new AppIdentity("AppId", "1.0.0");
-	await deploymentRepository.UploadApplicationBinaries(oldAppIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
-
-	// update the DeploymentConfig
+	// Update the DeploymentConfig
 	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
-    deploymentConfig = deploymentConfig.RemoveApplication(oldAppIdentity, "cloudservice_deployment_id");
-	deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, "cloudservice_deployment_id");
+	
+	// Remove the app from the DeploymentConfig
+	deploymentConfig = deploymentConfig.RemoveApplication(appIdentity, "cloudservice_deployment_id");
+
+	// The app will be shutdown when the DeploymentConfig is published
 	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 
 	// You can also cleanup the old binaries if you're not planing to revert back to it in the future.
-    await deploymentRepository.DeleteApplicationBinaries(oldAppIdentity);
+	await deploymentRepository.DeleteApplicationBinaries(appIdentity);
 ```
 
 * Other DeploymentConfig Apis
