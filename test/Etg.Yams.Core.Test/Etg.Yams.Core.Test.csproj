@@ -130,6 +130,9 @@
     <None Include="Data\DeploymentConfig\DeploymentConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Data\EndToEndTest\DeploymentConfigWithProperties.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\EndToEndTest\DeploymentConfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
