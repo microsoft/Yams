@@ -1,16 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Etg.Yams.Application;
+using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Deploy
 {
     public interface IApplicationDeploymentDirectory
     {
-        /// <summary>
-        /// Returns the list of application that should be deployed on the given deploymentId.
-        /// </summary>
-        /// <param name="deploymentId"></param>
-        /// <returns></returns>
-        Task<IEnumerable<AppIdentity>> FetchDeployments(string deploymentId);
+        /// <returns>the list of application that should be deployed to the current cluster</returns>
+        Task<IEnumerable<AppDeploymentConfig>> FetchDeployments();
     }
 }

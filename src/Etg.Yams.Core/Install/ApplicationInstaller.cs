@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
+using Etg.Yams.Storage.Config;
 using Etg.Yams.Update;
 using Etg.Yams.Utils;
 using Semver;
@@ -27,10 +28,10 @@ namespace Etg.Yams.Install
             _applicationPool = applicationPool;
         }
 
-        public async Task Install(AppIdentity appIdentity)
+        public async Task Install(AppInstallConfig appInstallConfig)
         {
             IApplication application =
-                await _applicationFactory.CreateApplication(appIdentity, GetApplicationAbsolutePath(appIdentity));
+                await _applicationFactory.CreateApplication(appInstallConfig, GetApplicationAbsolutePath(appInstallConfig.AppIdentity));
             await _applicationPool.AddApplication(application);
         }
 
@@ -40,15 +41,14 @@ namespace Etg.Yams.Install
             await FileUtils.DeleteDirectoryIfAny(GetApplicationAbsolutePath(appIdentity), recursive:true);
         }
 
-        public async Task<bool> Update(string appId, IEnumerable<SemVersion> versionsToRemove, IEnumerable<SemVersion> versionsToDeploy)
+        public async Task<bool> Update(IEnumerable<AppIdentity> applicationsToRemove, IEnumerable<AppInstallConfig> applicationsToDeploy)
         {
-            if (!versionsToRemove.Any() || !versionsToDeploy.Any())
+            if (!applicationsToDeploy.Any() || !applicationsToRemove.Any())
             {
                 throw new ArgumentException("An update must at least involve an application to remove and an application to deploy");
             }
 
-            IEnumerable<AppIdentity> applicationsToDeploy = versionsToDeploy.Select(v => new AppIdentity(appId, v));
-            IEnumerable<AppIdentity> applicationsToRemove = versionsToRemove.Select(v => new AppIdentity(appId, v));
+            string appId = applicationsToDeploy.First().AppIdentity.Id;
 
             bool failed = false;
             try
@@ -85,19 +85,19 @@ namespace Etg.Yams.Install
         private async Task UnInstallApplications(IEnumerable<AppIdentity> applicationsToRemove)
         {
             var tasks = new List<Task>();
-            foreach (AppIdentity application in applicationsToRemove)
+            foreach (AppIdentity appIdentity in applicationsToRemove)
             {
-                tasks.Add(UnInstall(application));
+                tasks.Add(UnInstall(appIdentity));
             }
             await Task.WhenAll(tasks);
         }
 
-        private async Task InstallApplications(IEnumerable<AppIdentity> applications)
+        private async Task InstallApplications(IEnumerable<AppInstallConfig> applications)
         {
             var tasks = new List<Task>();
-            foreach (AppIdentity application in applications)
+            foreach (AppInstallConfig appInstallConfig in applications)
             {
-                tasks.Add(Install(application));
+                tasks.Add(Install(appInstallConfig));
             }
             await Task.WhenAll(tasks);
         }

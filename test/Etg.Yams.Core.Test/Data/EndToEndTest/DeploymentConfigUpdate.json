@@ -1,35 +1,34 @@
 ﻿{
-	"Applications":
-	[
-        {
-            "Id": "test.app1",
-            "Version": "1.0.1",
-            "DeploymentIds": [ "deploymentId1" ]
-        },
-        {
-            "Id": "test.app2",
-            "Version": "1.1.0",
-            "DeploymentIds": [ "deploymentId2" ]
-        },
-        {
-            "Id": "test.app2",
-            "Version": "2.0.0-beta",
-            "DeploymentIds": [ "deploymentId1", "deploymentId2" ]
-        },
-        {
-            "Id": "test.app3",
-            "Version": "1.0.0",
-            "DeploymentIds": [ "deploymentId1", "deploymentId2" ]
-        },
-        {
-            "Id": "test.app3",
-            "Version": "1.1.0",
-            "DeploymentIds": [ "deploymentId1", "deploymentId2" ]
-        },
-        {
-            "Id": "test.app4",
-			"Version": "1.0.0",
-            "DeploymentIds": [ "deploymentId1"]
-		}
-	]
+  "Applications": [
+    {
+      "Id": "test.app1",
+      "Version": "1.0.1",
+      "targetClusters": [ "clusterId1" ]
+    },
+    {
+      "Id": "test.app2",
+      "Version": "1.1.0",
+      "targetClusters": [ "clusterId2" ]
+    },
+    {
+      "Id": "test.app2",
+      "Version": "2.0.0-beta",
+      "targetClusters": [ "clusterId1", "clusterId2" ]
+    },
+    {
+      "Id": "test.app3",
+      "Version": "1.0.0",
+      "targetClusters": [ "clusterId1", "clusterId2" ]
+    },
+    {
+      "Id": "test.app3",
+      "Version": "1.1.0",
+      "targetClusters": [ "clusterId1", "clusterId2" ]
+    },
+    {
+      "Id": "test.app4",
+      "Version": "1.0.0",
+      "targetClusters": [ "clusterId1" ]
+    }
+  ]
 }

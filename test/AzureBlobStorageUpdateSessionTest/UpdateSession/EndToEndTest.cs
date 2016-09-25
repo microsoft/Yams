@@ -20,7 +20,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         {
             fixture.ClearBlobStorage();
 
-            var module = new AzureBlobStorageUpdateSessionDiModule("deploymentId", "instanceId", "1",
+            var module = new AzureBlobStorageUpdateSessionDiModule("clusterId", "instanceId", "1",
                 EmulatorConnectionString);
             _updateSessionManager = module.UpdateSessionManager;
         }
@@ -35,13 +35,13 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         public async Task TestThatOnlyOneUpdateDomainCanUpdateAtATime()
         {
             Assert.True(await _updateSessionManager.TryStartUpdateSession("app1"));
-            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("deploymentId", "instanceId2", "2");
+            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("clusterId", "instanceId2", "2");
             Assert.False(await otherUpdateSessionManager.TryStartUpdateSession("app1"));
         }
 
-        private static IUpdateSessionManager CreateUpdateSessionManager(string deploymentId, string instanceId, string updateDomain)
+        private static IUpdateSessionManager CreateUpdateSessionManager(string clusterId, string instanceId, string updateDomain)
         {
-            return new AzureBlobStorageUpdateSessionDiModule(deploymentId, instanceId, updateDomain, EmulatorConnectionString).UpdateSessionManager;
+            return new AzureBlobStorageUpdateSessionDiModule(clusterId, instanceId, updateDomain, EmulatorConnectionString).UpdateSessionManager;
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         {
             Assert.True(await _updateSessionManager.TryStartUpdateSession("app1"));
 
-            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("deploymentId", "instanceId2", "1");
+            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("clusterId", "instanceId2", "1");
             Assert.True(await otherUpdateSessionManager.TryStartUpdateSession("app1"));
         }
 
@@ -60,7 +60,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession
 
             await _updateSessionManager.EndUpdateSession("app1");
 
-            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("deploymentId", "instanceId2", "2");
+            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("clusterId", "instanceId2", "2");
             Assert.True(await otherUpdateSessionManager.TryStartUpdateSession("app1"));
         }
 
@@ -69,7 +69,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession
         {
             Assert.True(await _updateSessionManager.TryStartUpdateSession("app1"));
 
-            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("deploymentId2", "instanceId2", "2");
+            IUpdateSessionManager otherUpdateSessionManager = CreateUpdateSessionManager("clusterId2", "instanceId2", "2");
             Assert.True(await otherUpdateSessionManager.TryStartUpdateSession("app1"));
         }
 
@@ -96,7 +96,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession
 		        .TryLockUpdateBlob(id => AsyncUtils.AsyncTaskWithResult(updateBlobStub));
 
 
-            ContainerBuilder builder = AzureBlobStorageUpdateSessionDiModule.RegisterTypes("deploymentId",
+            ContainerBuilder builder = AzureBlobStorageUpdateSessionDiModule.RegisterTypes("clusterId",
                 "instanceId", "1",
                 EmulatorConnectionString);
             builder.RegisterInstance(updateBlobFactoryStub).As<IUpdateBlobFactory>();

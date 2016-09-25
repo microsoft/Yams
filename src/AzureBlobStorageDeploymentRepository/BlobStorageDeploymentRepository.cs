@@ -13,13 +13,16 @@ namespace Etg.Yams.Azure.Storage
     {
         public const string ApplicationsRootFolderName = "applications";
         private readonly CloudBlobContainer _blobContainer;
+        private readonly IDeploymentConfigSerializer _serializer;
 
-        public BlobStorageDeploymentRepository(CloudBlobContainer blobContainer)
+        public BlobStorageDeploymentRepository(CloudBlobContainer blobContainer, IDeploymentConfigSerializer serializer)
         {
             _blobContainer = blobContainer;
+            _serializer = serializer;
         }
 
-        public BlobStorageDeploymentRepository(string connectionString) : this(GetApplicationsContainerReference(connectionString))
+        public BlobStorageDeploymentRepository(string connectionString, IDeploymentConfigSerializer serializer) 
+            : this(GetApplicationsContainerReference(connectionString), serializer)
         {
         }
 
@@ -51,7 +54,7 @@ namespace Etg.Yams.Azure.Storage
             }
 
             string data = await blob.DownloadTextAsync();
-            return new DeploymentConfig(data);
+            return _serializer.Deserialize(data);
         }
 
         public Task<bool> HasApplicationBinaries(AppIdentity appIdentity)
@@ -86,7 +89,7 @@ namespace Etg.Yams.Azure.Storage
         public Task PublishDeploymentConfig(DeploymentConfig deploymentConfig)
         {
             CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(Constants.DeploymentConfigFileName);
-            return blob.UploadTextAsync(deploymentConfig.RawData());
+            return blob.UploadTextAsync(_serializer.Serialize(deploymentConfig));
         }
 
         public async Task UploadApplicationBinaries(AppIdentity appIdentity, string localPath,

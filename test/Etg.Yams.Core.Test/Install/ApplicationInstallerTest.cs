@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Install;
+using Etg.Yams.Storage.Config;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Update;
 using Semver;
@@ -30,7 +31,7 @@ namespace Etg.Yams.Test.Install
             _applicationInstaller = new ApplicationInstaller(_applicationsRoot, null, applicationFactory, _applicationPool);
 
             AppIdentity appIdentity = new AppIdentity("test.app", new SemVersion(1,0,0));
-            await _applicationInstaller.Install(appIdentity);
+            await _applicationInstaller.Install(new AppInstallConfig(appIdentity));
 
             Assert.True(_applicationPool.HasApplicationBeenAdded(appIdentity));
         }
@@ -43,7 +44,7 @@ namespace Etg.Yams.Test.Install
             _applicationInstaller = new ApplicationInstaller(_applicationsRoot, null, applicationFactory, _applicationPool);
 
             AppIdentity appIdentity = new AppIdentity("test.app", new SemVersion(1, 0, 0));
-            _applicationInstaller.Install(appIdentity).Wait();
+            _applicationInstaller.Install(new AppInstallConfig(appIdentity)).Wait();
 
             // make sure the app directory exists because uninstall will try to delete it
             string appPath = Path.Combine(_applicationsRoot, "test.app", "1.0.0");
@@ -83,11 +84,11 @@ namespace Etg.Yams.Test.Install
                 {
                     Directory.CreateDirectory(appPath);
                 }
-                await applicationInstaller.Install(existingApp);
+                await applicationInstaller.Install(new AppInstallConfig(existingApp));
                 Assert.True(applicationPool.HasApplication(existingApp));
             }
 
-            await applicationInstaller.Update(appId, existingApps.Select(app => app.Version), newApps.Select(app => app.Version));
+            await applicationInstaller.Update(existingApps, newApps.Select(appIdentity => new AppInstallConfig(appIdentity)));
 
             foreach (AppIdentity app in existingApps)
             {
@@ -112,10 +113,10 @@ namespace Etg.Yams.Test.Install
             IApplicationInstaller applicationInstaller = new ApplicationInstaller(_applicationsRoot, updateSessionManager, new ApplicationFactoryStub(), applicationPool);
 
             AppIdentity existingApp = new AppIdentity("test.app", new SemVersion(1, 0, 0));
-            await applicationInstaller.Install(existingApp);
+            await applicationInstaller.Install(new AppInstallConfig(existingApp));
 
             AppIdentity newApp = new AppIdentity(existingApp.Id, new SemVersion(1, 1, 0));
-            await applicationInstaller.Update(existingApp.Id, new[] {existingApp.Version}, new[] {newApp.Version});
+            await applicationInstaller.Update(new[] {existingApp}, new[] {new AppInstallConfig(newApp), });
 
             Assert.True(applicationPool.HasApplication(existingApp));
             Assert.False(applicationPool.HasApplication(newApp));

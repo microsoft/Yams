@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Etg.Yams.Process;
+using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Application
 {
@@ -17,9 +18,10 @@ namespace Etg.Yams.Application
             _processStopper = processStopper;
         }
 
-        public async Task<IApplication> CreateApplication(AppIdentity appIdentity, string appPath)
+        public async Task<IApplication> CreateApplication(AppInstallConfig appInstallConfig, string appPath)
         {
-            ApplicationConfig appConfig = await _appConfigParser.ParseFile(Path.Combine(appPath, Constants.AppConfigFileName), appIdentity);
+            string appConfigPath = Path.Combine(appPath, Constants.AppConfigFileName);
+            ApplicationConfig appConfig = await _appConfigParser.ParseFile(appConfigPath, appInstallConfig);
             return new ConfigurableApplication(appPath, appConfig, _processFactory, _processStopper);
         }
     }

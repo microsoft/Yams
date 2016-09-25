@@ -15,7 +15,7 @@ namespace Etg.Yams.Azure.UpdateSession
         private const string UpdateSessionRetryStrategyModuleName = "updateSessionRetryStrategy";
 
         public AzureBlobStorageUpdateSessionDiModule(
-            string deploymentId,
+            string clusterId,
             string instanceId,
             string updateDomain,
             string connectionString,
@@ -24,7 +24,7 @@ namespace Etg.Yams.Azure.UpdateSession
             int lockBlobRetryIntervalInSeconds = 1,
             int storageExceptionRetryCount = 20,
             int storageExceptionRetryIntervalInSeconds = 1) : this(RegisterTypes(
-                deploymentId, instanceId, updateDomain, connectionString, blobContainerName, lockBlobRetryCount,
+                clusterId, instanceId, updateDomain, connectionString, blobContainerName, lockBlobRetryCount,
                 lockBlobRetryIntervalInSeconds, storageExceptionRetryCount, storageExceptionRetryIntervalInSeconds).Build())
         {
         }
@@ -34,7 +34,7 @@ namespace Etg.Yams.Azure.UpdateSession
             _container = container;
         }
 
-        public static ContainerBuilder RegisterTypes(string deploymentId,
+        public static ContainerBuilder RegisterTypes(string clusterId,
             string instanceId,
             string updateDomain,
             string connectionString,
@@ -49,7 +49,7 @@ namespace Etg.Yams.Azure.UpdateSession
 
             containerBuilder.Register<IUpdateBlobFactory>(c =>
                 new UpdateBlobFactoryRetryLockDecorator(
-                    new UpdateBlobFactory(deploymentId,
+                    new UpdateBlobFactory(clusterId,
                         BlobUtils.GetBlobContainer(connectionString, blobContainerName),
                         c.Resolve<IBlobLeaseFactory>()),
                     c.ResolveNamed<RetryStrategy>(UpdateBlobFactoryRetryStrategyModuleName)

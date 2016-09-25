@@ -1,21 +1,23 @@
 using System.Threading.Tasks;
+using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Application
 {
     public class ApplicationConfigSymbolResolver : IApplicationConfigSymbolResolver
     {
         private readonly string _instanceId;
-        private readonly string _deploymentId;
+        private readonly string _clusterId;
 
-        public ApplicationConfigSymbolResolver(string deploymentId, string instanceId)
+        public ApplicationConfigSymbolResolver(string clusterId, string instanceId)
         {
             _instanceId = instanceId;
-            _deploymentId = deploymentId;
+            _clusterId = clusterId;
         }
 
-        public Task<string> ResolveSymbol(AppIdentity appIdentity, string symbol)
+        public Task<string> ResolveSymbol(AppInstallConfig appInstallConfig, string symbol)
         {
             string symbolValue = symbol;
+            AppIdentity appIdentity = appInstallConfig.AppIdentity;
             switch (symbol)
             {
                 case "Id":
@@ -36,11 +38,18 @@ namespace Etg.Yams.Application
                 case "Version.Prerelease":
                     symbolValue = appIdentity.Version.Prerelease;
                     break;
+                case "ClusterId":
+                    symbolValue = _clusterId;
+                    break;
+                // TODO: This has been kept for backward compatibility; remove at some point
                 case "DeploymentId":
-                    symbolValue = _deploymentId;
+                    symbolValue = _clusterId;
                     break;
                 case "InstanceId":
                     symbolValue = _instanceId;
+                    break;
+                default:
+                    appInstallConfig.Properties.TryGetValue(symbol, out symbolValue);
                     break;
             }
             return Task.FromResult(symbolValue);

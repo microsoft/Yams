@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
+using Etg.Yams.Storage.Config;
 using Semver;
 
 namespace Etg.Yams.Install
@@ -15,9 +16,9 @@ namespace Etg.Yams.Install
         /// <summary>
         /// Creates, runs and registers the application
         /// </summary>
-        /// <param name="appIdentity"></param>
+        /// <param name="appInstallConfig"></param>
         /// <returns></returns>
-        Task Install(AppIdentity appIdentity);
+        Task Install(AppInstallConfig appInstallConfig);
 
         /// <summary>
         /// Stops and unregister the application.
@@ -27,12 +28,13 @@ namespace Etg.Yams.Install
         Task UnInstall(AppIdentity appIdentity);
 
         /// <summary>
-        /// Updated the given application.
+        /// Performs an update. All given applications must have the same application id.
+        /// The main difference between install/uninstall and update is that update obey the update domain.
+        /// In other words, applications are updated in one update domain at a time.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="versionsToRemove"></param>
-        /// <param name="versionsToDeploy"></param>
+        /// <param name="applicationsToRemove"></param>
+        /// <param name="applicationsToDeploy"></param>
         /// <returns></returns>
-        Task<bool> Update(string appId, IEnumerable<SemVersion> versionsToRemove, IEnumerable<SemVersion> versionsToDeploy);
+        Task<bool> Update(IEnumerable<AppIdentity> applicationsToRemove, IEnumerable<AppInstallConfig> applicationsToDeploy);
     }
 }

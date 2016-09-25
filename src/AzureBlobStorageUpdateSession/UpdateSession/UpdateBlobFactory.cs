@@ -7,13 +7,13 @@ namespace Etg.Yams.Azure.UpdateSession
 {
     public class UpdateBlobFactory : IUpdateBlobFactory
     {
-        private readonly string _clusterDeploymentId;
+        private readonly string _clusterId;
         private readonly CloudBlobContainer _blobContainer;
         private readonly IBlobLeaseFactory _blobLeaseFactory;
 
-        public UpdateBlobFactory(string clusterDeploymentId, CloudBlobContainer blobContainer, IBlobLeaseFactory blobLeaseFactory)
+        public UpdateBlobFactory(string clusterId, CloudBlobContainer blobContainer, IBlobLeaseFactory blobLeaseFactory)
         {
-            _clusterDeploymentId = clusterDeploymentId;
+            _clusterId = clusterId;
             _blobContainer = blobContainer;
             _blobLeaseFactory = blobLeaseFactory;
         }
@@ -35,7 +35,7 @@ namespace Etg.Yams.Azure.UpdateSession
 
         private string GetUpdateBlobName(string applicationId)
         {
-            return _clusterDeploymentId + "_" + applicationId + "_update_blob";
+            return _clusterId + "_" + applicationId + "_update_blob";
         }
 
         private CloudBlockBlob GetBlob(string updateBlobName)

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Application
 {
@@ -8,8 +9,8 @@ namespace Etg.Yams.Application
         /// Parses the application config file.
         /// </summary>
         /// <param name="path">The absolute path of the application config file</param>
-        /// <param name="identity">The identity of the corresponding app</param>
+        /// <param name="appInstallConfig">The installation config of the corresponding app</param>
         /// <returns></returns>
-        Task<ApplicationConfig> ParseFile(string path, AppIdentity identity);
+        Task<ApplicationConfig> ParseFile(string path, AppInstallConfig appInstallConfig);
     }
 }

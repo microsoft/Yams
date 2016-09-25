@@ -11,22 +11,24 @@ namespace Etg.Yams.Test.Storage
     {
         private readonly string _path;
         private readonly string _deploymentConfigPath;
+        private readonly IDeploymentConfigSerializer _serializer;
 
-        public LocalDeploymentRepository(string path)
+        public LocalDeploymentRepository(string path, IDeploymentConfigSerializer serializer)
         {
             _path = path;
             _deploymentConfigPath = Path.Combine(_path, Constants.DeploymentConfigFileName);
+            _serializer = serializer;
         }
 
         public Task<DeploymentConfig> FetchDeploymentConfig()
         {
             string data = File.ReadAllText(_deploymentConfigPath);
-            return Task.FromResult(new DeploymentConfig(data));
+            return Task.FromResult(_serializer.Deserialize(data));
         }
 
         public Task PublishDeploymentConfig(DeploymentConfig deploymentConfig)
         {
-            File.WriteAllText(_deploymentConfigPath, deploymentConfig.RawData());
+            File.WriteAllText(_deploymentConfigPath, _serializer.Serialize(deploymentConfig));
             return Task.CompletedTask;
         }
 
