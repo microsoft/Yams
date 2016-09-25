@@ -7,6 +7,7 @@ using Etg.Yams.Application;
 using Etg.Yams.Deploy;
 using Etg.Yams.Download;
 using Etg.Yams.Install;
+using Etg.Yams.Storage.Config;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Update;
 using Semver;
@@ -33,9 +34,10 @@ namespace Etg.Yams.Test.Update
             AppIdentity app1v5 = new AppIdentity(id1, v5);
 
             IEnumerable<AppIdentity> appsToDeploy = new[] {app1v3, app1v4, app1v5};
+            IEnumerable<string> clusters = new[] {"clusterId1"};
 
 	        IApplicationDeploymentDirectory applicationDeploymentDirectory = new StubIApplicationDeploymentDirectory()
-		        .FetchDeployments(deploymentId => Task.FromResult(appsToDeploy));
+		        .FetchDeployments(() => Task.FromResult(appsToDeploy.Select(identity => new AppDeploymentConfig(identity, clusters))));
 
             IApplicationPool applicationPool = new ApplicationPoolStub();
             string path = Path.GetTempPath();
@@ -58,9 +60,9 @@ namespace Etg.Yams.Test.Update
             IEnumerable<SemVersion> versionsRemoved = null;
             IEnumerable<SemVersion> versionsAdded = null;
             IApplicationInstaller applicationInstaller = new StubIApplicationInstaller()
-                .Install(appIdentity =>
+                .Install(config => 
                 {
-                    installedApps.Add(appIdentity);
+                    installedApps.Add(config.AppIdentity);
                     return Task.FromResult(true);
                 })
                 .UnInstall(appIdentity =>
@@ -68,16 +70,16 @@ namespace Etg.Yams.Test.Update
                     uninstalledApps.Add(appIdentity);
                     return Task.FromResult(true);
                 })
-                .Update((appId, versionsToRemove, versionToDeploy) =>
+                .Update((applicationsToRemove, applicationsToInstall) => 
                 {
-	                updatedAppId = appId;
-	                versionsRemoved = versionsToRemove;
-	                versionsAdded = versionToDeploy;
+	                updatedAppId = applicationsToInstall.First().AppIdentity.Id;
+	                versionsRemoved = applicationsToRemove.Select(identity => identity.Version);
+	                versionsAdded = applicationsToInstall.Select(config => config.AppIdentity.Version);
 	                return Task.FromResult(true);
                 }
             );
 
-            ApplicationUpdateManager applicationUpdateManager = new ApplicationUpdateManager("deploymentId", applicationDeploymentDirectory, applicationPool, applicationDownloader, applicationInstaller);
+            ApplicationUpdateManager applicationUpdateManager = new ApplicationUpdateManager("clusterId", applicationDeploymentDirectory, applicationPool, applicationDownloader, applicationInstaller);
             await applicationUpdateManager.CheckForUpdates();
 
             Assert.Equal(2, downloadedApps.Count);
@@ -88,7 +90,7 @@ namespace Etg.Yams.Test.Update
             Assert.False(uninstalledApps.Any());
 
             Assert.Equal(id1, updatedAppId);
-            Assert.Equal(new []{ v1, v2 }, versionsRemoved.ToList());
+            Assert.Equal(new [] { v1, v2 }, versionsRemoved.ToList());
             Assert.Equal(new[] { v4, v5 }, versionsAdded.ToList());
         }
     }

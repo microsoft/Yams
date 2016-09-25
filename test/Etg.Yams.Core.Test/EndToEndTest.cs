@@ -9,6 +9,9 @@ using Etg.Yams.Update;
 using Etg.Yams.Utils;
 using Xunit;
 using Autofac;
+using Etg.Yams.Json;
+using Etg.Yams.Storage.Config;
+using Newtonsoft.Json.Serialization;
 using Semver;
 
 namespace Etg.Yams.Test
@@ -33,14 +36,16 @@ namespace Etg.Yams.Test
 
             CopyTestProcessExeToTestApps();
 
-            var yamsConfig = new YamsConfigBuilder("deploymentId1", "1", "instanceId",
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
                 _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
 
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
                 .TryStartUpdateSession(applicationId => Task.FromResult(true))
                 .EndUpdateSession(applicationId => Task.FromResult(true));
 
-            _yamsDiModule = new YamsDiModule(yamsConfig, new LocalDeploymentRepository(_deploymentDirPath), updateSessionManager);
+            _yamsDiModule = new YamsDiModule(yamsConfig, new LocalDeploymentRepository(
+                _deploymentDirPath, new JsonDeploymentConfigSerializer(
+                    new JsonSerializer(new DiagnosticsTraceWriter()))), updateSessionManager);
             _yamsService = _yamsDiModule.YamsService;
         }
 

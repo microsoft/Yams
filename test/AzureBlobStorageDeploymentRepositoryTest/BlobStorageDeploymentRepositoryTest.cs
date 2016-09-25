@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Azure.Utils;
 using Etg.Yams.AzureTestUtils.Fixtures;
+using Etg.Yams.Json;
 using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Utils;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json.Serialization;
 using Semver;
 using Xunit;
 
@@ -18,6 +20,7 @@ namespace Etg.Yams.Azure.Storage.Test
 {
     public class BlobStorageDeploymentRepositoryTest : IClassFixture<AzureStorageEmulatorTestFixture>
     {
+        private const string EmulatorDataConnectionString = "UseDevelopmentStorage=true";
         private const string TestAppFileName = "AppConfig.json";
         private const string TestAppBlobRelPath = "app/1.0.0";
         private const string TestAppId = "app";
@@ -29,13 +32,15 @@ namespace Etg.Yams.Azure.Storage.Test
 
         private static CloudBlobClient _blobClient;
         private static IDeploymentRepository _deploymentRepository;
-
+        private readonly IDeploymentConfigSerializer _serializer;
 
         public BlobStorageDeploymentRepositoryTest(AzureStorageEmulatorTestFixture fixture)
         {
             fixture.ClearBlobStorage();
             _blobClient = fixture.BlobClient;
-            _deploymentRepository = new BlobStorageDeploymentRepository(Constants.EmulatorDataConnectionString);
+
+            _serializer = new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter()));
+            _deploymentRepository = new BlobStorageDeploymentRepository(EmulatorDataConnectionString, _serializer);
         }
 
         [Fact]
@@ -49,10 +54,10 @@ namespace Etg.Yams.Azure.Storage.Test
         public async Task TestPublishThenFetchDeploymentConfig()
         {
             string data = File.ReadAllText(_deploymentConfigFilePath);
-            DeploymentConfig deploymentConfig = new DeploymentConfig(data);
+            DeploymentConfig deploymentConfig = _serializer.Deserialize(data);
             await _deploymentRepository.PublishDeploymentConfig(deploymentConfig);
             DeploymentConfig newDeploymentConfig = await _deploymentRepository.FetchDeploymentConfig();
-            Assert.Equal(deploymentConfig.RawData(), newDeploymentConfig.RawData());
+            Assert.Equal(_serializer.Serialize(deploymentConfig), _serializer.Serialize(newDeploymentConfig));
         }
 
         [Fact]

@@ -23,7 +23,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession
             const string containerName = "container";
             _container = blobClient.GetContainerReference(containerName);
             _container.CreateIfNotExists();
-            _updateBlobFactory = new UpdateBlobFactory("DeploymentId", _container, new BlobLeaseFactory());
+            _updateBlobFactory = new UpdateBlobFactory("clusterId", _container, new BlobLeaseFactory());
         }
 
         [Fact]

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Storage;
@@ -15,36 +16,36 @@ namespace Etg.Yams.Deploy
     public class RemoteApplicationDeploymentDirectory : IApplicationDeploymentDirectory
     {
         private readonly IDeploymentRepository _deploymentRepository;
+        private readonly IAppDeploymentMatcher _appDeploymentMatcher;
 
-        public RemoteApplicationDeploymentDirectory(IDeploymentRepository deploymentRepository)
+        public RemoteApplicationDeploymentDirectory(IDeploymentRepository deploymentRepository, IAppDeploymentMatcher appDeploymentMatcher)
         {
             _deploymentRepository = deploymentRepository;
+            _appDeploymentMatcher = appDeploymentMatcher;
         }
 
-        public async Task<IEnumerable<AppIdentity>> FetchDeployments(string deploymentId)
+        public async Task<IEnumerable<AppDeploymentConfig>> FetchDeployments()
         {
-            var apps = new HashSet<AppIdentity>();
+            var apps = new HashSet<AppDeploymentConfig>();
 
             DeploymentConfig deploymentConfig = await _deploymentRepository.FetchDeploymentConfig();
-            foreach (string appId in deploymentConfig.ListApplications(deploymentId))
-            {
-                foreach (string version in deploymentConfig.ListVersions(appId, deploymentId))
-                {
-                    AppIdentity appIdentity = new AppIdentity(appId, version);
-                    try
-                    {
-                        if (!await _deploymentRepository.HasApplicationBinaries(appIdentity))
-                        {
-                            Trace.TraceError($"Could not find binaries for application {appIdentity} in the yams repository");
-                            continue;
-                        }
 
-                        apps.Add(appIdentity);
-                    }
-                    catch (Exception e)
+            foreach (AppDeploymentConfig appDeploymentConfig in deploymentConfig.Where(_appDeploymentMatcher.IsMatch))
+            {
+                AppIdentity appIdentity = appDeploymentConfig.AppIdentity;
+                try
+                {
+                    if (!await _deploymentRepository.HasApplicationBinaries(appIdentity))
                     {
-                        Trace.TraceError($"Exception occured while loading application {appIdentity}, Exception: {e}");
+                        Trace.TraceError($"Could not find binaries for application {appIdentity} in the yams repository");
+                        continue;
                     }
+
+                    apps.Add(appDeploymentConfig);
+                }
+                catch (Exception e)
+                {
+                    Trace.TraceError($"Exception occured while loading application {appIdentity}, Exception: {e}");
                 }
             }
             return apps;

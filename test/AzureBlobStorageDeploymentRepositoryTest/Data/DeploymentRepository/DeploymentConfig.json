@@ -1,25 +1,24 @@
 ﻿{
-    "Applications":
-    [
-		{
-			"Id": "app1",
-			"Version": "1.0.0",
-			"DeploymentIds": [ "deploymentid1" ]
-		},
-		{
-            "Id": "app1",
-            "Version": "1.0.1",
-            "DeploymentIds": [ "deploymentid1", "deploymentid2" ]
-        },
-		{
-			"Id": "app2",
-			"Version": "1.0.0",
-			"DeploymentIds": [ "deploymentid1" ]
-		},
-		{
-			"Id": "app3",
-			"Version": "2.0.0",
-			"DeploymentIds": [ "deploymentid3" ]
-		}
-    ]
+  "Applications": [
+    {
+      "Id": "app1",
+      "Version": "1.0.0",
+      "TargetClusters": [ "clusterId1" ]
+    },
+    {
+      "Id": "app1",
+      "Version": "1.0.1",
+      "TargetClusters": [ "clusterId1", "clusterId2" ]
+    },
+    {
+      "Id": "app2",
+      "Version": "1.0.0",
+      "TargetClusters": [ "clusterId1" ]
+    },
+    {
+      "Id": "app3",
+      "Version": "2.0.0",
+      "TargetClusters": [ "clusterId3" ]
+    }
+  ]
 }

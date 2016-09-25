@@ -1,7 +1,10 @@
 ﻿using Etg.Yams.Azure.Storage;
 using Etg.Yams.Azure.UpdateSession;
+using Etg.Yams.Json;
 using Etg.Yams.Storage;
+using Etg.Yams.Storage.Config;
 using Etg.Yams.Update;
+using Newtonsoft.Json.Serialization;
 
 namespace Etg.Yams
 {
@@ -11,12 +14,13 @@ namespace Etg.Yams
             string updateSessionStorageConnectionString)
         {
             IUpdateSessionManager updateSessionManager = new AzureBlobStorageUpdateSessionDiModule(
-                yamsConfig.ClusterDeploymentId,
+                yamsConfig.ClusterId,
                 yamsConfig.InstanceId,
                 yamsConfig.InstanceUpdateDomain,
                 updateSessionStorageConnectionString).UpdateSessionManager;
 
-            IDeploymentRepository deploymentRepository = new BlobStorageDeploymentRepository(deploymentRepositoryStorageConnectionString);
+            IDeploymentConfigSerializer serializer = new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter()));
+            IDeploymentRepository deploymentRepository = new BlobStorageDeploymentRepository(deploymentRepositoryStorageConnectionString, serializer);
             return new YamsDiModule(yamsConfig, deploymentRepository, updateSessionManager).YamsService;
         }
     }

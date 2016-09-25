@@ -35,6 +35,10 @@
       <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Semver, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Semver.2.0.4\lib\netstandard1.1\Semver.dll</HintPath>
       <Private>True</Private>
@@ -64,9 +68,17 @@
     <Compile Include="Application\IApplicationFactory.cs" />
     <Compile Include="Application\IApplicationPool.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Deploy\AndDeploymentMatcher.cs" />
+    <Compile Include="Deploy\ClusterIdDeploymentMatcher.cs" />
+    <Compile Include="Deploy\IAppDeploymentMatcher.cs" />
     <Compile Include="Deploy\IApplicationDeploymentDirectory.cs" />
+    <Compile Include="Deploy\PropertiesDeploymentMatcher.cs" />
     <Compile Include="Deploy\RemoteApplicationDeploymentDirectory.cs" />
     <Compile Include="IYamsService.cs" />
+    <Compile Include="Storage\Config\AppDeploymentConfig.cs" />
+    <Compile Include="Install\AppInstallConfig.cs" />
+    <Compile Include="Storage\Config\IDeploymentConfigSerializer.cs" />
+    <Compile Include="Storage\Config\JsonDeploymentConfigSerializer.cs" />
     <Compile Include="YamsDiModule.cs" />
     <Compile Include="Download\ApplicationDownloader.cs" />
     <Compile Include="Download\IApplicationDownloader.cs" />
@@ -82,9 +94,7 @@
     <Compile Include="Process\SelfRestartingProcessFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\BinariesNotFoundException.cs" />
-    <Compile Include="Storage\Config\AppDeploymentConfig.cs" />
     <Compile Include="Storage\Config\DeploymentConfig.cs" />
-    <Compile Include="Storage\Config\VersionDeploymentConfig.cs" />
     <Compile Include="Storage\ConflictResolutionMode.cs" />
     <Compile Include="Storage\DuplicateBinariesException.cs" />
     <Compile Include="Storage\IDeploymentRepository.cs" />

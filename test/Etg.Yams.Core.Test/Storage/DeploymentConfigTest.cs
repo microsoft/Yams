@@ -2,10 +2,13 @@
 using System.IO;
 using System.Linq;
 using Etg.Yams.Application;
+using Etg.Yams.Json;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Test.Utils;
+using Etg.Yams.Utils;
 using Xunit;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Etg.Yams.Test.Storage
 {
@@ -13,6 +16,7 @@ namespace Etg.Yams.Test.Storage
     {
         public DeploymentConfig DeploymentConfig { get; private set; }
         public string DeploymentConfigJson { get; private set; }
+        public IDeploymentConfigSerializer DeploymentConfigSerializer { get; }
 
         private readonly string _deploymentConfigFilePath = Path.Combine("Data", "DeploymentConfig",
             "DeploymentConfig.json");
@@ -20,18 +24,18 @@ namespace Etg.Yams.Test.Storage
         public DeploymentConfigTestFixture()
         {
             DeploymentConfigJson = File.ReadAllText(_deploymentConfigFilePath);
-            DeploymentConfig = new DeploymentConfig(DeploymentConfigJson);
+            DeploymentConfigSerializer = new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter()));
+            DeploymentConfig = DeploymentConfigSerializer.Deserialize(DeploymentConfigJson);
         }
     }
     public class DeploymentConfigTest : IClassFixture<DeploymentConfigTestFixture>
     {
         private DeploymentConfig _deploymentConfig;
-        private string _deplymentConfigJson;
-
+        private readonly IDeploymentConfigSerializer _serializer;
         public DeploymentConfigTest(DeploymentConfigTestFixture fixture)
         {
             _deploymentConfig = fixture.DeploymentConfig;
-            _deplymentConfigJson = fixture.DeploymentConfigJson;
+            _serializer = fixture.DeploymentConfigSerializer;
         }
 
         [Fact]
@@ -42,16 +46,16 @@ namespace Etg.Yams.Test.Storage
         }
 
         [Fact]
-        public void TestListApplicationsForGivenDeploymentId()
+        public void TestListApplicationsForGivenClusterId()
         {
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "app1", "app2" },
-                _deploymentConfig.ListApplications("deploymentid1"));
+                _deploymentConfig.ListApplications("clusterId1"));
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "app1" },
-                _deploymentConfig.ListApplications("deploymentid2"));
+                _deploymentConfig.ListApplications("clusterId2"));
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "app3" },
-                _deploymentConfig.ListApplications("deploymentid3"));
+                _deploymentConfig.ListApplications("clusterId3"));
             AssertUtils.ContainsSameElementsInAnyOrder(new string[] { },
-                _deploymentConfig.ListApplications("deploymentid4"));
+                _deploymentConfig.ListApplications("clusterId4"));
         }
 
         [Fact]
@@ -68,94 +72,94 @@ namespace Etg.Yams.Test.Storage
         }
 
         [Fact]
-        public void TestListVersionsWithDeploymentId()
+        public void TestListVersionsWithClusterId()
         {
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.0", "1.0.1" },
-                _deploymentConfig.ListVersions("app1", "deploymentid1"));
+                _deploymentConfig.ListVersions("app1", "clusterId1"));
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.1" },
-                _deploymentConfig.ListVersions("app1", "deploymentid2"));
+                _deploymentConfig.ListVersions("app1", "clusterId2"));
             AssertUtils.ContainsSameElementsInAnyOrder(new string[] { },
-                _deploymentConfig.ListVersions("app1", "deploymentid13"));
+                _deploymentConfig.ListVersions("app1", "clusterId13"));
         }
 
         [Fact]
-        public void TestListVersionsWithDeploymentIdForAnAppThatIsNotThere()
+        public void TestListVersionsWithClusterIdForAnAppThatIsNotThere()
         {
-            Assert.False(_deploymentConfig.ListVersions("UnknownApp", "deploymentid1").Any());
+            Assert.False(_deploymentConfig.ListVersions("UnknownApp", "clusterId1").Any());
         }
 
         [Fact]
         public void TestListDeploymentsForApp()
         {
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid1", "deploymentid2" },
-                _deploymentConfig.ListDeploymentIds("app1"));
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid3" },
-                _deploymentConfig.ListDeploymentIds("app3"));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId1", "clusterId2" },
+                _deploymentConfig.ListClusters("app1"));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId3" },
+                _deploymentConfig.ListClusters("app3"));
         }
 
         [Fact]
         public void TestListDeploymentsForAppThatIsNotThere()
         {
-            Assert.False(_deploymentConfig.ListDeploymentIds("UnknownApp").Any());
+            Assert.False(_deploymentConfig.ListClusters("UnknownApp").Any());
         }
 
         [Fact]
         public void TestListDeploymentsForVersion()
         {
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid1" },
-                _deploymentConfig.ListDeploymentIds(new AppIdentity("app1", "1.0.0")));
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid1", "deploymentid2" },
-                _deploymentConfig.ListDeploymentIds(new AppIdentity("app1", "1.0.1")));
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid3" },
-                _deploymentConfig.ListDeploymentIds(new AppIdentity("app3", "2.0.0-beta")));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId1" },
+                _deploymentConfig.ListClusters(new AppIdentity("app1", "1.0.0")));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId1", "clusterId2" },
+                _deploymentConfig.ListClusters(new AppIdentity("app1", "1.0.1")));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId3" },
+                _deploymentConfig.ListClusters(new AppIdentity("app3", "2.0.0-beta")));
         }
 
         [Fact]
         public void TestListDeploymentsForVersionThatIsNotThere()
         {
-            Assert.False(_deploymentConfig.ListDeploymentIds(new AppIdentity("app1", "5.0.0")).Any());
+            Assert.False(_deploymentConfig.ListClusters(new AppIdentity("app1", "5.0.0")).Any());
         }
 
         [Fact]
         public void TestListDeploymentsForVersionButAppIsNotThere()
         {
-            Assert.False(_deploymentConfig.ListDeploymentIds(new AppIdentity("app13", "1.0.0")).Any());
+            Assert.False(_deploymentConfig.ListClusters(new AppIdentity("app13", "1.0.0")).Any());
         }
 
         [Fact]
         public void TestAddDeploymentForNewApp()
         {
-            _deploymentConfig = _deploymentConfig.AddApplication(new AppIdentity("app13", "1.0.13"), "deploymentid13");
+            _deploymentConfig = _deploymentConfig.AddApplication(new AppIdentity("app13", "1.0.13"), "clusterId13");
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "app1", "app2", "app3", "app13" },
                 _deploymentConfig.ListApplications());
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.13" }, _deploymentConfig.ListVersions("app13"));
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid13" },
-                _deploymentConfig.ListDeploymentIds("app13"));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId13" },
+                _deploymentConfig.ListClusters("app13"));
         }
 
         [Fact]
         public void TestAddDeploymentForExistingApp()
         {
-            _deploymentConfig = _deploymentConfig.AddApplication(new AppIdentity("app3", "1.0.13"), "deploymentid13");
+            _deploymentConfig = _deploymentConfig.AddApplication(new AppIdentity("app3", "1.0.13"), "clusterId13");
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.13", "2.0.0-beta" }, _deploymentConfig.ListVersions("app3"));
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid3", "deploymentid13" },
-                _deploymentConfig.ListDeploymentIds("app3"));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId3", "clusterId13" },
+                _deploymentConfig.ListClusters("app3"));
         }
 
         [Fact]
         public void TestAddDeploymentForExistingVersion()
         {
-            _deploymentConfig = _deploymentConfig.AddApplication(new AppIdentity("app2", "1.0.0"), "deploymentid13");
+            _deploymentConfig = _deploymentConfig.AddApplication(new AppIdentity("app2", "1.0.0"), "clusterId13");
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.0" }, _deploymentConfig.ListVersions("app2"));
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid1", "deploymentid13" },
-                _deploymentConfig.ListDeploymentIds("app2"));
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId1", "clusterId13" },
+                _deploymentConfig.ListClusters("app2"));
         }
 
         [Fact]
         public void TestAddExistingDeployment()
         {
             Assert.Throws<InvalidOperationException>(() =>
-            _deploymentConfig.AddApplication(new AppIdentity("app2", "1.0.0"), "deploymentid1"));
+            _deploymentConfig.AddApplication(new AppIdentity("app2", "1.0.0"), "clusterId1"));
         }
 
         [Fact]
@@ -203,22 +207,22 @@ namespace Etg.Yams.Test.Storage
         [Fact]
         public void TestRemoveDeployment()
         {
-            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.1"), "deploymentid2");
-            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "deploymentid1" },
-                _deploymentConfig.ListDeploymentIds("app1"));
+            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.1"), "clusterId2");
+            AssertUtils.ContainsSameElementsInAnyOrder(new[] { "clusterId1" },
+                _deploymentConfig.ListClusters("app1"));
         }
 
         [Fact]
         public void TestThatRemoveLastDeploymentAlsoRemovesVersion()
         {
-            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.0"), "deploymentid1");
+            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.0"), "clusterId1");
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "1.0.1" }, _deploymentConfig.ListVersions("app1"));
         }
 
         [Fact]
         public void TestThatRemoveLastDeploymentAlsoRemovesApplication()
         {
-            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app3", "2.0.0-beta"), "deploymentid3");
+            _deploymentConfig = _deploymentConfig.RemoveApplication(new AppIdentity("app3", "2.0.0-beta"), "clusterId3");
             AssertUtils.ContainsSameElementsInAnyOrder(new[] { "app1", "app2" }, _deploymentConfig.ListApplications());
         }
 
@@ -226,27 +230,31 @@ namespace Etg.Yams.Test.Storage
         public void TestRemoveDeploymentForAnAppThatIsNotThere()
         {
             Assert.Throws<InvalidOperationException>(() =>
-           _deploymentConfig.RemoveApplication(new AppIdentity("app13", "1.0.0"), "deploymentid13"));
+           _deploymentConfig.RemoveApplication(new AppIdentity("app13", "1.0.0"), "clusterId13"));
         }
 
         [Fact]
         public void TestRemoveDeploymentForAVersionThatIsNotThere()
         {
             Assert.Throws<InvalidOperationException>(() =>
-           _deploymentConfig.RemoveApplication(new AppIdentity("app1", "13.0.0"), "deploymentid13"));
+           _deploymentConfig.RemoveApplication(new AppIdentity("app1", "13.0.0"), "clusterId13"));
         }
 
         [Fact]
         public void TestRemoveADeploymentThatIsNotThere()
         {
             Assert.Throws<InvalidOperationException>(() =>
-           _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.0"), "deploymentid13"));
+           _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.0"), "clusterId13"));
         }
 
         [Fact]
-        public void TestToJson()
+        public void TestSerializeRoundTrip()
         {
-            Assert.Equal(JObject.Parse(_deplymentConfigJson).ToString(), JObject.Parse(_deploymentConfig.RawData()).ToString());
+            string serialized = JObject.Parse(_serializer.Serialize(_deploymentConfig)).ToString();
+            DeploymentConfig deploymentConfig = _serializer.Deserialize(serialized);
+            string roundTripJson = JObject.Parse(_serializer.Serialize(deploymentConfig)).ToString();
+            Assert.Equal(_deploymentConfig, deploymentConfig);
+            Assert.Equal(serialized, roundTripJson);
         }
 
         [Fact]
@@ -265,12 +273,12 @@ namespace Etg.Yams.Test.Storage
         }
 
         [Fact]
-        public void TestHasApplication_appId_version_deploymentId()
+        public void TestHasApplication_appId_version_clusterId()
         {
-            Assert.True(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.0"), "deploymentid1"));
-            Assert.True(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.1"), "deploymentid2"));
-            Assert.False(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.0"), "deploymentid13"));
-            Assert.False(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.13"), "deploymentid1"));
+            Assert.True(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.0"), "clusterId1"));
+            Assert.True(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.1"), "clusterId2"));
+            Assert.False(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.0"), "clusterId13"));
+            Assert.False(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.13"), "clusterId1"));
         }
     }
 }

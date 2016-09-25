@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Etg.Yams.Azure.Lease;
 using Microsoft.WindowsAzure.Storage;
@@ -89,11 +90,15 @@ namespace Etg.Yams.Azure.UpdateSession
 
                 return true;
             }
-            catch (StorageException e)
+            catch (Exception e)
             {
-                DisposeLease();
-                Trace.TraceInformation($"Failed to acquire the lease on blob {_blob.Name}", e);
-                return false;
+                if (e is StorageException || e is WebException)
+                {
+                    DisposeLease();
+                    Trace.TraceInformation($"Failed to acquire the lease on blob {_blob.Name}", e);
+                    return false;
+                }
+                throw;
             }
         }
 

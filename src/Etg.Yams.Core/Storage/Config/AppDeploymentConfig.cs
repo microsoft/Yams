@@ -1,44 +1,64 @@
+using System;
 using System.Collections.Generic;
-using Etg.Yams.Utils;
+using System.Linq;
+using Etg.Yams.Application;
 
 namespace Etg.Yams.Storage.Config
 {
-    internal class AppDeploymentConfig
+    public class AppDeploymentConfig : AppInstallConfig
     {
-        public AppDeploymentConfig(string appId)
+        public AppDeploymentConfig(AppIdentity appIdentity, IEnumerable<string> clustersIds,
+            IReadOnlyDictionary<string, string> properties) : base(appIdentity, properties)
         {
-            AppId = appId;
-            Versions = new Dictionary<string, VersionDeploymentConfig>();
+            ClustersIds = new HashSet<string>(clustersIds);
         }
 
-        public AppDeploymentConfig(string appId, IDictionary<string, VersionDeploymentConfig> versions)
+        public AppDeploymentConfig(AppIdentity appIdentity, IEnumerable<string> clustersIds) : this(appIdentity, clustersIds,
+            new Dictionary<string, string>())
         {
-            AppId = appId;
-            Versions = new Dictionary<string, VersionDeploymentConfig>(versions);
         }
 
-        public AppDeploymentConfig SetVersionConfig(VersionDeploymentConfig versionDeploymentConfig)
+        public AppDeploymentConfig AddClusterId(string clusterId)
         {
-            var versions = new Dictionary<string, VersionDeploymentConfig>(ToDictionary(Versions));
-            versions[versionDeploymentConfig.Version] = versionDeploymentConfig;
-            return new AppDeploymentConfig(AppId, versions);
+            if (ClustersIds.Contains(clusterId))
+            {
+                throw new InvalidOperationException();
+            }
+            var clusterIds = new HashSet<string>(ClustersIds) {clusterId};
+            return new AppDeploymentConfig(AppIdentity, clusterIds, Properties);
         }
 
-        public AppDeploymentConfig RemoveVersionConfig(string version)
+        protected bool Equals(AppDeploymentConfig other)
         {
-            var versions = new Dictionary<string, VersionDeploymentConfig>(ToDictionary(Versions));
-            versions.Remove(version);
-            return new AppDeploymentConfig(AppId, versions);
+            return base.Equals(other) && (new HashSet<string>(ClustersIds).SetEquals(other.ClustersIds));
         }
 
-        private static Dictionary<string, VersionDeploymentConfig> ToDictionary(
-            IReadOnlyDictionary<string, VersionDeploymentConfig> roDict)
+        public override bool Equals(object obj)
         {
-            return DictionaryUtils.ToDictionary(roDict);
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((AppDeploymentConfig) obj);
         }
 
-        public string AppId { get; }
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (base.GetHashCode()*397) ^ (ClustersIds != null ? ClustersIds.GetHashCode() : 0);
+            }
+        }
 
-        public IReadOnlyDictionary<string, VersionDeploymentConfig> Versions { get; }
+        public static bool operator ==(AppDeploymentConfig left, AppDeploymentConfig right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(AppDeploymentConfig left, AppDeploymentConfig right)
+        {
+            return !Equals(left, right);
+        }
+
+        public IEnumerable<string> ClustersIds { get; }
     }
 }

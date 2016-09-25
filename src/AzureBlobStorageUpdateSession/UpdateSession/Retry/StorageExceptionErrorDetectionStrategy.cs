@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using Microsoft.WindowsAzure.Storage;
 
@@ -8,7 +9,7 @@ namespace Etg.Yams.Azure.UpdateSession.Retry
     {
         public bool IsTransient(Exception ex)
         {
-            return ex is StorageException;
+            return ex is StorageException || ex is WebException;
         }
     }
 }

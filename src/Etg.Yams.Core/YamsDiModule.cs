@@ -8,6 +8,8 @@ using Etg.Yams.Storage;
 using Etg.Yams.Update;
 using Etg.Yams.Watcher;
 using Autofac;
+using Etg.Yams.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Etg.Yams
 {
@@ -68,7 +70,23 @@ namespace Etg.Yams
 
             builder.RegisterType<YamsService>().As<IYamsService>().SingleInstance();
 
+            RegisterAppDeploymentMatcher(builder);
+
+            builder.RegisterType<DiagnosticsTraceWriter>().As<ITraceWriter>().SingleInstance();
+            builder.RegisterType<JsonSerializer>().As<IJsonSerializer>().SingleInstance();
+
             return builder;
+        }
+
+        private static void RegisterAppDeploymentMatcher(ContainerBuilder builder)
+        {
+            builder.Register<IAppDeploymentMatcher>(c =>
+            {
+                var config = c.Resolve<YamsConfig>();
+                var propertiesDeploymentMatcher = new PropertiesDeploymentMatcher(config.ClusterProperties);
+                var clusterIdDeploymentMatcher = new ClusterIdDeploymentMatcher(config.ClusterId);
+                return new AndDeploymentMatcher(clusterIdDeploymentMatcher, propertiesDeploymentMatcher);
+            });
         }
 
         private static void RegisterDeploymentWatcher(ContainerBuilder builder)
@@ -87,7 +105,7 @@ namespace Etg.Yams
                 c =>
                 {
                     var config = c.Resolve<YamsConfig>();
-                    return new ApplicationUpdateManager(config.ClusterDeploymentId,
+                    return new ApplicationUpdateManager(config.ClusterId,
                         c.Resolve<IApplicationDeploymentDirectory>(), c.Resolve<IApplicationPool>(),
                         c.Resolve<IApplicationDownloader>(), c.Resolve<IApplicationInstaller>());
                 }).SingleInstance();
@@ -110,11 +128,7 @@ namespace Etg.Yams
 
         private static void RegisterApplicationConfigParser(ContainerBuilder builder)
         {
-            builder.Register<IApplicationConfigParser>(c =>
-                {
-                    IApplicationConfigSymbolResolver symbolResolver = c.Resolve<IApplicationConfigSymbolResolver>();
-                    return new ApplicationConfigParser(symbolResolver);
-                }).SingleInstance();
+            builder.RegisterType<ApplicationConfigParser>().As<IApplicationConfigParser>().SingleInstance();
         }
 
         private static void RegisterApplicationConfigSymbolResolver(ContainerBuilder builder)
@@ -122,7 +136,7 @@ namespace Etg.Yams
             builder.Register<IApplicationConfigSymbolResolver>(c =>
                 {
                     YamsConfig config = c.Resolve<YamsConfig>();
-                    return new ApplicationConfigSymbolResolver(config.ClusterDeploymentId, config.InstanceId);
+                    return new ApplicationConfigSymbolResolver(config.ClusterId, config.InstanceId);
                 }).SingleInstance();
         }
 
@@ -169,7 +183,8 @@ namespace Etg.Yams
         private static void RegisterApplicationDeploymentDirectory(ContainerBuilder builder)
         {
             builder.Register<IApplicationDeploymentDirectory>(
-                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentRepository>())).SingleInstance();
+                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentRepository>(),
+                c.Resolve<IAppDeploymentMatcher>())).SingleInstance();
         }
     }
 }

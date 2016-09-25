@@ -1,305 +1,184 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Etg.Yams.Application;
-using Etg.Yams.Utils;
 
 namespace Etg.Yams.Storage.Config
 {
-    public class DeploymentConfig
+    public class DeploymentConfig : IEnumerable<AppDeploymentConfig>
     {
-        private readonly IReadOnlyDictionary<string, AppDeploymentConfig> _apps =
-            new Dictionary<string, AppDeploymentConfig>();
+        private readonly ISet<AppDeploymentConfig> _apps = new HashSet<AppDeploymentConfig>();
 
         public DeploymentConfig()
         {
         }
 
-        private DeploymentConfig(IDictionary<string, AppDeploymentConfig> apps)
+        protected bool Equals(DeploymentConfig other)
         {
-            _apps = new ReadOnlyDictionary<string, AppDeploymentConfig>(apps);
+            return Equals(_apps, other._apps);
         }
 
-        public DeploymentConfig(string rawData)
+        public override bool Equals(object obj)
         {
-            _apps = ParseDeploymentsConfig(rawData);
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DeploymentConfig) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (_apps != null ? _apps.GetHashCode() : 0);
+        }
+
+        public DeploymentConfig(IEnumerable<AppDeploymentConfig> apps)
+        {
+            _apps = new HashSet<AppDeploymentConfig>(apps);
         }
 
         public IEnumerable<string> ListApplications()
         {
-            return _apps.Keys;
+            var appIds = new HashSet<string>();
+            appIds.UnionWith(_apps.Select(config => config.AppIdentity.Id));
+            return appIds;
         }
 
-        public IEnumerable<string> ListApplications(string deploymentId)
+        public IEnumerable<string> ListApplications(string clusterId)
         {
-            var apps = new List<string>();
-            foreach (string appId in _apps.Keys)
-            {
-                foreach (KeyValuePair<string, VersionDeploymentConfig> version in _apps[appId].Versions)
-                {
-                    if (version.Value.DeploymentIds.Contains(deploymentId))
-                    {
-                        apps.Add(appId);
-                    }
-                }
-            }
-
-            return apps;
+            var appIds = new HashSet<string>();
+            appIds.UnionWith(_apps.Where(config => config.ClustersIds.Contains(clusterId))
+                .Select(config => config.AppIdentity.Id));
+            return appIds;
         }
 
         public IEnumerable<string> ListVersions(string appId)
         {
-            if (!_apps.ContainsKey(appId))
-            {
-                return new string[] {};
-            }
-            return _apps[appId].Versions.Keys;
+            var appIds = new HashSet<string>();
+            appIds.UnionWith(_apps
+                .Where(config => config.AppIdentity.Id == appId)
+                .Select(config => config.AppIdentity.Version.ToString()));
+            return appIds;
         }
 
-        public IEnumerable<string> ListVersions(string appId, string deploymentId)
+        public IEnumerable<string> ListVersions(string appId, string clusterId)
         {
-            if (!_apps.ContainsKey(appId))
-            {
-                return new string[] {};
-            }
-
-            return
-                _apps[appId].Versions.Where(versionConfig => versionConfig.Value.DeploymentIds.Contains(deploymentId))
-                    .Select(versionConfig => versionConfig.Key);
+            var appIds = new HashSet<string>();
+            appIds.UnionWith(_apps
+                .Where(config => config.AppIdentity.Id == appId && config.ClustersIds.Contains(clusterId))
+                .Select(config => config.AppIdentity.Version.ToString()));
+            return appIds;
         }
 
-        public IEnumerable<string> ListDeploymentIds(string appId)
+        public IEnumerable<string> ListClusters(string appId)
         {
-            if (!_apps.ContainsKey(appId))
-            {
-                return new string[] {};
-            }
-            return _apps[appId].Versions.Values.SelectMany(vc => vc.DeploymentIds);
+            var clusterIds = new HashSet<string>();
+            clusterIds.UnionWith(_apps.Where(config => config.AppIdentity.Id == appId).SelectMany(config => config.ClustersIds));
+            return clusterIds;
         }
 
-        public IEnumerable<string> ListDeploymentIds(AppIdentity appIdentity)
+        public IEnumerable<string> ListClusters(AppIdentity appIdentity)
         {
-            string appId = appIdentity.Id;
-            string version = appIdentity.Version.ToString();
-            if (!_apps.ContainsKey(appId))
-            {
-                return new string[] {};
-            }
-            var appConfig = _apps[appId];
-            if (!appConfig.Versions.ContainsKey(version))
-            {
-                return new string[] {};
-            }
-            return _apps[appId].Versions[version].DeploymentIds;
+            var clusterIds = new HashSet<string>();
+            clusterIds.UnionWith(_apps.Where(config => config.AppIdentity == appIdentity).SelectMany(config => config.ClustersIds));
+            return clusterIds;
         }
 
-        public DeploymentConfig AddApplication(AppIdentity appIdentity, string deploymentId)
+        public DeploymentConfig AddApplication(AppIdentity appIdentity, string clusterId)
         {
-            string appId = appIdentity.Id;
-            string version = appIdentity.Version.ToString();
-            Dictionary<string, AppDeploymentConfig> apps = GetAppsCopy();
-            apps = AddAppConfigIfNoneExists(apps, appId);
-            AppDeploymentConfig appDeploymentConfig = apps[appId];
-            appDeploymentConfig = AddVersionConfigIfNoneExists(appDeploymentConfig, version);
-            VersionDeploymentConfig versionDeploymentConfig = appDeploymentConfig.Versions[version];
-            if (versionDeploymentConfig.DeploymentIds.Contains(deploymentId))
+            AppDeploymentConfig appDeploymentConfig;
+            DeploymentConfig deploymentConfig = this;
+            if (deploymentConfig.HasApplication(appIdentity))
             {
-                throw new InvalidOperationException(
-                    $"Cannot add the deployment {deploymentId} to application {appId}, version {version} because it's already there");
+                appDeploymentConfig = deploymentConfig.GetAppConfig(appIdentity);
+                appDeploymentConfig = appDeploymentConfig.AddClusterId(clusterId);
+                deploymentConfig = RemoveApplication(appIdentity);
             }
-            versionDeploymentConfig = versionDeploymentConfig.AddDeployment(deploymentId);
-            appDeploymentConfig = appDeploymentConfig.SetVersionConfig(versionDeploymentConfig);
-            apps[appId] = appDeploymentConfig;
+            else
+            {
+                appDeploymentConfig = new AppDeploymentConfig(appIdentity, new [] {clusterId});
+            }
+            return deploymentConfig.AddApplication(appDeploymentConfig);
+        }
+
+        public DeploymentConfig AddApplication(AppDeploymentConfig appDeploymentConfig)
+        {
+            var apps = new HashSet<AppDeploymentConfig>(_apps) {appDeploymentConfig};
             return new DeploymentConfig(apps);
         }
 
-        private Dictionary<string, AppDeploymentConfig> GetAppsCopy()
+        public AppDeploymentConfig GetAppConfig(AppIdentity appIdentity)
         {
-            return new Dictionary<string, AppDeploymentConfig>(DictionaryUtils.ToDictionary(_apps));
+            IEnumerable<AppDeploymentConfig> appConfigs = _apps.Where(config => config.AppIdentity == appIdentity);
+            if (!appConfigs.Any())
+            {
+                throw new InvalidOperationException($"App {appIdentity} doesn't exist");
+            }
+            if (appConfigs.Count() > 1)
+            {
+                throw new InvalidOperationException($"There should not be more than one app for a given {nameof(AppIdentity)}");
+            }
+            return appConfigs.First();
         }
 
         public bool HasApplication(string appId)
         {
-            return _apps.ContainsKey(appId);
+            return _apps.Any(appDeploymentConfig => appDeploymentConfig.AppIdentity.Id == appId);
         }
 
         public bool HasApplication(AppIdentity appIdentity)
         {
-            string appId = appIdentity.Id;
-            string version = appIdentity.Version.ToString();
-            if (!HasApplication(appId))
-            {
-                return false;
-            }
-            return _apps[appId].Versions.ContainsKey(version);
+            return _apps.Any(appDeploymentConfig => appDeploymentConfig.AppIdentity == appIdentity);
         }
 
-        public bool HasApplication(AppIdentity appIdentity, string deploymentId)
+        public bool HasApplication(AppIdentity appIdentity, string clusterId)
         {
-            string appId = appIdentity.Id;
-            string version = appIdentity.Version.ToString();
-            if (!HasApplication(appIdentity))
-            {
-                return false;
-            }
-            return _apps[appId].Versions[version].DeploymentIds.Contains(deploymentId);
+            return _apps.Any(
+                appDeploymentConfig => appDeploymentConfig.AppIdentity == appIdentity && 
+                appDeploymentConfig.ClustersIds.Contains(clusterId));
         }
 
         public DeploymentConfig RemoveApplication(string appId)
         {
-            var apps = GetAppsCopy();
-            if (!apps.ContainsKey(appId))
+            if (!HasApplication(appId))
             {
-                throw new InvalidOperationException($"Cannot remove application {appId} because it was not found");
+                throw new InvalidOperationException("Cannot remove an application that is not there");
             }
-            apps.Remove(appId);
+            var apps = new HashSet<AppDeploymentConfig>(_apps);
+            apps.RemoveWhere(config => config.AppIdentity.Id == appId);
             return new DeploymentConfig(apps);
         }
 
         public DeploymentConfig RemoveApplication(AppIdentity appIdentity)
         {
-            string appId = appIdentity.Id;
-            string version = appIdentity.Version.ToString();
-            var apps = GetAppsCopy();
-            if (!apps.ContainsKey(appId))
+            if (!HasApplication(appIdentity))
             {
-                throw new InvalidOperationException($"Cannot remove version {version} because {appId} was not found");
+                throw new InvalidOperationException("Cannot remove an application that is not there");
             }
-            AppDeploymentConfig appDeploymentConfig = apps[appId];
-            if (!appDeploymentConfig.Versions.ContainsKey(version))
-            {
-                throw new InvalidOperationException(
-                    $"Cannot remove version {version} from application {appId} because version {version} was not found");
-            }
-            appDeploymentConfig = appDeploymentConfig.RemoveVersionConfig(version);
-            if (!appDeploymentConfig.Versions.Any())
-            {
-                apps.Remove(appId);
-            }
-            else
-            {
-                apps[appId] = appDeploymentConfig;
-            }
-
+            var apps = new HashSet<AppDeploymentConfig>(_apps);
+            apps.RemoveWhere(config => config.AppIdentity == appIdentity);
             return new DeploymentConfig(apps);
         }
 
-        public DeploymentConfig RemoveApplication(AppIdentity appIdentity, string deploymentId)
+        public DeploymentConfig RemoveApplication(AppIdentity appIdentity, string clusterId)
         {
-            string appId = appIdentity.Id;
-            string version = appIdentity.Version.ToString();
-            var apps = GetAppsCopy();
-            if (!apps.ContainsKey(appId))
+            if (!HasApplication(appIdentity, clusterId))
             {
-                throw new InvalidOperationException($"Cannot remove deployment because app {appId} was not found");
+                throw new InvalidOperationException("Cannot remove an application that is not there");
             }
-            AppDeploymentConfig appDeploymentConfig = apps[appId];
-            if (!appDeploymentConfig.Versions.ContainsKey(version))
-            {
-                throw new InvalidOperationException(
-                    $"Cannot remove deployment because app {appId}, version {version} was not found");
-            }
-            VersionDeploymentConfig versionDeploymentConfig = appDeploymentConfig.Versions[version];
-            if (!versionDeploymentConfig.DeploymentIds.Contains(deploymentId))
-            {
-                throw new InvalidOperationException(
-                    $"Cannot remove deployment {deploymentId} from app {appId}, version {version} because it was not found");
-            }
-            versionDeploymentConfig = versionDeploymentConfig.RemoveDeployment(deploymentId);
-            appDeploymentConfig = appDeploymentConfig.SetVersionConfig(versionDeploymentConfig);
-            apps[appId] = appDeploymentConfig;
-            DeploymentConfig dc = new DeploymentConfig(apps);
-
-            if (!dc._apps[appId].Versions[version].DeploymentIds.Any())
-            {
-                dc = dc.RemoveApplication(appIdentity);
-            }
-            return dc;
+            var apps = new HashSet<AppDeploymentConfig>(_apps);
+            apps.RemoveWhere(config => config.AppIdentity == appIdentity && config.ClustersIds.Contains(clusterId));
+            return new DeploymentConfig(apps);
         }
 
-        public string RawData()
+        public IEnumerator<AppDeploymentConfig> GetEnumerator()
         {
-            var applicationsList = new List<ApplicationData>();
-            foreach (KeyValuePair<string, AppDeploymentConfig> app in _apps)
-            {
-                string appId = app.Key;
-                AppDeploymentConfig appDeploymentConfig = app.Value;
-                foreach (KeyValuePair<string, VersionDeploymentConfig> v in appDeploymentConfig.Versions)
-                {
-                    string version = v.Key;
-                    VersionDeploymentConfig versionDeploymentConfig = v.Value;
-                    applicationsList.Add(new ApplicationData(appId, version,
-                        versionDeploymentConfig.DeploymentIds.ToArray()));
-                }
-            }
-            ApplicationsData applicationsData = new ApplicationsData(applicationsList.ToArray());
-            return JsonUtils.Serialize(applicationsData);
+            return _apps.GetEnumerator();
         }
 
-        private AppDeploymentConfig AddVersionConfigIfNoneExists(AppDeploymentConfig appDeploymentConfig, string version)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            if (!appDeploymentConfig.Versions.ContainsKey(version))
-            {
-                return appDeploymentConfig.SetVersionConfig(new VersionDeploymentConfig(version));
-            }
-            return appDeploymentConfig;
-        }
-
-        private static Dictionary<string, AppDeploymentConfig> AddAppConfigIfNoneExists(
-            Dictionary<string, AppDeploymentConfig> apps, string appId)
-        {
-            if (!apps.ContainsKey(appId))
-            {
-                var appConfig = new AppDeploymentConfig(appId);
-                apps[appId] = appConfig;
-            }
-            return apps;
-        }
-
-        private static Dictionary<string, AppDeploymentConfig> ParseDeploymentsConfig(string json)
-        {
-            Dictionary<string, AppDeploymentConfig> apps = new Dictionary<string, AppDeploymentConfig>();
-            if (string.IsNullOrEmpty(json))
-            {
-                return apps;
-            }
-
-            ApplicationsData appsData = JsonUtils.Deserialize<ApplicationsData>(json);
-            foreach (ApplicationData appData in appsData.Applications)
-            {
-                VersionDeploymentConfig versionDeploymentConfig = new VersionDeploymentConfig(appData.Version,
-                    appData.DeploymentIds);
-                apps = AddAppConfigIfNoneExists(apps, appData.Id);
-                AppDeploymentConfig appDeploymentConfig = apps[appData.Id];
-                appDeploymentConfig = appDeploymentConfig.SetVersionConfig(versionDeploymentConfig);
-                apps[appData.Id] = appDeploymentConfig;
-            }
-            return apps;
-        }
-
-        private class ApplicationData
-        {
-            public ApplicationData(string id, string version, string[] deploymentIds)
-            {
-                Id = id;
-                Version = version;
-                DeploymentIds = deploymentIds;
-            }
-
-            public string Id { get; private set; }
-            public string Version { get; private set; }
-            public string[] DeploymentIds { get; private set; }
-        }
-
-        private class ApplicationsData
-        {
-            public ApplicationsData(ApplicationData[] applications)
-            {
-                Applications = applications;
-            }
-
-            public ApplicationData[] Applications { get; private set; }
+            return GetEnumerator();
         }
     }
 }

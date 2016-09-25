@@ -2,10 +2,13 @@
 using System.IO;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
+using Etg.Yams.Json;
 using Etg.Yams.Process;
+using Etg.Yams.Storage.Config;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Test.Utils;
 using Etg.Yams.Utils;
+using Newtonsoft.Json.Serialization;
 using Semver;
 using Xunit;
 
@@ -15,7 +18,7 @@ namespace Etg.Yams.Test.Application
     {
         public string ApplicationsRootPath { get; private set; }
         public IApplicationFactory ApplicationFactory { get; private set; }
-        private const string DeploymentId = "testDeploymentId";
+        private const string ClusterId = "testClusterId";
         private const string InstanceId = "testInstanceId";
 
         public ApplicationPoolTestFixture()
@@ -39,7 +42,8 @@ namespace Etg.Yams.Test.Application
             }
 
             ApplicationFactory =
-                new ConfigurableApplicationFactory(new ApplicationConfigParser(new ApplicationConfigSymbolResolver(DeploymentId, InstanceId)),
+                new ConfigurableApplicationFactory(new ApplicationConfigParser(
+                    new ApplicationConfigSymbolResolver(ClusterId, InstanceId), new JsonSerializer(new DiagnosticsTraceWriter())),
                     new SelfRestartingProcessFactory(0, false), new ProcessStopper(0));
         }
     }
@@ -66,15 +70,17 @@ namespace Etg.Yams.Test.Application
         public async Task TestAddApplication()
         {
             AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
-            await AddApplication(appIdentity);
+            AppInstallConfig config = new AppInstallConfig(appIdentity);
+            await AddApplication(config);
 
             Assert.NotNull(_applicationPool.GetApplication(appIdentity));
             Assert.Equal("TestProcess.exe foo1 foo2", GetOutput(appIdentity));
         }
 
-        private async Task AddApplication(AppIdentity appIdentity)
+        private async Task AddApplication(AppInstallConfig appInstallConfig)
         {
-            IApplication application = await _applicationFactory.CreateApplication(appIdentity, GetApplicationPath(appIdentity));
+            IApplication application = await _applicationFactory.CreateApplication(appInstallConfig, 
+                GetApplicationPath(appInstallConfig.AppIdentity));
             await _applicationPool.AddApplication(application);
         }
 
@@ -89,8 +95,9 @@ namespace Etg.Yams.Test.Application
         {
             await Assert.ThrowsAsync<ArgumentException>(async () => {
                 AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
-                await AddApplication(appIdentity);
-                await AddApplication(appIdentity);
+                AppInstallConfig config = new AppInstallConfig(appIdentity);
+                await AddApplication(config);
+                await AddApplication(config);
             });
         }
 

@@ -1,15 +1,18 @@
-﻿namespace Etg.Yams
+﻿using System.Collections.Generic;
+
+namespace Etg.Yams
 {
     /// <summary>
     /// Configuration parameters for YAMS.
     /// </summary>
     public class YamsConfig
     {
-        public YamsConfig(string clusterDeploymentId, string instanceUpdateDomain, string instanceId, 
+        public YamsConfig(string clusterId, string instanceUpdateDomain, string instanceId, 
             string applicationInstallDirectory, int checkForUpdatesPeriodInSeconds, int applicationRestartCount, 
-            int processWaitForExitInSeconds, bool showApplicationProcessWindow)
+            int processWaitForExitInSeconds, bool showApplicationProcessWindow, 
+            IReadOnlyDictionary<string, string> clusterProperties)
         {
-            ClusterDeploymentId = clusterDeploymentId;
+            ClusterId = clusterId;
             InstanceUpdateDomain = instanceUpdateDomain;
             InstanceId = instanceId;
             ApplicationInstallDirectory = applicationInstallDirectory;
@@ -17,12 +20,13 @@
             ApplicationRestartCount = applicationRestartCount;
             ProcessWaitForExitInSeconds = processWaitForExitInSeconds;
             ShowApplicationProcessWindow = showApplicationProcessWindow;
+            ClusterProperties = clusterProperties;
         }
 
         /// <summary>
         /// The cluster deployment id.
         /// </summary>
-        public string ClusterDeploymentId { get; private set; }
+        public string ClusterId { get; private set; }
 
         /// <summary>
         /// The role instance update domain.
@@ -55,5 +59,7 @@
         public int ProcessWaitForExitInSeconds { get; private set; }
 
         public bool ShowApplicationProcessWindow { get; private set; }
+
+        public IReadOnlyDictionary<string, string> ClusterProperties { get; private set; } 
     }
 }
