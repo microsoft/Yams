@@ -1,0 +1,49 @@
+﻿{
+  "Applications": [
+    {
+      "Id": "test.app1",
+      "Version": "1.0.0",
+      "TargetClusters": [ "clusterId1" ],
+      "Properties": {
+        "NodeType": "Test",
+        "Region":  "East"
+      }
+    },
+    {
+      "Id": "test.app2",
+      "Version": "1.1.0",
+      "TargetClusters": [ "clusterId1", "clusterId2" ],
+      "Properties": {
+        "NodeType": "Test",
+        "Region": "West"
+      }
+    },
+    {
+      "Id": "test.app2",
+      "Version": "2.0.0-beta",
+      "TargetClusters": [ "clusterId1", "clusterId2" ],
+      "Properties": {
+        "NodeType": "Test"
+      }
+    },
+    {
+      "Id": "test.app3",
+      "Version": "1.1.0",
+      "TargetClusters": [ "clusterId1", "clusterId2" ],
+      "Properties": {
+        "NodeType": "Prod",
+        "Region": "East"
+      }
+    },
+    {
+      "Id": "test.app4",
+      "Version": "1.0.0",
+      "TargetClusters": [ "clusterId2" ]
+    },
+    {
+      "Id": "test.app5",
+      "Version": "1.0.0",
+      "TargetClusters": [ "clusterId1" ]
+    }
+  ]
+}

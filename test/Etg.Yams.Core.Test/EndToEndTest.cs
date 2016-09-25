@@ -22,8 +22,8 @@ namespace Etg.Yams.Test
         private readonly string _testDirPath;
         private readonly string _applicationsInstallPath;
         private readonly string _deploymentDirPath;
-        private readonly IYamsService _yamsService;
-        private readonly YamsDiModule _yamsDiModule;
+        private IYamsService _yamsService;
+        private YamsDiModule _yamsDiModule;
 
         public EndToEndTest()
         {
@@ -35,10 +35,10 @@ namespace Etg.Yams.Test
             FileUtils.CopyDir(_dataRootPath, _deploymentDirPath, overwrite: true).Wait();
 
             CopyTestProcessExeToTestApps();
+        }
 
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
-                _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
-
+        private void InitializeYamsService(YamsConfig yamsConfig)
+        {
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
                 .TryStartUpdateSession(applicationId => Task.FromResult(true))
                 .EndUpdateSession(applicationId => Task.FromResult(true));
@@ -80,6 +80,11 @@ namespace Etg.Yams.Test
         [Fact]
         public async Task TestThatApplicationsAreLoadedAtStartup()
         {
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
+
+            InitializeYamsService(yamsConfig);
+
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
 
@@ -107,6 +112,11 @@ namespace Etg.Yams.Test
         [Fact]
         public async Task TestMultipleUpdates()
         {
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
+
+            InitializeYamsService(yamsConfig);
+
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
 
@@ -124,6 +134,30 @@ namespace Etg.Yams.Test
             AssertThatApplicationIsRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
 
             AssertThatNumberOfApplicationsRunningIs(5);
+        }
+
+        [Fact]
+        public async Task TestThatClusterPropertiesAreUsedToMatchDeployments()
+        {
+            File.Copy(Path.Combine(_dataRootPath, "DeploymentConfigWithProperties.json"), Path.Combine(_deploymentDirPath, "DeploymentConfig.json"), overwrite: true);
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                _applicationsInstallPath).SetShowApplicationProcessWindow(false)
+                .AddClusterProperty("NodeType", "Test")
+                .AddClusterProperty("Region", "East").Build();
+
+            InitializeYamsService(yamsConfig);
+
+            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
+            await applicationUpdateManager.CheckForUpdates();
+
+            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
+
+            AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
+            AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0, "beta")));
+            AssertThatApplicationIsNotRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
+            AssertThatApplicationIsNotRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
+
+            AssertThatNumberOfApplicationsRunningIs(1);
         }
 
         public void AssertThatApplicationIsRunning(AppIdentity appIdentity)
