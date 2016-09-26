@@ -16,7 +16,7 @@ namespace WebApp
                     'Version': '{1}',
                     'Cloud Service Deployment Id': '{2}'
                 }}
-                ", App.Id, App.Version, App.DeploymentId);
+                ", App.Id, App.Version, App.ClusterId);
 
             return JObject.Parse(json);
         }
