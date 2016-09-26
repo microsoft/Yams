@@ -47,7 +47,7 @@ namespace Etg.Yams.Storage.Config
         public IEnumerable<string> ListApplications(string clusterId)
         {
             var appIds = new HashSet<string>();
-            appIds.UnionWith(_apps.Where(config => config.ClustersIds.Contains(clusterId))
+            appIds.UnionWith(_apps.Where(config => config.TargetClusters.Contains(clusterId))
                 .Select(config => config.AppIdentity.Id));
             return appIds;
         }
@@ -65,7 +65,7 @@ namespace Etg.Yams.Storage.Config
         {
             var appIds = new HashSet<string>();
             appIds.UnionWith(_apps
-                .Where(config => config.AppIdentity.Id == appId && config.ClustersIds.Contains(clusterId))
+                .Where(config => config.AppIdentity.Id == appId && config.TargetClusters.Contains(clusterId))
                 .Select(config => config.AppIdentity.Version.ToString()));
             return appIds;
         }
@@ -73,14 +73,14 @@ namespace Etg.Yams.Storage.Config
         public IEnumerable<string> ListClusters(string appId)
         {
             var clusterIds = new HashSet<string>();
-            clusterIds.UnionWith(_apps.Where(config => config.AppIdentity.Id == appId).SelectMany(config => config.ClustersIds));
+            clusterIds.UnionWith(_apps.Where(config => config.AppIdentity.Id == appId).SelectMany(config => config.TargetClusters));
             return clusterIds;
         }
 
         public IEnumerable<string> ListClusters(AppIdentity appIdentity)
         {
             var clusterIds = new HashSet<string>();
-            clusterIds.UnionWith(_apps.Where(config => config.AppIdentity == appIdentity).SelectMany(config => config.ClustersIds));
+            clusterIds.UnionWith(_apps.Where(config => config.AppIdentity == appIdentity).SelectMany(config => config.TargetClusters));
             return clusterIds;
         }
 
@@ -135,7 +135,7 @@ namespace Etg.Yams.Storage.Config
         {
             return _apps.Any(
                 appDeploymentConfig => appDeploymentConfig.AppIdentity == appIdentity && 
-                appDeploymentConfig.ClustersIds.Contains(clusterId));
+                appDeploymentConfig.TargetClusters.Contains(clusterId));
         }
 
         public DeploymentConfig RemoveApplication(string appId)
@@ -167,7 +167,7 @@ namespace Etg.Yams.Storage.Config
                 throw new InvalidOperationException("Cannot remove an application that is not there");
             }
             var apps = new HashSet<AppDeploymentConfig>(_apps);
-            apps.RemoveWhere(config => config.AppIdentity == appIdentity && config.ClustersIds.Contains(clusterId));
+            apps.RemoveWhere(config => config.AppIdentity == appIdentity && config.TargetClusters.Contains(clusterId));
             return new DeploymentConfig(apps);
         }
 

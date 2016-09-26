@@ -7,10 +7,10 @@ namespace Etg.Yams.Storage.Config
 {
     public class AppDeploymentConfig : AppInstallConfig
     {
-        public AppDeploymentConfig(AppIdentity appIdentity, IEnumerable<string> clustersIds,
+        public AppDeploymentConfig(AppIdentity appIdentity, IEnumerable<string> targetClusters,
             IReadOnlyDictionary<string, string> properties) : base(appIdentity, properties)
         {
-            ClustersIds = new HashSet<string>(clustersIds);
+            TargetClusters = new HashSet<string>(targetClusters);
         }
 
         public AppDeploymentConfig(AppIdentity appIdentity, IEnumerable<string> clustersIds) : this(appIdentity, clustersIds,
@@ -20,17 +20,17 @@ namespace Etg.Yams.Storage.Config
 
         public AppDeploymentConfig AddClusterId(string clusterId)
         {
-            if (ClustersIds.Contains(clusterId))
+            if (TargetClusters.Contains(clusterId))
             {
                 throw new InvalidOperationException();
             }
-            var clusterIds = new HashSet<string>(ClustersIds) {clusterId};
+            var clusterIds = new HashSet<string>(TargetClusters) {clusterId};
             return new AppDeploymentConfig(AppIdentity, clusterIds, Properties);
         }
 
         protected bool Equals(AppDeploymentConfig other)
         {
-            return base.Equals(other) && (new HashSet<string>(ClustersIds).SetEquals(other.ClustersIds));
+            return base.Equals(other) && (new HashSet<string>(TargetClusters).SetEquals(other.TargetClusters));
         }
 
         public override bool Equals(object obj)
@@ -45,7 +45,7 @@ namespace Etg.Yams.Storage.Config
         {
             unchecked
             {
-                return (base.GetHashCode()*397) ^ (ClustersIds != null ? ClustersIds.GetHashCode() : 0);
+                return (base.GetHashCode()*397) ^ (TargetClusters != null ? TargetClusters.GetHashCode() : 0);
             }
         }
 
@@ -59,6 +59,6 @@ namespace Etg.Yams.Storage.Config
             return !Equals(left, right);
         }
 
-        public IEnumerable<string> ClustersIds { get; }
+        public IEnumerable<string> TargetClusters { get; }
     }
 }
