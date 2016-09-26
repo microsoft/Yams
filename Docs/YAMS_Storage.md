@@ -4,20 +4,32 @@ This tutorial demonstrates the use of the `IDeploymentRepository` Api which can 
 
 * Create a proxy to the Yams storage
 ```csharp
-    IDeploymentRepository deploymentRepository = new BlobStorageDeploymentRepository("my_data_connection_string");
+    IDeploymentRepository deploymentRepository = BlobStorageDeploymentRepository.Create("my_data_connection_string");
+```
+
+* Fetch the DeploymentConfig
+```csharp
+	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
+	
+	// DeploymentConfig implements IEnumerable.
+	foreach(AppDeploymentConfig appDeploymentConfig in deploymentConfig)
+	{
+		AppIdentity appIdentity = appDeploymentConfig.AppIdentity;
+		IEnumerable<string> targetClusters = appDeploymentConfig.TargetClusters;
+	}	
 ```
 
 * Deploy a new application
 ```csharp
 	AppIdentity appIdentity = new AppIdentity("AppId", "1.0.0");
-	
+
 	// Upload the application binaries
 	await deploymentRepository.UploadApplicationBinaries(appIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
 
 	// Update the DeploymentConfig. Note that the DeploymentConfig class is immutable
 	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
-	deploymentConfig = deploymentConfig.AddApplication(appIdentity, "cloudservice_deployment_id");
-	
+	deploymentConfig = deploymentConfig.AddApplication(appIdentity, "yams_cluster_id");
+
 	// The application will only be deployed to the cluster when the DeploymentConfig is published
 	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 ```
@@ -27,12 +39,12 @@ This tutorial demonstrates the use of the `IDeploymentRepository` Api which can 
 ```csharp
 	// Upload the new binaries
 	await deploymentRepository.UploadApplicationBinaries(newAppIdentity, localBinariesDirPath, ConflictResolutionMode.FailIfBinariesExist);
-	
+
 	// Fetch and update the DeploymentConfig
 	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
-	deploymentConfig = deploymentConfig.RemoveApplication(oldAppIdentity, "cloudservice_deployment_id");
-	deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, "cloudservice_deployment_id");
-	
+	deploymentConfig = deploymentConfig.RemoveApplication(oldAppIdentity, "yams_cluster_id");
+	deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, "yams_cluster_id");
+
 	// The update will be performed when the new DeploymentConfig is published
 	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
 
@@ -42,44 +54,44 @@ This tutorial demonstrates the use of the `IDeploymentRepository` Api which can 
 
 * Remove an application
 ```csharp
-	// Update the DeploymentConfig
-	DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
-	
-	// Remove the app from the DeploymentConfig
-	deploymentConfig = deploymentConfig.RemoveApplication(appIdentity, "cloudservice_deployment_id");
+    // Update the DeploymentConfig
+    DeploymentConfig deploymentConfig = await deploymentRepository.FetchDeploymentConfig();
 
-	// The app will be shutdown when the DeploymentConfig is published
-	await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
+    // Remove the app from the DeploymentConfig
+    deploymentConfig = deploymentConfig.RemoveApplication(appIdentity, "yams_cluster_id");
 
-	// You can also cleanup the old binaries if you're not planing to revert back to it in the future.
-	await deploymentRepository.DeleteApplicationBinaries(appIdentity);
+    // The app will be shutdown when the DeploymentConfig is published
+    await deploymentRepository.PublishDeploymentConfig(deploymentConfig);
+
+    // You can also cleanup the old binaries if you're not planing to revert back to it in the future.
+    await deploymentRepository.DeleteApplicationBinaries(appIdentity);
 ```
 
 * Other DeploymentConfig Apis
 ```csharp
-	// Get the list of apps Ids
-	IEnumerable<string> appIds = deploymentConfig.ListApplications();
+    // Get the list of apps Ids
+    IEnumerable<string> appIds = deploymentConfig.ListApplications();
 
-	// Get the list of applications deployed to a given yams cluster
-	appIds = deploymentConfig.ListApplications("MyDeploymentId");
+    // Get the list of applications deployed to a given yams cluster
+    appIds = deploymentConfig.ListApplications("yams_cluster_id");
 
-	// Get the list of versions of a given app
-	IEnumerable<string> versions = deploymentConfig.ListVersions("MyAppId");
+    // Get the list of versions of a given app
+    IEnumerable<string> versions = deploymentConfig.ListVersions("MyAppId");
 
-	// Get the list of versions of a given app that are deployed on a given Yams cluster
-	versions = deploymentConfig.ListVersions("myAppId", "MyDeploymentId");
+    // Get the list of versions of a given app that are deployed on a given Yams cluster
+    versions = deploymentConfig.ListVersions("myAppId", "yams_cluster_id");
 
-	// List the yams clusters where an app is deployed
-	IEnumerable<string> deploymentIds = deploymentConfig.ListDeploymentIds("MyAppId");
+    // List the yams clusters where an app is deployed
+    IEnumerable<string> clusterIds = deploymentConfig.ListClusters("MyAppId");
 
-	// List the yams clusters where a version of an app is deployed
-	deploymentIds = deploymentConfig.ListDeploymentIds(new AppIdentity("MyAppId", "1.0.0"));
+    // List the yams clusters where a version of an app is deployed
+    clusterIds = deploymentConfig.ListClusters(new AppIdentity("MyAppId", "1.0.0"));
 
-	// Add a application to the DeploymentConfig.json
-	deploymentConfig.AddApplication(new AppIdentity("AppId", "2.0.0"), "DeploymentId");
+    // Add a application to the DeploymentConfig.json
+    deploymentConfig.AddApplication(new AppIdentity("AppId", "2.0.0"), "yams_cluster_id");
 
-	// Remove an application, a specific version or a specific deployment:
-	deploymentConfig.RemoveApplication("MyAppId");
-	deploymentConfig.RemoveApplication(new AppIdentity("MyAppId", "1.0.0"));
-	deploymentConfig.RemoveApplication(new AppIdentity("MyAppId", "1.0.0"), "MyDeploymentId");
+    // Remove an application, a specific version or a specific cluster:
+    deploymentConfig.RemoveApplication("MyAppId");
+    deploymentConfig.RemoveApplication(new AppIdentity("MyAppId", "1.0.0"));
+    deploymentConfig.RemoveApplication(new AppIdentity("MyAppId", "1.0.0"), "yams_cluster_id");
 ```
