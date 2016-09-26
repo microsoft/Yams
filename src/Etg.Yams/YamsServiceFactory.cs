@@ -19,8 +19,7 @@ namespace Etg.Yams
                 yamsConfig.InstanceUpdateDomain,
                 updateSessionStorageConnectionString).UpdateSessionManager;
 
-            IDeploymentConfigSerializer serializer = new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter()));
-            IDeploymentRepository deploymentRepository = new BlobStorageDeploymentRepository(deploymentRepositoryStorageConnectionString, serializer);
+            IDeploymentRepository deploymentRepository = BlobStorageDeploymentRepository.Create(deploymentRepositoryStorageConnectionString);
             return new YamsDiModule(yamsConfig, deploymentRepository, updateSessionManager).YamsService;
         }
     }
