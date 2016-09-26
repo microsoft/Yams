@@ -46,24 +46,24 @@ The `DeploymentConfig.json` file contains information about what application sho
         {
             "Id": "app1",
             "Version": "1.0.0",
-            "DeploymentIds": [ "YAMS_CLUSTER_ID" ]
+            "TargetClusters": [ "YAMS_CLUSTER_ID" ]
         },  
         {
             "Id": "app2",
             "Version": "1.0.1",
-            "DeploymentIds": [ "YAMS_CLUSTER_ID", "YAMS_CLUSTER_ID_OTHER" ]
+            "TargetClusters": [ "YAMS_CLUSTER_ID", "YAMS_CLUSTER_ID_OTHER" ]
         },
     ]
 }
 ```
 
-The `DeploymentIds` field identifies the Yams clusters where an application should be deployed. With a single Worker Role, it is the same deployment id of the Azure cloud service where the Yams cluster is deployed. If you have multiple Worker Roles in the same Azure cloud service, then it is a concatenation of the deployment id of the Azure cloud service and the name of the Worker Role.
+The `TargetClusters` field identifies the Yams clusters where an application should be deployed.
 
 ## Deploying Yams to a cloud service
 Yams can be deployed to Azure like any typical cloud service. The [Deploy YAMS tutorial](Deploy_YAMS.md) explains the steps needed to deploy Yams to Azure.
 
 ## Scanning blob storage
-When a Yams cluster is deployed to a cloud service, each instance in the cluster reads the `DeploymentConfig.json` file and deploy all apps that have the corresponding `DeploymentId` (typically the deployment id of the cloud service where the Yams cluster is deployed). Then, periodically, each Yams instance scans the `DeploymentConfig.json` file for changes and takes the appropriate actions. There are three types of changes that can occur:
+When a Yams cluster is deployed to a cloud service, each instance in the cluster reads the `DeploymentConfig.json` file and deploy all apps that have the corresponding `ClusterId` (typically the deployment id of the cloud service where the Yams cluster is deployed). Then, periodically, each Yams instance scans the `DeploymentConfig.json` file for changes and takes the appropriate actions. There are three types of changes that can occur:
 
 1. **An application is added** 
 2. **An application is removed**
@@ -84,7 +84,7 @@ Notice the ${Id} symbol in the ExeArgs which will be substituted with the actual
 * ${Version.Major}
 * ${Version.Minor}
 * ${Version.Build}
-* ${DeploymentId}: the cloud service deployment id.
+* ${ClusterId}: the Yams cluster id.
 * ${InstanceId}: the current VM instance id.
 
 Note that Yams also support running multiple versions of the same app side-by-side. Please see the [Deploy and Host an App in YAMS tutorial](Deploy&Host_an_App_in_YAMS.md) to learn more about this feature.
@@ -106,7 +106,7 @@ One of the main goals of Yams is sharing infrastructure to reduce cost. In fact,
 
 Another use case where sharing infrastructure can result in large savings is in testing environments. In fact, without sharing infrastructure, at least one additional VM is needed for testing each microservice. Considering that testing (such as running integration and end to end tests) doesn't have high performance requirements and that microservices are not all tested at the same time, using a pool of shared VMs for testing can significantly reduce the number of required VMs.
 
-To deploy multiple apps to the same Yams cluster, simply use the same deployment id as shown below:
+To deploy multiple apps to the same Yams cluster, simply use the same cluster id as shown below:
 ```
 {
     "Applications":
@@ -114,12 +114,12 @@ To deploy multiple apps to the same Yams cluster, simply use the same deployment
         {
             "Id": "app1",
             "Version": "1.0.0",
-            "DeploymentIds": [ "cluster_1_deploymentid" ]
+            "TargetClusters": [ "cluster_1_id" ]
         },  
         {
             "Id": "app2",
             "Version": "1.0.1",
-            "DeploymentIds": [ "cluster_1_deploymentid" ]
+            "TargetClusters": [ "cluster_1_id" ]
         },
     ]
 }
@@ -136,17 +136,17 @@ To address this issue, microservices can be deployed to different Yams clusters 
         {
             "Id": "Microservice1",
             "Version": "1.0.0",
-            "DeploymentIds": [ "cluster_1_deploymentid" ]
+            "TargetClusters": [ "cluster_1_id" ]
         },  
         {
             "Id": "Microservice2",
             "Version": "1.0.1",
-            "DeploymentIds": [ "cluster_2_deploymentid" ]
+            "TargetClusters": [ "cluster_2_id" ]
         },
         {
             "Id": "Microservice3",
             "Version": "2.0.0",
-            "DeploymentIds": [ "cluster_2_deploymentid" ]
+            "TargetClusters": [ "cluster_2_id" ]
         },        
     ]
 }
