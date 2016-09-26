@@ -10,9 +10,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using Etg.Yams.Json;
 using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Utils;
+using Newtonsoft.Json.Serialization;
+using Semver;
 
 namespace YamsStudio
 {
@@ -27,16 +30,21 @@ namespace YamsStudio
         private readonly DeploymentRepositoryManager _deploymentRepositoryManager;
         private DeploymentConfig _deploymentConfig;
         private readonly FileSystemWatcher _deploymentConfigFileWatcher;
+        private readonly IJsonSerializer _jsonSerializer;
+        private readonly IDeploymentConfigSerializer _deploymentConfigSerializer;
+
         public MainWindow()
         {
             InitializeComponent();
             ConnectionsListView.ItemsSource = _storageAccountConnections;
             IDeploymentRepositoryFactory deploymentRepositoryFactory = new DeploymentRepositoryFactory();
             _deploymentRepositoryManager = new DeploymentRepositoryManager(deploymentRepositoryFactory);
+            _jsonSerializer = new JsonSerializer(new DiagnosticsTraceWriter());
+            _deploymentConfigSerializer = new JsonDeploymentConfigSerializer(_jsonSerializer);
             if (File.Exists(SettingsFilePath))
             {
                 string json = File.ReadAllText(SettingsFilePath);
-                _storageAccountConnections = JsonUtils.Deserialize<List<StorageAccountConnectionInfo>>(json);
+                _storageAccountConnections = _jsonSerializer.Deserialize<List<StorageAccountConnectionInfo>>(json);
                 ConnectionsListView.ItemsSource = _storageAccountConnections;
             }
 
@@ -57,7 +65,7 @@ namespace YamsStudio
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            string json = JsonUtils.Serialize(_storageAccountConnections);
+            string json = _jsonSerializer.Serialize(_storageAccountConnections);
             File.WriteAllText(SettingsFilePath, json);
             _deploymentConfigFileWatcher.Dispose();
             base.OnClosing(e);
@@ -91,7 +99,7 @@ namespace YamsStudio
             AddNewApplicationDialog dialog = new AddNewApplicationDialog();
             if (dialog.ShowDialog() == true)
             {
-                AppIdentity appIdentity = new AppIdentity(dialog.ApplicationName, new Version(dialog.Version));
+                AppIdentity appIdentity = new AppIdentity(dialog.ApplicationName, SemVersion.Parse(dialog.Version));
                 await AddApplication(appIdentity, dialog.DeploymentId, dialog.BinariesPath);
             }
         }
@@ -117,7 +125,7 @@ namespace YamsStudio
 
         private void SaveLocalDeploymentConfig(StorageAccountConnectionInfo connectionInfo)
         {
-            string json = _deploymentConfig.RawData();
+            string json = _deploymentConfigSerializer.Serialize(_deploymentConfig);
             SaveLocalDeploymentConfig(connectionInfo, json);
         }
 
@@ -148,7 +156,7 @@ namespace YamsStudio
             AddNewApplicationDialog dialog = new AddNewApplicationDialog(appId);
             if (dialog.ShowDialog() == true)
             {
-                AppIdentity appIdentity = new AppIdentity(dialog.ApplicationName, new Version(dialog.Version));
+                AppIdentity appIdentity = new AppIdentity(dialog.ApplicationName, SemVersion.Parse(dialog.Version));
                 await AddApplication(appIdentity, dialog.DeploymentId, dialog.BinariesPath);
             }
         }
@@ -161,7 +169,7 @@ namespace YamsStudio
             AddNewDeploymentDialog dialog = new AddNewDeploymentDialog(appId, version);
             if (dialog.ShowDialog() == true)
             {
-                AppIdentity appIdentity = new AppIdentity(appId, new Version(version));
+                AppIdentity appIdentity = new AppIdentity(appId, SemVersion.Parse(version));
                 _deploymentConfig = _deploymentConfig.AddApplication(appIdentity, dialog.DeploymentId);
                 SaveLocalDeploymentConfig(connectionInfo);
             }
@@ -173,7 +181,7 @@ namespace YamsStudio
             string appId = GetSelectedAppId();
             string version = GetSelectedVersion();
 	        AppIdentity appIdentity = new AppIdentity(appId, version);
-			IEnumerable<string> availableDeploymentIds = _deploymentConfig.ListDeploymentIds(appIdentity);
+			IEnumerable<string> availableDeploymentIds = _deploymentConfig.ListClusters(appIdentity);
             UpdateVersionDialog dialog = new UpdateVersionDialog(appId, version, availableDeploymentIds);
             if (dialog.ShowDialog() == true)
             {
@@ -246,7 +254,7 @@ namespace YamsStudio
                 StorageAccountConnectionInfo connectionInfo = GetCurrentConnection();
                 IDeploymentRepository connection = _deploymentRepositoryManager.GetRepository(connectionInfo);
                 DeploymentConfig deploymentConfig = await connection.FetchDeploymentConfig();
-                SaveLocalDeploymentConfig(connectionInfo, deploymentConfig.RawData());
+                SaveLocalDeploymentConfig(connectionInfo, _deploymentConfigSerializer.Serialize(deploymentConfig));
             }
         }
 
@@ -298,11 +306,11 @@ namespace YamsStudio
             string path = GetDeploymentConfigLocalPath(connectionInfo.AccountName);
             if (File.Exists(path))
             {
-                return new DeploymentConfig(File.ReadAllText(path));
+                return _deploymentConfigSerializer.Deserialize(File.ReadAllText(path));
             }
 	        IDeploymentRepository connection = _deploymentRepositoryManager.GetRepository(connectionInfo);
 	        DeploymentConfig deploymentConfig = await connection.FetchDeploymentConfig();
-			SaveLocalDeploymentConfig(connectionInfo, deploymentConfig.RawData());
+			SaveLocalDeploymentConfig(connectionInfo, _deploymentConfigSerializer.Serialize(deploymentConfig));
 	        return deploymentConfig;
         }
 
@@ -322,7 +330,7 @@ namespace YamsStudio
             IEnumerable<AppIdentity> apps;
             if (id != null)
             {
-                apps = _deploymentConfig.ListVersions(id).Select(v => new AppIdentity(id, new Version(v)));
+                apps = _deploymentConfig.ListVersions(id).Select(v => new AppIdentity(id, SemVersion.Parse(v)));
             }
             else
             {
@@ -349,7 +357,7 @@ namespace YamsStudio
             IEnumerable<DeploymentInfo> deployments;
             if (appIdentity != null)
             {
-                deployments = _deploymentConfig.ListDeploymentIds(appIdentity).Select(deploymentId => new DeploymentInfo(appIdentity, deploymentId));
+                deployments = _deploymentConfig.ListClusters(appIdentity).Select(deploymentId => new DeploymentInfo(appIdentity, deploymentId));
             }
             else
             {
