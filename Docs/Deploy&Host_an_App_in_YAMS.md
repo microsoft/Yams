@@ -26,13 +26,13 @@ namespace WebApp
     {
         public static string Id;
         public static string Version;
-        public static string DeploymentId;
+        public static string ClusterId;
 
         static void Main(string[] args)
         {
             Id = args[0];
             Version = args[1];
-            DeploymentId = args[2];
+            ClusterId = args[2];
 
             string baseUrl = string.Format("http://{0}/{1}/", GetIpAddress(), Id);
             Console.WriteLine("Url is: " + baseUrl);
@@ -101,9 +101,9 @@ namespace WebApp
                 {{
                     'Id': '{0}',
                     'Version': '{1}',
-                    'Cloud Service Deployment Id': '{2}'
+                    'Yams Cluster Id': '{2}'
                 }}
-                ", App.Id, App.Version, App.DeploymentId);
+                ", App.Id, App.Version, App.ClusterId);
 
             return JObject.Parse(json);
         }
@@ -121,7 +121,7 @@ Before deploying an application in YAMS, we need to add a YAMS specific configur
 ```json
 {
     "ExeName": "WebApp.exe",
-    "ExeArgs": "${Id} ${Version} ${DeploymentId}"
+    "ExeArgs": "${Id} ${Version} ${ClusterId}"
 }
 ```
 
@@ -144,7 +144,7 @@ To deploy **WebApp** to YAMS, follow the steps below:
 		{
 			"Id": "WebApp",
 			"Version": "1.0.0",
-			"DeploymentIds": [ "MY_DEPLOYMENT_ID" ]
+			"TargetClusters": [ "MY_CLUSTER_ID" ]
 		}
 	]
 }
@@ -162,7 +162,7 @@ The result should look like the following:
 {
   "Id": "WebApp",
   "Version": "1.0.0",
-  "Cloud Service Deployment Id": "MY_DEPLOYMENT_ID"
+  "Yams Cluster Id": "MY_CLUSTER_ID"
 }
 ```
 
@@ -234,12 +234,12 @@ To deploy the new version (let's say `2.0.0`) side-by-side with the currently ru
 		{
 			"Id": "WebApp",
 			"Version": "1.1.0",
-			"DeploymentIds": [ "MY_DEPLOYMENT_ID" ]
+			"TargetClusters": [ "MY_DEPLOYMENT_ID" ]
 		},
 		{
 			"Id": "WebApp",
 			"Version": "2.0.0",
-			"DeploymentIds": [ "MY_DEPLOYMENT_ID" ]
+			"TargetClusters": [ "MY_DEPLOYMENT_ID" ]
 		}		
 	]
 }
