@@ -6,6 +6,8 @@ using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Utils;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Etg.Yams.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Etg.Yams.Azure.Storage
 {
@@ -24,6 +26,12 @@ namespace Etg.Yams.Azure.Storage
         public BlobStorageDeploymentRepository(string connectionString, IDeploymentConfigSerializer serializer) 
             : this(GetApplicationsContainerReference(connectionString), serializer)
         {
+        }
+
+        public static BlobStorageDeploymentRepository Create(string connectionString)
+        {
+            IDeploymentConfigSerializer serializer = new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter()));
+            return new BlobStorageDeploymentRepository(connectionString, serializer);
         }
 
         private static CloudBlobContainer GetApplicationsContainerReference(string connectionString)
