@@ -9,13 +9,13 @@ namespace WebApp
     {
         public static string Id;
         public static string Version;
-        public static string DeploymentId;
+        public static string ClusterId;
 
         static void Main(string[] args)
         {
             Id = args[0];
             Version = args[1];
-            DeploymentId = args[2];
+            ClusterId = args[2];
 
             Version version = new Version(Version);
             string apiVersion = string.Format("{0}.{1}", version.Major, version.Minor);
