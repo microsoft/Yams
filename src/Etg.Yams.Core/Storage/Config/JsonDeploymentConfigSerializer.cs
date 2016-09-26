@@ -41,7 +41,7 @@ namespace Etg.Yams.Storage.Config
             foreach (AppDeploymentConfig appDeploymentConfig in deploymentConfig)
             {
                 applicationsList.Add(new ApplicationData(appDeploymentConfig.AppIdentity.Id, 
-                    appDeploymentConfig.AppIdentity.Version.ToString(), appDeploymentConfig.ClustersIds.ToArray(), 
+                    appDeploymentConfig.AppIdentity.Version.ToString(), appDeploymentConfig.TargetClusters.ToArray(), 
                     appDeploymentConfig.Properties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)));
             }
             ApplicationsData applicationsData = new ApplicationsData(applicationsList.ToArray());

@@ -14,7 +14,7 @@ namespace Etg.Yams.Deploy
 
         public bool IsMatch(AppDeploymentConfig appDeploymentConfig)
         {
-            return appDeploymentConfig.ClustersIds.Contains(_clusterId);
+            return appDeploymentConfig.TargetClusters.Contains(_clusterId);
         }
     }
 }
