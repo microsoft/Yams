@@ -6,12 +6,15 @@ namespace Etg.Yams.Utils
     {
         public static int GetHashCode(IEnumerable enumerable)
         {
-            int hash = 19;
-            foreach (var element in enumerable)
+            unchecked
             {
-                hash = hash * 31 + element.GetHashCode();
+                int hash = 19;
+                foreach (var element in enumerable)
+                {
+                    hash = (hash*31) ^ element.GetHashCode();
+                }
+                return hash;
             }
-            return hash;
         }
     }
 }
