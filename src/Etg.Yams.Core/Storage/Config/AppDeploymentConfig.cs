@@ -2,11 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Etg.Yams.Application;
+using Etg.Yams.Install;
+using Etg.Yams.Utils;
 
 namespace Etg.Yams.Storage.Config
 {
     public class AppDeploymentConfig : AppInstallConfig
     {
+        public AppDeploymentConfig(AppIdentity appIdentity) : base(appIdentity)
+        {
+        }
+
         public AppDeploymentConfig(AppIdentity appIdentity, IEnumerable<string> targetClusters,
             IReadOnlyDictionary<string, string> properties) : base(appIdentity, properties)
         {
@@ -28,7 +34,39 @@ namespace Etg.Yams.Storage.Config
             return new AppDeploymentConfig(AppIdentity, clusterIds, Properties);
         }
 
-        protected bool Equals(AppDeploymentConfig other)
+        public AppDeploymentConfig RemoveClusterId(string clusterId)
+        {
+            if (!TargetClusters.Contains(clusterId))
+            {
+                throw new InvalidOperationException();
+            }
+            var clusterIds = TargetClusters.Where(c => c != clusterId);
+            return new AppDeploymentConfig(AppIdentity, clusterIds, Properties);
+        }
+
+        public AppDeploymentConfig AddProperty(string key, string value)
+        {
+            if (Properties.ContainsKey(key))
+            {
+                return this;
+            }
+            Dictionary<string, string> dict = Properties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            dict[key] = value;
+            return new AppDeploymentConfig(AppIdentity, TargetClusters, dict);
+        }
+
+        public AppDeploymentConfig RemoveProperty(string key)
+        {
+            if (Properties.ContainsKey(key))
+            {
+                return this;
+            }
+            Dictionary<string, string> dict = Properties.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            dict.Remove(key);
+            return new AppDeploymentConfig(AppIdentity, TargetClusters, dict);
+        }
+
+        protected new bool Equals(AppDeploymentConfig other)
         {
             return base.Equals(other) && (new HashSet<string>(TargetClusters).SetEquals(other.TargetClusters));
         }
@@ -45,7 +83,8 @@ namespace Etg.Yams.Storage.Config
         {
             unchecked
             {
-                return (base.GetHashCode()*397) ^ (TargetClusters != null ? TargetClusters.GetHashCode() : 0);
+                int hashCode = (base.GetHashCode()*397) ^ (TargetClusters != null ? HashCodeUtils.GetHashCode(TargetClusters) : 0);
+                return hashCode;
             }
         }
 

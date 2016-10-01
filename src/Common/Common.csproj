@@ -50,6 +50,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\DictionaryUtils.cs" />
     <Compile Include="Utils\FileUtils.cs" />
+    <Compile Include="Utils\HashCodeUtils.cs" />
     <Compile Include="Utils\TraceUtils.cs" />
   </ItemGroup>
   <ItemGroup>

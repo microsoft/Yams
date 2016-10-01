@@ -234,12 +234,12 @@ To deploy the new version (let's say `2.0.0`) side-by-side with the currently ru
 		{
 			"Id": "WebApp",
 			"Version": "1.1.0",
-			"TargetClusters": [ "MY_DEPLOYMENT_ID" ]
+			"TargetClusters": [ "MY_CLUSTER_ID" ]
 		},
 		{
 			"Id": "WebApp",
 			"Version": "2.0.0",
-			"TargetClusters": [ "MY_DEPLOYMENT_ID" ]
+			"TargetClusters": [ "MY_CLUSTER_ID" ]
 		}		
 	]
 }

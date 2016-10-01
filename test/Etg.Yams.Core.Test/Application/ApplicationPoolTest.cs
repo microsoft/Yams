@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
+using Etg.Yams.Install;
 using Etg.Yams.Json;
 using Etg.Yams.Process;
 using Etg.Yams.Storage.Config;
