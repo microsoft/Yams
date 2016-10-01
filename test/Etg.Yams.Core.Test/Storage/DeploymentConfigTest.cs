@@ -5,7 +5,6 @@ using Etg.Yams.Application;
 using Etg.Yams.Json;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Test.Utils;
-using Etg.Yams.Utils;
 using Xunit;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -23,17 +22,24 @@ namespace Etg.Yams.Test.Storage
 
         public DeploymentConfigTestFixture()
         {
-            DeploymentConfigJson = File.ReadAllText(_deploymentConfigFilePath);
             DeploymentConfigSerializer = new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter()));
-            DeploymentConfig = DeploymentConfigSerializer.Deserialize(DeploymentConfigJson);
+            DeploymentConfig = ParseTestDeploymentConfig();
+        }
+
+        public DeploymentConfig ParseTestDeploymentConfig()
+        {
+            DeploymentConfigJson = File.ReadAllText(_deploymentConfigFilePath);
+            return DeploymentConfigSerializer.Deserialize(DeploymentConfigJson);
         }
     }
     public class DeploymentConfigTest : IClassFixture<DeploymentConfigTestFixture>
     {
+        private readonly DeploymentConfigTestFixture _fixture;
         private DeploymentConfig _deploymentConfig;
         private readonly IDeploymentConfigSerializer _serializer;
         public DeploymentConfigTest(DeploymentConfigTestFixture fixture)
         {
+            _fixture = fixture;
             _deploymentConfig = fixture.DeploymentConfig;
             _serializer = fixture.DeploymentConfigSerializer;
         }
@@ -279,6 +285,47 @@ namespace Etg.Yams.Test.Storage
             Assert.True(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.1"), "clusterId2"));
             Assert.False(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.0"), "clusterId13"));
             Assert.False(_deploymentConfig.HasApplication(new AppIdentity("app1", "1.0.13"), "clusterId1"));
+        }
+
+        [Fact]
+        public void TestThatPropertiesAreParsed()
+        {
+            AppDeploymentConfig config = _deploymentConfig.GetApplicationConfig(new AppIdentity("app2", "1.0.0"));
+            Assert.True(config.Properties.ContainsKey("NodeType"));
+            Assert.Equal("PROD", config.Properties["NodeType"]);
+        }
+
+        [Fact]
+        public void TestSetApplicationConfig()
+        {
+            AppIdentity appIdentity = new AppIdentity("newApp", "1.0.0");
+            AppDeploymentConfig config = new AppDeploymentConfig(appIdentity, new [] {"clusterId1"});
+            config = config.AddProperty("Foo", "Bar");
+            var deploymentConfig = _deploymentConfig.SetApplicationConfig(config);
+            Assert.Equal("Bar", deploymentConfig.GetApplicationConfig(appIdentity).Properties["Foo"]);
+        }
+
+        [Fact]
+        public void TestThatSetApplicationConfigOverwritesExisting()
+        {
+            AppIdentity appIdentity = new AppIdentity("app1", "1.0.0");
+            AppDeploymentConfig config = _deploymentConfig.GetApplicationConfig(appIdentity);
+            config = config.AddProperty("key1", "value1");
+            var deploymentConfig = _deploymentConfig.SetApplicationConfig(config);
+            Assert.Equal("value1", deploymentConfig.GetApplicationConfig(appIdentity).Properties["key1"]);
+
+            config = config.AddProperty("key2", "value2");
+            deploymentConfig = deploymentConfig.SetApplicationConfig(config);
+            Assert.Equal("value1", deploymentConfig.GetApplicationConfig(appIdentity).Properties["key1"]);
+            Assert.Equal("value2", deploymentConfig.GetApplicationConfig(appIdentity).Properties["key2"]);
+        }
+
+        [Fact]
+        public void TestEqualsAndHashCode()
+        {
+            DeploymentConfig deploymentConfig = _fixture.ParseTestDeploymentConfig();
+            Assert.Equal(_deploymentConfig, deploymentConfig);
+            Assert.Equal(_deploymentConfig.GetHashCode(), deploymentConfig.GetHashCode());
         }
     }
 }

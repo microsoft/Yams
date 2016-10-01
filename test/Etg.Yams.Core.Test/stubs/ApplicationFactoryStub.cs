@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Etg.Yams.Application;
+using Etg.Yams.Install;
 using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Test.stubs

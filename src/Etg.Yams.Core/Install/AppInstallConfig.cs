@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Etg.Yams.Application;
+using Etg.Yams.Storage.Config;
+using Etg.Yams.Utils;
 
-namespace Etg.Yams.Storage.Config
+namespace Etg.Yams.Install
 {
     public class AppInstallConfig
     {
@@ -37,7 +39,7 @@ namespace Etg.Yams.Storage.Config
             unchecked
             {
                 var hashCode = (AppIdentity != null ? AppIdentity.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Properties != null ? Properties.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Properties != null ? HashCodeUtils.GetHashCode(Properties) : 0);
                 return hashCode;
             }
         }

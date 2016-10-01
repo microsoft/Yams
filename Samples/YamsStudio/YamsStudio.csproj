@@ -40,27 +40,27 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Etg.Yams, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Etg.Yams.1.1.0-test\lib\net451\Etg.Yams.dll</HintPath>
+      <HintPath>..\packages\Etg.Yams.1.1.0-rc\lib\net451\Etg.Yams.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Etg.Yams.AzureBlobStorageDeploymentRepository, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Etg.Yams.1.1.0-test\lib\net451\Etg.Yams.AzureBlobStorageDeploymentRepository.dll</HintPath>
+      <HintPath>..\packages\Etg.Yams.1.1.0-rc\lib\net451\Etg.Yams.AzureBlobStorageDeploymentRepository.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Etg.Yams.AzureBlobStorageUpdateSession, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Etg.Yams.1.1.0-test\lib\net451\Etg.Yams.AzureBlobStorageUpdateSession.dll</HintPath>
+      <HintPath>..\packages\Etg.Yams.1.1.0-rc\lib\net451\Etg.Yams.AzureBlobStorageUpdateSession.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Etg.Yams.AzureUtils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Etg.Yams.1.1.0-test\lib\net451\Etg.Yams.AzureUtils.dll</HintPath>
+      <HintPath>..\packages\Etg.Yams.1.1.0-rc\lib\net451\Etg.Yams.AzureUtils.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Etg.Yams.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Etg.Yams.1.1.0-test\lib\net451\Etg.Yams.Common.dll</HintPath>
+      <HintPath>..\packages\Etg.Yams.1.1.0-rc\lib\net451\Etg.Yams.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Etg.Yams.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Etg.Yams.1.1.0-test\lib\net451\Etg.Yams.Core.dll</HintPath>
+      <HintPath>..\packages\Etg.Yams.1.1.0-rc\lib\net451\Etg.Yams.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">

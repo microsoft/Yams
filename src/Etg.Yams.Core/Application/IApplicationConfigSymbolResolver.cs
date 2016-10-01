@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Etg.Yams.Install;
 using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Application

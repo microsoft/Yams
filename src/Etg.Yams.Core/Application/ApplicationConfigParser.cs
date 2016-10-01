@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Etg.Yams.Install;
 using Etg.Yams.Json;
 using Etg.Yams.Storage.Config;
 
