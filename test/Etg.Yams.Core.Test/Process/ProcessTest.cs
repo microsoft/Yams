@@ -13,19 +13,22 @@ namespace Etg.Yams.Test.Process
         private readonly string _testDirPath;
         public readonly string SuicidalExePath;
         public readonly string HangingExePath;
+        public readonly string IPCExePath;
 
         const string SuicidalProcessExeName = "SuicidalProcess.exe";
         const string HangingProcessExeName = "HangingProcess.exe";
+        const string IPCProcess = "IPCProcess.exe";
 
         public ProcessTestFixture()
         {
             _testDirPath = Path.Combine(Directory.GetCurrentDirectory(), "ProcessTest");
             SuicidalExePath = Path.Combine(_testDirPath, SuicidalProcessExeName);
             HangingExePath = Path.Combine(_testDirPath, HangingProcessExeName);
+            IPCExePath = Path.Combine(_testDirPath, IPCProcess);
 
             Directory.CreateDirectory(_testDirPath);
 
-            string[] exes = { SuicidalProcessExeName, HangingProcessExeName };
+            string[] exes = { SuicidalProcessExeName, HangingProcessExeName, IPCProcess };
             foreach (string exeName in exes)
             {
                 TestUtils.CopyExe(exeName, _testDirPath);
@@ -35,13 +38,15 @@ namespace Etg.Yams.Test.Process
 
     public class ProcessTest : IClassFixture<ProcessTestFixture>
     {
-        private string _hangingExePath;
-        private string _suicidalExePath;
+        private readonly string _hangingExePath;
+        private readonly string _suicidalExePath;
+        private readonly string _ipcExePath;
 
         public ProcessTest(ProcessTestFixture fixture)
         {
             _hangingExePath = fixture.HangingExePath;
             _suicidalExePath = fixture.SuicidalExePath;
+            _ipcExePath = fixture.IPCExePath;
         }
 
         [Fact]
@@ -104,6 +109,14 @@ namespace Etg.Yams.Test.Process
             IProcess suicidalProcess = new Yams.Process.Process(_suicidalExePath, exeArgs, false);
             Assert.Equal(_suicidalExePath, suicidalProcess.ExePath);
             Assert.Equal(exeArgs, suicidalProcess.ExeArgs);
+        }
+
+        [Fact]
+        public async Task TestThatStartedMessageIsReceivedFromProcessWithIPC()
+        {
+            IProcess ipcProcess = new Yams.Process.Process(_ipcExePath, "Foo", true);
+            await ipcProcess.Start();
+            await ipcProcess.Kill();
         }
     }
 }

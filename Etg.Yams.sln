@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureUtilsTest", "test\Azur
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Etg.Yams.Core", "src\Etg.Yams.Core\Etg.Yams.Core.csproj", "{7145E485-34FA-4632-89B0-BD27C96AF69C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPCProcess", "test\IPCProcess\IPCProcess.csproj", "{4F7B6739-5452-4F8C-8904-72112FAB3C1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +105,10 @@ Global
 		{7145E485-34FA-4632-89B0-BD27C96AF69C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7145E485-34FA-4632-89B0-BD27C96AF69C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7145E485-34FA-4632-89B0-BD27C96AF69C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F7B6739-5452-4F8C-8904-72112FAB3C1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F7B6739-5452-4F8C-8904-72112FAB3C1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F7B6739-5452-4F8C-8904-72112FAB3C1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F7B6739-5452-4F8C-8904-72112FAB3C1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +129,7 @@ Global
 		{E66F281C-BD50-45B0-AAEF-FB87E4C9D0CC} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
 		{2FE963BD-D826-4CC5-8A63-864CDA212233} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
 		{7145E485-34FA-4632-89B0-BD27C96AF69C} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
+		{4F7B6739-5452-4F8C-8904-72112FAB3C1E} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8

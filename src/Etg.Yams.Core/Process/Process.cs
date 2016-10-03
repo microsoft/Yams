@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
@@ -65,12 +66,36 @@ namespace Etg.Yams.Process
                     _process.StartInfo.UseShellExecute = false;
                     _process.StartInfo.CreateNoWindow = true;
                 }
-                if (!_process.Start())
+
+                using (AnonymousPipeServerStream pipeServer =
+                    new AnonymousPipeServerStream(PipeDirection.In,
+                        HandleInheritability.Inheritable))
                 {
-                    await ReleaseResources();
-                    throw new Exception($"The OS failed to start the process at {_exePath} with arguments {_exeArgs}");
+                    _process.StartInfo.Arguments += " " + pipeServer.GetClientHandleAsString();
+                    if (!_process.Start())
+                    {
+                        await ReleaseResources();
+                        throw new Exception(
+                            $"The OS failed to start the process at {_exePath} with arguments {_exeArgs}");
+                    }
+                    _isRunning = true;
+                    pipeServer.DisposeLocalCopyOfClientHandle();
+
+                    using (StreamReader sr = new StreamReader(pipeServer))
+                    {
+                        string msg;
+
+                        // Wait for 'sync message' from the server.
+                        do
+                        {
+                            Debug.WriteLine("Yams is waiting for the app to finish initializing");
+                            msg = sr.ReadLine();
+                        }
+                        while (!msg.StartsWith("[STARTED]"));
+
+                        Console.WriteLine("App Initialized and ready to receive requests");
+                    }
                 }
-                _isRunning = true;
             });
         }
 

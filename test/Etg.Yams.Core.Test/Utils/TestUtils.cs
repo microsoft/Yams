@@ -34,7 +34,13 @@ namespace Etg.Yams.Test.Utils
 
         public static void CopyExe(string exeName, string destPath)
         {
-            File.Copy(Path.Combine(GetTestExesDirPath(), exeName), Path.Combine(destPath, exeName), overwrite: true);
+            try
+            {
+                File.Copy(Path.Combine(GetTestExesDirPath(), exeName), Path.Combine(destPath, exeName), overwrite: true);
+            }
+            catch (IOException)
+            {
+            }
         }
     }
 }
