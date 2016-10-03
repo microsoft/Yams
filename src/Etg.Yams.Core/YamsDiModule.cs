@@ -136,7 +136,7 @@ namespace Etg.Yams
             builder.Register<IApplicationConfigSymbolResolver>(c =>
                 {
                     YamsConfig config = c.Resolve<YamsConfig>();
-                    return new ApplicationConfigSymbolResolver(config.ClusterId, config.InstanceId);
+                    return new ApplicationConfigSymbolResolver(config.ClusterId, config.InstanceId, config.ClusterProperties);
                 }).SingleInstance();
         }
 

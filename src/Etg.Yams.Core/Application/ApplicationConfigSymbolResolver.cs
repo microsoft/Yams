@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Etg.Yams.Install;
 using Etg.Yams.Storage.Config;
@@ -7,11 +8,17 @@ namespace Etg.Yams.Application
     public class ApplicationConfigSymbolResolver : IApplicationConfigSymbolResolver
     {
         private readonly string _instanceId;
+        private readonly IReadOnlyDictionary<string, string> _clusterProperties;
         private readonly string _clusterId;
 
-        public ApplicationConfigSymbolResolver(string clusterId, string instanceId)
+        public ApplicationConfigSymbolResolver(string clusterId, string instanceId) : this(clusterId, instanceId, new Dictionary<string, string>())
+        {
+        }
+
+        public ApplicationConfigSymbolResolver(string clusterId, string instanceId, IReadOnlyDictionary<string, string> clusterProperties)
         {
             _instanceId = instanceId;
+            _clusterProperties = clusterProperties;
             _clusterId = clusterId;
         }
 
@@ -34,7 +41,7 @@ namespace Etg.Yams.Application
                     symbolValue = appIdentity.Version.Minor.ToString();
                     break;
                 case "Version.Build":
-                    symbolValue = appIdentity.Version.Build;
+                    symbolValue = appIdentity.Version.Patch.ToString();
                     break;
                 case "Version.Prerelease":
                     symbolValue = appIdentity.Version.Prerelease;
@@ -50,7 +57,10 @@ namespace Etg.Yams.Application
                     symbolValue = _instanceId;
                     break;
                 default:
-                    appInstallConfig.Properties.TryGetValue(symbol, out symbolValue);
+                    if (!appInstallConfig.Properties.TryGetValue(symbol, out symbolValue))
+                    {
+                        _clusterProperties.TryGetValue(symbol, out symbolValue);
+                    }
                     break;
             }
             return Task.FromResult(symbolValue);
