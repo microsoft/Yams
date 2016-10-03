@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application\ApplicationConfigParserTest.cs" />
+    <Compile Include="Application\ApplicationConfigSymbolResolverTest.cs" />
     <Compile Include="Application\ApplicationPoolTest.cs" />
     <Compile Include="Application\ApplicationTest.cs" />
     <Compile Include="EndToEndTest.cs" />
