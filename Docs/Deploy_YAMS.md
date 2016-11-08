@@ -12,10 +12,6 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
       {
           public WorkerRoleConfig()
           {
-              UpdateFrequencyInSeconds =
-                  Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("UpdateFrequencyInSeconds"));
-              ApplicationRestartCount =
-                  Convert.ToInt32(RoleEnvironment.GetConfigurationSettingValue("ApplicationRestartCount"));
               StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
               CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
           }
@@ -23,10 +19,6 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
           public string StorageDataConnectionString { get; }
 
           public string CurrentRoleInstanceLocalStoreDirectory { get; }
-
-          public int UpdateFrequencyInSeconds { get; }
-
-          public int ApplicationRestartCount { get; }
       }
   ```
 
@@ -52,11 +44,9 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
                   return Constants.TestDeploymentId;
               }
 
-              string deploymentId = RoleEnvironment.IsEmulated
+              return RoleEnvironment.IsEmulated
                   ? Constants.TestDeploymentId
                   : RoleEnvironment.DeploymentId;
-
-	      return deploymentId;
           }
       }
   ```
@@ -84,8 +74,8 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
                   RoleEnvironment.CurrentRoleInstance.Id,
                   config.CurrentRoleInstanceLocalStoreDirectory)
                   // optional configs
-                  .SetCheckForUpdatesPeriodInSeconds(config.UpdateFrequencyInSeconds)
-                  .SetApplicationRestartCount(config.ApplicationRestartCount)
+                  .SetCheckForUpdatesPeriodInSeconds(5)
+                  .SetApplicationRestartCount(3)
                   .Build();
               _yamsService = YamsServiceFactory.Create(yamsConfig,
                   deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
