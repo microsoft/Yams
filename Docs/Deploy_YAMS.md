@@ -56,13 +56,7 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
                   ? Constants.TestDeploymentId
                   : RoleEnvironment.DeploymentId;
 
-              if (isSingleClusterDeployment)
-              {
-                  return deploymentId;
-              }
-
-              // This concatenates the Cloud Service deployment id and the role name so that there is a unique name for each role in the Cloud Service
-              return $"{deploymentId}_{RoleEnvironment.CurrentRoleInstance.Role.Name}";
+	      return deploymentId;
           }
       }
   ```
@@ -73,11 +67,6 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
       public class YamsWorkerRole : RoleEntryPoint
       {
           private IYamsService _yamsService;
-
-          protected virtual bool IsSingleClusterDeployment
-          {
-              get { return true; }
-          }
 
           [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
           public override void Run()
@@ -155,8 +144,6 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
           }
       }
   ```
-
-You can create additional Worker Roles that inherit from this Worker Role. If you create multiple Worker Roles, you must override `IsSingleClusterDeployment` and set it to be `false` in each Worker Role. This will make the YAMS cluster id a concatenation of the Azure cloud service deployment id and the Worker Role name.
 
 YAMS relies on Azure blob storage to deploy applications. It uses the `dataConnectionString` provided in the `YamsConfig` to connect to the appropriate blob storage.
 
