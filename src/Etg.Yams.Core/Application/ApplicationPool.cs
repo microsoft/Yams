@@ -19,17 +19,19 @@ namespace Etg.Yams.Application
         {
             if (HasApplication(application.Identity))
             {
-                throw new ArgumentException(string.Format("Cannot add application {0} to the application pool because it is already there", application.Identity));    
+                throw new ArgumentException(
+                    $"Cannot add application {application.Identity} to the application pool because it is already there");
             }
 
             if (! await StartApplication(application))
             {
-                throw new Exception(string.Format("Failed to start application {0}", application.Identity));
+                throw new Exception($"Failed to start application {application.Identity}");
             }
 
             if (!_applications.TryAdd(application.Identity, application))
             {
-                throw new Exception(string.Format("Could not add the application {0} to the concurent dictionary. This is likely a bug", application.Identity));
+                throw new Exception(
+                    $"Could not add the application {application.Identity} to the concurent dictionary. This is likely a bug");
             }
             application.Exited += OnApplicationExited;
         }
@@ -48,19 +50,19 @@ namespace Etg.Yams.Application
             return _applications[appIdentity];
         }
 
-        public IEnumerable<IApplication> Applications {
-            get { return _applications.Values; }
-        }
+        public IEnumerable<IApplication> Applications => _applications.Values;
 
         public async Task RemoveApplication(AppIdentity appIdentity)
         {
             IApplication application;
             if (!_applications.TryRemove(appIdentity, out application))
             {
-                throw new ArgumentException(string.Format("Cannot remove application {0} because it doesn't exist in the pool", appIdentity));
+                throw new ArgumentException(
+                    $"Cannot remove application {appIdentity} because it doesn't exist in the pool");
             }
             application.Exited -= OnApplicationExited;
             await application.Stop();
+            application.Dispose();
             await Task.Delay(5000);
         }
 
@@ -78,7 +80,7 @@ namespace Etg.Yams.Application
         private void OnApplicationExited(object sender, ApplicationExitedArgs args)
         {
             AppIdentity appIdentity = args.AppIdentity;
-            Trace.TraceError("Application {0} exited unexpectedly with message {1}", appIdentity, args.Message);
+            Trace.TraceError($"Application {appIdentity} exited unexpectedly with message {args.Message}");
             if (_applications.ContainsKey(appIdentity))
             {
                 RemoveApplication(appIdentity).Wait();
@@ -96,10 +98,13 @@ namespace Etg.Yams.Application
 
         public void Dispose()
         {
+            var tasks = new List<Task>();
             foreach (IApplication application in Applications)
             {
+                tasks.Add(RemoveApplication(application.Identity));
                 application.Dispose();
             }
+            Task.WhenAll(tasks).Wait();
         }
     }
 }

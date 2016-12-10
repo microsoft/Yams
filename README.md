@@ -10,6 +10,7 @@ YAMS
 * **Versioning** of microservices, quick **updates**, **reverts**, etc. 
 * Support for **Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates, including first-class support for **Azure Upgrade Domains**.
 * Microservices can be developed in **any programming language** and deployed with YAMS (as long as your service can be started with an exe).
+* **Health monitoring** and **graceful shutdown** of microservices.
 
 YAMS has first-class support for deploying applications from Azure **blob storage**, but with its pluggable storage architecture, other providers such as SQL Server or file storage can be created and plugged in as well.
 

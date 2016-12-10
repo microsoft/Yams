@@ -1,6 +1,11 @@
 {
-    "IgnoredProjects": [
-    ],
+  "IgnoredProjects": [
+    "Stubs",
+    "AzureBlobStorageUpdateSession",
+    "Etg.Yams.Core",
+    "AzureTestUtils",
+    "AzureUtils"
+  ],
     "IgnoredInterfaces": [
     ],
 	"StubInternalInterfaces": false

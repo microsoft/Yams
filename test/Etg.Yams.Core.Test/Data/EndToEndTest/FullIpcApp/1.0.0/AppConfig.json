@@ -1,0 +1,7 @@
+﻿{
+  "ExeName": "FullIpcProcess.exe",
+  "ExeArgs": "foo1 foo2",
+  "MonitorInitialization": true,
+  "MonitorHealth": true,
+  "GracefulShutdown":  true
+}

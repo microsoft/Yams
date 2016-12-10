@@ -5,7 +5,7 @@ namespace Etg.Yams.Process
 {
     public interface IProcess : IProcessInfo, IDisposable
     {
-        Task Start();
+        Task Start(string args);
 
         Task Close();
 

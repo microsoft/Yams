@@ -88,10 +88,10 @@ namespace Etg.Yams.Test
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
 
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)), "TestProcess");
 
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
 
@@ -120,26 +120,32 @@ namespace Etg.Yams.Test
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
 
-            File.Copy(Path.Combine(_dataRootPath, "DeploymentConfigUpdate.json"), Path.Combine(_deploymentDirPath, "DeploymentConfig.json"), overwrite:true);
+            UploadDeploymentConfig("DeploymentConfigUpdate.json");
 
             await applicationUpdateManager.CheckForUpdates();
 
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
 
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 1)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 0, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
-            AssertThatApplicationIsRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 1)), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 0, 0)), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)), "TestProcess");
 
             AssertThatNumberOfApplicationsRunningIs(5);
+        }
+
+        private void UploadDeploymentConfig(string deploymentConfigFileName)
+        {
+            File.Copy(Path.Combine(_dataRootPath, deploymentConfigFileName), Path.Combine(_deploymentDirPath,
+                "DeploymentConfig.json"), overwrite: true);
         }
 
         [Fact]
         public async Task TestThatClusterPropertiesAreUsedToMatchDeployments()
         {
-            File.Copy(Path.Combine(_dataRootPath, "DeploymentConfigWithProperties.json"), Path.Combine(_deploymentDirPath, "DeploymentConfig.json"), overwrite: true);
+            UploadDeploymentConfig("DeploymentConfigWithProperties.json");
             var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
                 _applicationsInstallPath).SetShowApplicationProcessWindow(false)
                 .AddClusterProperty("NodeType", "Test")
@@ -150,7 +156,7 @@ namespace Etg.Yams.Test
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
 
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
+            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)), "TestProcess");
 
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0, "beta")));
@@ -160,12 +166,151 @@ namespace Etg.Yams.Test
             AssertThatNumberOfApplicationsRunningIs(1);
         }
 
-        public void AssertThatApplicationIsRunning(AppIdentity appIdentity)
+        [Fact]
+        public async Task TestApplicationWithHeartBeat()
         {
+            await RunHeartBeatTest(TimeSpan.FromSeconds(3));
+        }
+
+        /// <summary>
+        /// The current behaviour is to not terminate the app if it has slow (or no) heart beat but to only log errors.
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task TestApplicationWithHeartBeatTimeout()
+        {
+            await RunHeartBeatTest(TimeSpan.FromSeconds(1));
+        }
+
+        private async Task RunHeartBeatTest(TimeSpan heartBeatTimeout)
+        {
+            await CopyAppBinariesToAppDeploymentDir("HeartBeatApp", "HeartBeatProcess", "1.0.0");
+            UploadDeploymentConfig("DeploymentConfigHeartBeatApp.json");
+
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                    _applicationsInstallPath)
+                .SetAppHeartBeatTimeout(heartBeatTimeout)
+                .SetShowApplicationProcessWindow(false).Build();
+
+            InitializeYamsService(yamsConfig);
+
+            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
+            await applicationUpdateManager.CheckForUpdates();
+
+            AssertThatApplicationIsRunning(new AppIdentity("HeartBeatApp", new SemVersion(1, 0, 0)));
+            // wait for a bit to make sure heart beat messages are not failing
+            await Task.Delay(1000);
+            AssertThatApplicationIsRunning(new AppIdentity("HeartBeatApp", new SemVersion(1, 0, 0)));
+        }
+
+        [Fact]
+        public async Task TestApplicationWithMonitoredInitialization()
+        {
+            await CopyAppBinariesToAppDeploymentDir("MonitorInitApp", "MonitorInitProcess", "1.0.0");
+            UploadDeploymentConfig("DeploymentConfigMonitorInitApp.json");
+
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                _applicationsInstallPath).SetAppInitTimeout(TimeSpan.FromSeconds(10))
+                .SetShowApplicationProcessWindow(false).Build();
+
+            InitializeYamsService(yamsConfig);
+
+            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
+            await applicationUpdateManager.CheckForUpdates();
+
+            AssertThatApplicationIsRunning(new AppIdentity("MonitorInitApp", new SemVersion(1, 0, 0)));
+        }
+
+        [Fact]
+        public async Task TestApplicationWithMonitoredInitializationTimeout()
+        {
+            await CopyAppBinariesToAppDeploymentDir("MonitorInitApp", "MonitorInitProcess", "1.0.0");
+            UploadDeploymentConfig("DeploymentConfigMonitorInitApp.json");
+
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                    _applicationsInstallPath).SetAppInitTimeout(TimeSpan.FromSeconds(1))
+                .SetShowApplicationProcessWindow(false).Build();
+
+            InitializeYamsService(yamsConfig);
+
+            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
+            await applicationUpdateManager.CheckForUpdates();
+
+            AssertThatApplicationIsNotRunning(new AppIdentity("MonitorInitApp", new SemVersion(1, 0, 0)));
+        }
+
+        [Fact]
+        public async Task TestApplicationWithGracefulShutdown()
+        {
+            await RunGracefulShutdownTest(TimeSpan.FromSeconds(10));
+        }
+
+        [Fact]
+        public async Task TestApplicationWithGracefulShutdownTimeout()
+        {
+            await RunGracefulShutdownTest(TimeSpan.FromSeconds(1));
+        }
+
+        private async Task RunGracefulShutdownTest(TimeSpan gracefulShutdownTimeout)
+        {
+            await CopyAppBinariesToAppDeploymentDir("GracefulShutdownApp", "GracefullShutdownProcess", "1.0.0");
+            UploadDeploymentConfig("DeploymentConfigGracefulShutdownApp.json");
+
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                    _applicationsInstallPath).SetAppGracefulShutdownTimeout(gracefulShutdownTimeout)
+                .SetShowApplicationProcessWindow(false).Build();
+
+            InitializeYamsService(yamsConfig);
+
+            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
+            await applicationUpdateManager.CheckForUpdates();
+            AssertThatApplicationIsRunning(new AppIdentity("GracefulShutdownApp", new SemVersion(1, 0, 0)));
+
+            UploadDeploymentConfig("DeploymentConfigNoApps.json");
+            await applicationUpdateManager.CheckForUpdates();
+            AssertThatApplicationIsNotRunning(new AppIdentity("GracefulShutdownApp", new SemVersion(1, 0, 0)));
+        }
+
+        [Fact]
+        public async Task TestFullIpcApp()
+        {
+            await CopyAppBinariesToAppDeploymentDir("FullIpcApp", "FullIpcProcess", "1.0.0");
+            UploadDeploymentConfig("DeploymentConfigFullIpcApp.json");
+
+            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+                    _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
+
+            InitializeYamsService(yamsConfig);
+
+            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
+            await applicationUpdateManager.CheckForUpdates();
+            AssertThatApplicationIsRunning(new AppIdentity("FullIpcApp", new SemVersion(1, 0, 0)));
+
+            await Task.Delay(5000);
+
+            UploadDeploymentConfig("DeploymentConfigNoApps.json");
+            await applicationUpdateManager.CheckForUpdates();
+            AssertThatApplicationIsNotRunning(new AppIdentity("FullIpcApp", new SemVersion(1, 0, 0)));
+        }
+
+        public void AssertThatApplicationIsRunning(AppIdentity appIdentity, string exeName = "")
+        {
+            if (String.IsNullOrEmpty(exeName))
+            {
+                exeName = appIdentity.Id;
+            }
             IApplicationPool applicationPool = _yamsDiModule.Container.Resolve<IApplicationPool>();
             Assert.True(applicationPool.HasApplication(appIdentity), $"App {appIdentity} should be running!");
-            string processOutput = TestUtils.GetTestApplicationOutput(_applicationsInstallPath, appIdentity);
-            Assert.Equal("TestProcess.exe foo1 foo2", processOutput);
+            string processOutput = TestUtils.GetTestApplicationOutput(_applicationsInstallPath, appIdentity, exeName);
+            Assert.Equal($"{exeName}.exe foo1 foo2", processOutput);
+        }
+
+        private async Task CopyAppBinariesToAppDeploymentDir(string appName, string processName, string version)
+        {
+            await FileUtils.CopyDir(
+                srcPath: Path.Combine(Directory.GetCurrentDirectory(), "Data", processName),
+                destPath: Path.Combine(Directory.GetCurrentDirectory(), "EndToEndTest", "Deployments", appName, version),
+                overwrite: true);
         }
 
         public void AssertThatApplicationIsNotRunning(AppIdentity appIdentity)

@@ -11,10 +11,10 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestThatProcessIsRestarted()
         {
-            ProcessStub process = new ProcessStub("exePath", "exeArgs");
+            ProcessStub process = new ProcessStub("exePath");
 
             SelfRestartingProcess selfRestartingProcess = new SelfRestartingProcess(process, 1);
-            await selfRestartingProcess.Start();
+            await selfRestartingProcess.Start("exeArgs");
             Assert.True(process.IsRunning);
 
             process.RaiseExitedEvent();
@@ -25,14 +25,14 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestThatExitedIsRaisedIfProcessFailsToRestart()
         {
-            ProcessStub process = new ProcessStub("exePath", "exeArgs");
+            ProcessStub process = new ProcessStub("exePath");
             SelfRestartingProcess selfRestartingProcess = new SelfRestartingProcess(process, 1);
             bool exitedFired = false;
             selfRestartingProcess.Exited += (sender, args) => {
                 exitedFired = true;
             };
 
-            await selfRestartingProcess.Start();
+            await selfRestartingProcess.Start("exeArgs");
             Assert.True(process.IsRunning);
 
             process.ShouldStart = false;
@@ -46,7 +46,7 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestThatExitedIsRaisedIfProcessMaxRetryCountIsReached()
         {
-            ProcessStub process = new ProcessStub("exePath", "exeArgs");
+            ProcessStub process = new ProcessStub("exePath");
             SelfRestartingProcess selfRestartingProcess = new SelfRestartingProcess(process, 1);
             bool exitedFired = false;
             selfRestartingProcess.Exited += (sender, args) =>
@@ -54,7 +54,7 @@ namespace Etg.Yams.Test.Process
                 exitedFired = true;
             };
 
-            await selfRestartingProcess.Start();
+            await selfRestartingProcess.Start("exeArgs");
             Assert.True(process.IsRunning);
 
             process.RaiseExitedEvent();

@@ -8,36 +8,7 @@ namespace Etg.Yams.Test.Process
     public class ProcessStopperTest
     {
         [Fact]
-        public void TestThatProcessIsStoppedGracefullyFirst()
-        {
-            bool resourcesReleased = false;
-            IProcess process = new StubIProcess()
-                .Close(() =>
-                {
-                    throw new Exception("Close should not be called if the process has exited gracefully");
-                })
-                .Kill(() =>
-                {
-                    throw new Exception("Kill should not be called if the process has exited gracefully");
-                })
-                .HasExited_Get(() => true)
-                .ExePath_Get(() => "exePath")
-                .ExeArgs_Get(() => "exeArgs")
-                .ReleaseResources(() =>
-                {
-                    resourcesReleased = true;
-                    return Task.FromResult(true);
-                }
-            );
-
-            IProcessStopper processStopper = new ProcessStopper(0);
-            processStopper.StopProcess(process);
-
-            Assert.True(resourcesReleased);
-        }
-
-        [Fact]
-        public void TestThatProcessIsClosedIfItWontExitGracefullyExit()
+        public void TestThatProcessIsClosedFirst()
         {
             bool resourcesReleased = false;
             bool hasExited = false;
@@ -69,7 +40,7 @@ namespace Etg.Yams.Test.Process
         }
 
         [Fact] 
-        public void TestThatProcessIsKilledIfItWontExitGracefullyExitNorClose()
+        public void TestThatProcessIsKilledIfItWontClose()
         {
             bool resourcesReleased = false;
             bool hasExited = false;

@@ -7,12 +7,11 @@ namespace Etg.Yams.Test.stubs
     public class ProcessStub : IProcess
     {
         private readonly string _exePath;
-        private readonly string _exeArgs;
+        private string _exeArgs;
 
-        public ProcessStub(string exePath, string exeArgs)
+        public ProcessStub(string exePath)
         {
             _exePath = exePath;
-            _exeArgs = exeArgs;
             ShouldStart = true;
         }
 
@@ -26,8 +25,9 @@ namespace Etg.Yams.Test.stubs
             get { return _exeArgs; }
         }
 
-        public Task Start()
+        public Task Start(string exeArgs)
         {
+            _exeArgs = exeArgs;
             if (!ShouldStart)
             {
                 throw new Exception("Cannot start process");

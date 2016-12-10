@@ -12,7 +12,6 @@ namespace Etg.Yams.Process
     public class Process : IProcess
     {
         private readonly string _exePath;
-        private readonly string _exeArgs;
         private readonly bool _showProcessWindow;
         private System.Diagnostics.Process _process;
         private bool _isRunning = false;
@@ -31,30 +30,30 @@ namespace Etg.Yams.Process
 
         public event EventHandler<ProcessExitedArgs> Exited;
 
-        public Process(string exePath, string exeArgs, bool showProcessWindow)
+        public Process(string exePath, bool showProcessWindow)
         {
             _exePath = exePath;
-            _exeArgs = exeArgs;
             _showProcessWindow = showProcessWindow;
         }
 
-        public async Task Start()
+        public async Task Start(string args)
         {
             if (_isRunning)
             {
                 throw new Exception("Cannot start a process that is already running");
             }
+            ExeArgs = args;
             await Task.Run(async () =>
             {
                 _process = new System.Diagnostics.Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        UseShellExecute = false,
+                        UseShellExecute = true,
                         FileName = _exePath,
                         WorkingDirectory = new FileInfo(_exePath).Directory.FullName,
                         WindowStyle = ProcessWindowStyle.Normal,
-                        Arguments = _exeArgs
+                        Arguments = ExeArgs
                     },
                     EnableRaisingEvents = true,
                 };
@@ -67,45 +66,25 @@ namespace Etg.Yams.Process
                     _process.StartInfo.CreateNoWindow = true;
                 }
 
-                using (AnonymousPipeServerStream pipeServer =
-                    new AnonymousPipeServerStream(PipeDirection.In,
-                        HandleInheritability.Inheritable))
+                if (!_process.Start())
                 {
-                    _process.StartInfo.Arguments += " " + pipeServer.GetClientHandleAsString();
-                    if (!_process.Start())
-                    {
-                        await ReleaseResources();
-                        throw new Exception(
-                            $"The OS failed to start the process at {_exePath} with arguments {_exeArgs}");
-                    }
-                    _isRunning = true;
-                    pipeServer.DisposeLocalCopyOfClientHandle();
-
-                    using (StreamReader sr = new StreamReader(pipeServer))
-                    {
-                        string msg;
-
-                        // Wait for 'sync message' from the server.
-                        do
-                        {
-                            Debug.WriteLine("Yams is waiting for the app to finish initializing");
-                            msg = sr.ReadLine();
-                        }
-                        while (!msg.StartsWith("[STARTED]"));
-
-                        Console.WriteLine("App Initialized and ready to receive requests");
-                    }
+                    await ReleaseResources();
+                    throw new Exception(
+                        $"The OS failed to start the process at {_exePath} with arguments {ExeArgs}");
                 }
+
+                _isRunning = true;
             });
         }
 
-        public async Task Close()
+    public async Task Close()
         {
             if (_process == null) return;
 
             _process.Exited -= ProcessExited;
             await Task.Run(() =>
             {
+                //TODO: Use Process.WaitForExit to wait for the process to exit
                 _isRunning = _process.CloseMainWindow();
             });
         }
@@ -117,6 +96,7 @@ namespace Etg.Yams.Process
             _process.Exited -= ProcessExited;
             return Task.Run(() =>
             {
+                //TODO: Use Process.WaitForExit to wait for the process to exit
                 _process.Kill();
                 _isRunning = false;
             });
@@ -156,8 +136,7 @@ namespace Etg.Yams.Process
         }
 
         public string ExePath => _exePath;
-
-        public string ExeArgs => _exeArgs;
+        public string ExeArgs { get; private set; }
 
         public void Dispose()
         {

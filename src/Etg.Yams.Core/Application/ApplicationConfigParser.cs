@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Etg.Yams.Install;
 using Etg.Yams.Json;
-using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Application
 {
@@ -20,6 +18,9 @@ namespace Etg.Yams.Application
 #pragma warning disable 649
             public string ExeName;
             public string ExeArgs;
+            public bool MonitorInitialization;
+            public bool MonitorHealth;
+            public bool GracefulShutdown;
 #pragma warning restore 649
         }
 
@@ -33,14 +34,16 @@ namespace Etg.Yams.Application
         {
             using (StreamReader r = new StreamReader(path))
             {
-                return await Parse(await _jsonSerializer.DeserializeAsync<ApplicationConfigData>(await r.ReadToEndAsync()), appInstallConfig);
+                return await Parse(await _jsonSerializer.DeserializeAsync<ApplicationConfigData>(
+                    await r.ReadToEndAsync()), appInstallConfig);
             }
         }
 
         private async Task<ApplicationConfig> Parse(ApplicationConfigData appConfigData, AppInstallConfig appInstallConfig)
         {
             string args = await SubstituteSymbols(appConfigData.ExeArgs, appInstallConfig);
-            return new ApplicationConfig(appInstallConfig.AppIdentity, appConfigData.ExeName, args);
+            return new ApplicationConfig(appInstallConfig.AppIdentity, appConfigData.ExeName, args,
+                appConfigData.MonitorInitialization, appConfigData.MonitorHealth, appConfigData.GracefulShutdown);
         }
 
         private async Task<string> SubstituteSymbols(string str, AppInstallConfig appInstallConfig)
@@ -62,7 +65,7 @@ namespace Etg.Yams.Application
         private async Task<string> SubstitueSymbol(string str, string symbol, AppInstallConfig appInstallConfig)
         {
             string symbolValue = await _symbolResolver.ResolveSymbol(appInstallConfig, symbol);
-            return str.Replace(string.Format("${{{0}}}", symbol), symbolValue);
+            return str.Replace($"${{{symbol}}}", symbolValue);
         }
     }
 }

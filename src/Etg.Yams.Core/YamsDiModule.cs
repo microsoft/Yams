@@ -171,7 +171,7 @@ namespace Etg.Yams
             builder.Register<IProcessFactory>(c =>
                 {
                     var config = c.Resolve<YamsConfig>();
-                    return new SelfRestartingProcessFactory(config.ApplicationRestartCount, config.ShowApplicationProcessWindow);
+                    return new ProcessFactory(config);
                 }).SingleInstance();
         }
 
