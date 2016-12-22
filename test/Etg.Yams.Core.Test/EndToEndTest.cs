@@ -13,6 +13,8 @@ using Etg.Yams.Json;
 using Etg.Yams.Storage.Config;
 using Newtonsoft.Json.Serialization;
 using Semver;
+using Etg.Yams.Storage;
+using Etg.Yams.Install;
 
 namespace Etg.Yams.Test
 {
@@ -39,14 +41,26 @@ namespace Etg.Yams.Test
 
         private void InitializeYamsService(YamsConfig yamsConfig)
         {
+            ContainerBuilder builder = InitializeContainerBuilder(yamsConfig);
+            InitializeYamsService(builder.Build());
+        }
+
+        private void InitializeYamsService(IContainer container)
+        {
+            _yamsDiModule = new YamsDiModule(container);
+            _yamsService = _yamsDiModule.YamsService;
+        }
+
+        private ContainerBuilder InitializeContainerBuilder(YamsConfig yamsConfig)
+        {
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
                 .TryStartUpdateSession(applicationId => Task.FromResult(true))
                 .EndUpdateSession(applicationId => Task.FromResult(true));
 
-            _yamsDiModule = new YamsDiModule(yamsConfig, new LocalDeploymentRepository(
-                _deploymentDirPath, new JsonDeploymentConfigSerializer(
-                    new JsonSerializer(new DiagnosticsTraceWriter()))), updateSessionManager);
-            _yamsService = _yamsDiModule.YamsService;
+            IDeploymentRepository deploymentRepository = new LocalDeploymentRepository(_deploymentDirPath,
+                new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter())));
+            
+            return YamsDiModule.RegisterTypes(yamsConfig, deploymentRepository, updateSessionManager);
         }
 
         private void CopyTestProcessExeToTestApps()
@@ -77,27 +91,6 @@ namespace Etg.Yams.Test
             DeleteDirectory(_testDirPath);
         }
 
-        [Fact]
-        public async Task TestThatApplicationsAreLoadedAtStartup()
-        {
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
-                _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
-
-            InitializeYamsService(yamsConfig);
-
-            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
-            await applicationUpdateManager.CheckForUpdates();
-
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)), "TestProcess");
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)), "TestProcess");
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")), "TestProcess");
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)), "TestProcess");
-
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
-
-            AssertThatNumberOfApplicationsRunningIs(4);
-        }
-
         /// <summary>
         /// This test replaces the content DeploymentConfig.json file with DeploymentConfigUpdate.json file.
         /// Several updates are involved:
@@ -119,6 +112,11 @@ namespace Etg.Yams.Test
 
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
+
+            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0, "beta")), "TestProcess");
+            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)), "TestProcess");
 
             UploadDeploymentConfig("DeploymentConfigUpdate.json");
 
@@ -151,19 +149,27 @@ namespace Etg.Yams.Test
                 .AddClusterProperty("NodeType", "Test")
                 .AddClusterProperty("Region", "East").Build();
 
-            InitializeYamsService(yamsConfig);
+            AppInstallConfig appInstallConfig = null;
+            var applicationInstallerStub = new StubIApplicationInstaller().Install(
+                (config) => 
+                {
+                    Assert.Null(appInstallConfig);
+                    appInstallConfig = config;
+                    return Task.CompletedTask;
+                });
+
+            ContainerBuilder builder = InitializeContainerBuilder(yamsConfig);
+            builder.RegisterInstance<IApplicationInstaller>(applicationInstallerStub);
+            InitializeYamsService(builder.Build());
 
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
 
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)), "TestProcess");
-
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0, "beta")));
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)));
-            AssertThatApplicationIsNotRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)));
-
-            AssertThatNumberOfApplicationsRunningIs(1);
+            Assert.Equal(new AppIdentity("test.app1", new SemVersion(1, 0, 0)), appInstallConfig.AppIdentity);
+            Assert.True(appInstallConfig.Properties.ContainsKey("NodeType"));
+            Assert.Equal("Test", appInstallConfig.Properties["NodeType"]);
+            Assert.True(appInstallConfig.Properties.ContainsKey("Region"));
+            Assert.Equal("East", appInstallConfig.Properties["Region"]);
         }
 
         [Fact]
