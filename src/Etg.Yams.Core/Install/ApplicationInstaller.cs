@@ -32,13 +32,21 @@ namespace Etg.Yams.Install
         {
             IApplication application =
                 await _applicationFactory.CreateApplication(appInstallConfig, GetApplicationAbsolutePath(appInstallConfig.AppIdentity));
-            await _applicationPool.AddApplication(application);
+            try
+            {
+                await _applicationPool.AddApplication(application);
+            }
+            catch (Exception)
+            {
+                await DeleteAppBinaries(appInstallConfig.AppIdentity);
+                throw;
+            }
         }
 
         public async Task UnInstall(AppIdentity appIdentity)
         {
             await _applicationPool.RemoveApplication(appIdentity);
-            await FileUtils.DeleteDirectoryIfAny(GetApplicationAbsolutePath(appIdentity), recursive:true);
+            await DeleteAppBinaries(appIdentity);
         }
 
         public async Task<bool> Update(IEnumerable<AppIdentity> applicationsToRemove, IEnumerable<AppInstallConfig> applicationsToDeploy)
@@ -80,6 +88,11 @@ namespace Etg.Yams.Install
                 return false;
             }
             return true;
+        }
+
+        private async Task DeleteAppBinaries(AppIdentity appIdentity)
+        {
+            await FileUtils.DeleteDirectoryIfAny(GetApplicationAbsolutePath(appIdentity), recursive: true);
         }
 
         private async Task UnInstallApplications(IEnumerable<AppIdentity> applicationsToRemove)

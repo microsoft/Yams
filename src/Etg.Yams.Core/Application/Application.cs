@@ -13,17 +13,17 @@ namespace Etg.Yams.Application
             Path = path;
         }
 
-        protected async Task<bool> StartProcess(IProcess process)
+        protected async Task<bool> StartProcess(IProcess process, string args)
         {
             try
             {
-                await process.Start();
+                await process.Start(args);
                 process.Exited += OnProcessExited;
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Trace.TraceInformation("Could not start the host process for application {0}", Identity);
+                Trace.TraceError($"Could not start the host process for application {Identity}, Inner Exception: {e}");
                 return false;    
             }
         }

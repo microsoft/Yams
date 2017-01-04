@@ -1,0 +1,9 @@
+﻿{
+  "Applications": [
+    {
+      "Id": "HeartBeatApp",
+      "Version": "1.0.0",
+      "TargetClusters": [ "clusterId1" ]
+    }
+  ]
+}

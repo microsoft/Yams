@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Etg.Yams.Process;
 
 namespace Etg.Yams
 {
@@ -7,9 +9,20 @@ namespace Etg.Yams
     /// </summary>
     public class YamsConfig
     {
-        public YamsConfig(string clusterId, string instanceUpdateDomain, string instanceId, 
-            string applicationInstallDirectory, int checkForUpdatesPeriodInSeconds, int applicationRestartCount, 
-            int processWaitForExitInSeconds, bool showApplicationProcessWindow, 
+        public YamsConfig(
+            string clusterId,
+            string instanceUpdateDomain,
+            string instanceId,
+            string applicationInstallDirectory,
+            int checkForUpdatesPeriodInSeconds,
+            int applicationRestartCount,
+            int processWaitForExitInSeconds,
+            bool showApplicationProcessWindow,
+            TimeSpan gracefulShutdownMessageTimeout,
+            TimeSpan appGracefulShutdownTimeout,
+            TimeSpan appHeartBeatTimeout,
+            TimeSpan ipcConnectTimeout,
+            TimeSpan appInitTimeout,
             IReadOnlyDictionary<string, string> clusterProperties)
         {
             ClusterId = clusterId;
@@ -20,6 +33,11 @@ namespace Etg.Yams
             ApplicationRestartCount = applicationRestartCount;
             ProcessWaitForExitInSeconds = processWaitForExitInSeconds;
             ShowApplicationProcessWindow = showApplicationProcessWindow;
+            GracefulShutdownMessageTimeout = gracefulShutdownMessageTimeout;
+            AppGracefulShutdownTimeout = appGracefulShutdownTimeout;
+            AppHeartBeatTimeout = appHeartBeatTimeout;
+            IpcConnectTimeout = ipcConnectTimeout;
+            AppInitTimeout = appInitTimeout;
             ClusterProperties = clusterProperties;
         }
 
@@ -58,8 +76,37 @@ namespace Etg.Yams
         /// </summary>
         public int ProcessWaitForExitInSeconds { get; private set; }
 
+        /// <summary>
+        /// Whether a console window should be shown or not
+        /// </summary>
         public bool ShowApplicationProcessWindow { get; private set; }
 
-        public IReadOnlyDictionary<string, string> ClusterProperties { get; private set; } 
+        /// <summary>
+        /// How long Yams should wait for the app to receive the graceful exit message
+        /// </summary>
+        public TimeSpan GracefulShutdownMessageTimeout { get; private set; }
+
+        /// <summary>
+        /// How long the app is given to exit after receiving the exit message
+        /// </summary>
+        public TimeSpan AppGracefulShutdownTimeout { get; private set; }
+
+        /// <summary>
+        /// Apps that are subscribed to health check periodically send heart beats messages to Yams.
+        /// This property is the timeout after which Yams will declare the app unhealthy.
+        /// </summary>
+        public TimeSpan AppHeartBeatTimeout { get; private set; }
+
+        /// <summary>
+        /// Timeout for establishing an IPC connection with apps
+        /// </summary>
+        public TimeSpan IpcConnectTimeout { get; private set; }
+
+        /// <summary>
+        /// Time given to apps to finish initialization
+        /// </summary>
+        public TimeSpan AppInitTimeout { get; private set; }
+
+        public IReadOnlyDictionary<string, string> ClusterProperties { get; private set; }
     }
 }

@@ -5,7 +5,6 @@ using Etg.Yams.Application;
 using Etg.Yams.Install;
 using Etg.Yams.Json;
 using Etg.Yams.Process;
-using Etg.Yams.Storage.Config;
 using Etg.Yams.Test.stubs;
 using Etg.Yams.Test.Utils;
 using Etg.Yams.Utils;
@@ -42,10 +41,12 @@ namespace Etg.Yams.Test.Application
                 TestUtils.CopyExe(exeName, Path.Combine(ApplicationsRootPath, testAppRelPath));
             }
 
+            YamsConfig config = new YamsConfigBuilder("clusterId", "1", "instanceId", "C:\\")
+                .SetShowApplicationProcessWindow(false).SetApplicationRestartCount(0).Build();
             ApplicationFactory =
                 new ConfigurableApplicationFactory(new ApplicationConfigParser(
                     new ApplicationConfigSymbolResolver(ClusterId, InstanceId), new JsonSerializer(new DiagnosticsTraceWriter())),
-                    new SelfRestartingProcessFactory(0, false), new ProcessStopper(0));
+                    new ProcessFactory(config), new ProcessStopper(0));
         }
     }
 
@@ -126,7 +127,8 @@ namespace Etg.Yams.Test.Application
                     stopCallCount++;
                     return Task.FromResult(true);
                 })
-                .Identity_Get(() => appIdentity);
+                .Identity_Get(() => appIdentity)
+                .Dispose(() => { });
 
             _applicationPool = new ApplicationPool();
 
@@ -177,7 +179,7 @@ namespace Etg.Yams.Test.Application
 
         private string GetOutput(AppIdentity appIdentity)
         {
-            return TestUtils.GetTestApplicationOutput(_applicationsRootPath, appIdentity);
+            return TestUtils.GetTestApplicationOutput(_applicationsRootPath, appIdentity, "TestProcess");
         }
     }
 }

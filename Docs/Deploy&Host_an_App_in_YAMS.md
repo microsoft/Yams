@@ -250,5 +250,112 @@ That's it! The two versions should be now happily running side-by-side.
 # Removing or reverting a deployment
 To remove an app from YAMS, simply remove the corresponding entry from the `DeploymentConfig.json` file. YAMS will terminate the corresponding process and remove the app. You can also delete the associated files from the blob storage if you are never going to use this app again or keep it there to preserve history of deployments and to allow reverts. In fact, to revert a deployment in YAMS, simply edit the `DeploymentConfig.json` file and replace the current version of the app (the version to be reverted) with the old version (the version to revert to).
 
+# Advanced features
+
+Yams has support for health monitoring and graceful shutdown of apps as described [here](../Docs/Overview.md#health-monitoring-and-graceful-shutdown). Note that you can choose to enable one or multiple features and apps within the same cluster can use different features. 
+
+## Monitored initialization
+By default, Yams does not monitor the initialization of apps. In other words, when an app is deployed, the associated process is launched and then Yams assumes that the app is running and ready to receive requests. With the monitored initialization feature enabled, Yams would wait for the app to finish initialization before moving on to the next app (the app would notify Yams that it's done initializing through an IPC message).
+
+To enable *monitored initialization* for a given app, the corresponding flag must be added to the `AppConfig.json` file as shown below:
+```json
+{
+  "ExeName": "MyProcess.exe",
+  "ExeArgs": "Foo Bar",
+  "MonitorInitialization": true
+}
+```
+
+The app source code will also need to be updated so that the app can communicate with Yams (using IPC). Install the `Etg.Yams` NuGet package and modify the app source code so that Yams is notified when initialization is done, as shown in the code below:
+
+```csharp
+        public static void Main(string[] args)
+        {
+            MainAsync(args).Wait();
+        }
+
+        private static async Task MainAsync(string[] args)
+        {
+            var yamsClientConfig = new YamsClientConfigBuilder(args).Build();
+            var yamsClientFactory = new YamsClientFactory();
+            IYamsClient yamsClient = yamsClientFactory.CreateYamsClient(yamsClientConfig);
+
+            await Task.WhenAll(yamsClient.Connect(), Initialize());
+
+            await yamsClient.SendInitializationDoneMessage();
+	    
+	    // ...
+```
+
+## Heart beats
+With this feature enabled, the app is expected to send heart beat messages to Yams at steady intervals. If heart beats are not received in time, errors will be logged (more complex handling will be added in the future). To enable this feature, update the `AppConfig.json` and your app source code as shown below:
+
+```json
+{
+  "ExeName": "MyProcess.exe",
+  "ExeArgs": "Foo Bar",
+  "MonitorHealth":  true
+}
+```
+
+```csharp
+        public static void Main(string[] args)
+        {
+            MainAsync(args).Wait();
+        }
+
+        private static async Task MainAsync(string[] args)
+        {
+            var yamsClientConfig = new YamsClientConfigBuilder(args).Build();
+            var yamsClientFactory = new YamsClientFactory();
+            IYamsClient yamsClient = yamsClientFactory.CreateYamsClient(yamsClientConfig);
+
+            await Task.WhenAll(yamsClient.Connect(), Initialize());
+
+            while (true)
+            {
+                await Task.Delay(heartBeatPeriod);
+                await yamsClient.SendHeartBeat();
+            }
+```
+
+## Graceful Shutdown
+
+When graceful shutdown is enabled for a given app, Yams will deliver an event to the app and allow it a configurable amount of time to exit gracefully before closing/killing it. The graceful shutdown event will be delivered through the `YamsClient` as a normal C# event. To enable this feature, update the `AppConfig.json` and your app source code as shown below:
+
+```json
+{
+  "ExeName": "MyProcess.exe",
+  "ExeArgs": "Foo Bar",
+  "GracefulShutdown":  true
+}
+```
+
+```csharp
+        public static void Main(string[] args)
+        {
+            MainAsync(args).Wait();
+        }
+
+        private static async Task MainAsync(string[] args)
+        {
+            var yamsClientConfig = new YamsClientConfigBuilder(args).Build();
+            var yamsClientFactory = new YamsClientFactory();
+            IYamsClient yamsClient = yamsClientFactory.CreateYamsClient(yamsClientConfig);
+
+            await Task.WhenAll(yamsClient.Connect(), Initialize());
+
+            bool exitMessageReceived = false;
+            yamsClient.ExitMessageReceived += (sender, eventArgs) =>
+            {
+                exitMessageReceived = true;
+            };
+	    
+            while (!exitMessageReceived)
+            {
+                await DoWork();                
+            }	    
+```
+
 # Source code
 The source code associated with this tutorial can be found in the [Samples/WebApp](../Samples/WebApp) directory.

@@ -35,6 +35,10 @@
       <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="CommandLine, Version=1.9.71.2, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -67,6 +71,13 @@
     <Compile Include="Application\IApplicationConfigSymbolResolver.cs" />
     <Compile Include="Application\IApplicationFactory.cs" />
     <Compile Include="Application\IApplicationPool.cs" />
+    <Compile Include="Client\IYamsClient.cs" />
+    <Compile Include="Client\IYamsClientFactory.cs" />
+    <Compile Include="Client\YamsClient.cs" />
+    <Compile Include="Client\YamsClientConfig.cs" />
+    <Compile Include="Client\YamsClientConfigBuilder.cs" />
+    <Compile Include="Client\YamsClientFactory.cs" />
+    <Compile Include="Client\YamsClientOptions.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Deploy\AndDeploymentMatcher.cs" />
     <Compile Include="Deploy\ClusterIdDeploymentMatcher.cs" />
@@ -75,10 +86,23 @@
     <Compile Include="Deploy\PropertiesDeploymentMatcher.cs" />
     <Compile Include="Deploy\RemoteApplicationDeploymentDirectory.cs" />
     <Compile Include="IYamsService.cs" />
+    <Compile Include="Process\AbstractProcessDecorator.cs" />
+    <Compile Include="Process\GracefullShutdownProcessDecorator.cs" />
+    <Compile Include="Process\Ipc\IIpcConnection.cs" />
+    <Compile Include="Process\Ipc\INamedPipe.cs" />
+    <Compile Include="Process\Ipc\INamedPipeFactory.cs" />
+    <Compile Include="Process\Ipc\IpcConnection.cs" />
+    <Compile Include="Process\Ipc\NamedPipeClientAdapter.cs" />
+    <Compile Include="Process\Ipc\NamedPipeFactory.cs" />
+    <Compile Include="Process\Ipc\NamedPipeServerAdapter.cs" />
+    <Compile Include="Process\IProcessInfo.cs" />
+    <Compile Include="Process\MonitorInitProcessDecorator.cs" />
+    <Compile Include="Process\HealthProcessDecorator.cs" />
     <Compile Include="Storage\Config\AppDeploymentConfig.cs" />
     <Compile Include="Install\AppInstallConfig.cs" />
     <Compile Include="Storage\Config\IDeploymentConfigSerializer.cs" />
     <Compile Include="Storage\Config\JsonDeploymentConfigSerializer.cs" />
+    <Compile Include="Utils\TaskExtensions.cs" />
     <Compile Include="YamsDiModule.cs" />
     <Compile Include="Download\ApplicationDownloader.cs" />
     <Compile Include="Download\IApplicationDownloader.cs" />
@@ -86,12 +110,11 @@
     <Compile Include="Install\IApplicationInstaller.cs" />
     <Compile Include="Process\IProcess.cs" />
     <Compile Include="Process\IProcessFactory.cs" />
-    <Compile Include="Process\IProcessInfo.cs" />
     <Compile Include="Process\IProcessStopper.cs" />
     <Compile Include="Process\Process.cs" />
     <Compile Include="Process\ProcessStopper.cs" />
     <Compile Include="Process\SelfRestartingProcess.cs" />
-    <Compile Include="Process\SelfRestartingProcessFactory.cs" />
+    <Compile Include="Process\ProcessFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\BinariesNotFoundException.cs" />
     <Compile Include="Storage\Config\DeploymentConfig.cs" />
@@ -117,6 +140,10 @@
       <Project>{3e982150-5b43-44da-8d96-66cf07a9a14c}</Project>
       <Name>Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Process" />
+    <Folder Include="Process\Ipc" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

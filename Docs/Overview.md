@@ -15,6 +15,7 @@ To deploy such a Microservices-based application to Azure using the Azure cloud 
 * **Versioning** of microservices, quick **updates**, **reverts**, etc. 
 * Support for **Upgrade Domains** to minimize (and potentially eliminate) application downtime during updates, including first-class support for **Azure Upgrade Domains**.
 * Microservices can be developed in **any programming language** and deployed with YAMS (as long as your service can be started with an exe).
+* **Health monitoring** and **graceful shutdown** of microservices.
 
 YAMS has first-class support for deploying applications from Azure **blob storage**, but with its pluggable storage architecture, other providers such as SQL Server or file storage can be created and plugged in as well. 
 
@@ -100,6 +101,19 @@ Yams supports **Azure Upgrade Domains** to minimize (and potentially eliminate) 
 Note that if an update fails, Yams will not try to revert back to the old version. However, Yams will keep trying to perform the update at every cycle (every time it checks for updates) and will log errors if the installation fails. Yams uses `System.Diagnostics.Trace` to log errors which can be re-routed to blob storage or other locations by configuring the appropriate trace listener.
 
 To revert a deployment, simply edit the `DeploymentConfig.json` file and replace the current version of the app (the version to be reverted) with the old version (the version to revert to).
+
+## Health monitoring and graceful shutdown
+
+Apps deployed with Yams can optionally enable health monitoring and/or graceful shutdown. Yams uses inter-process-communication (currently [named pipes](https://msdn.microsoft.com/en-us/library/bb546085(v=vs.110).aspx)) to communicate with apps. 
+
+There are three features available:
+* *Monitored initialization*: Yams waits for the app to finish initialization before considering it ready to receive requests. If an app takes longer than expected to finish initialization (the timeout is configurable), it's considered unhealthy and is killed.
+* *Monitored heart beats*: With this feature enabled, Yams expects to receive heart beats from apps at steady intervals. If a heart beat is not received in time, an error is logged (more complex handling will be added in the future).
+* *Graceful shutdown*: A event is sent to the app to signal shutdown. If the app does not exit gracefully in time (the timeout is configurable), the app will be closed or killed.
+
+Note that each of these features can be enabled/disabled separately. In addition, apps running within the same cluster can choose to enable/disable different features.
+
+The [Yams Client API](../src/Etg.Yams.Core/Client/IYamsClient.cs) can be used by apps to communicate with Yams. See [Deploy and host applications in YAMS tutorial](../Docs/Deploy&Host_an_App_in_YAMS.md) to learn how you can enable these features (one ore more features can be enabled at a time).
 
 ## Sharing infrastructure
 One of the main goals of Yams is sharing infrastructure to reduce cost. In fact, some microservices consume little resources and can be deployed alongside other microservices. In addition, sharing infrastructure reduces the cost of over-provisioning resources. To illustrate this, consider an application composed of two microservices. Each microservice requires 2 VMs at normal operation load and 4 VMs at peak time. If each microservice is deployed separately, 8 VMs are needed in total (4 VMs per microservice). However, in practice, the peak time resources are over estimated and the peak time of one microservice does not necessarily overlap with the peak time of another microservice. If the same VMs are shared by both microservices and peak times are not likely to overlap, 6 VMs can be sufficient for both microservices (which saves us 2 VMs). In fact, this strategy works better for a large number of microservices where the probability of all microservices peaking at the same time decreases with the number of microservices and as a result, sharing infrastructure can result in large savings.

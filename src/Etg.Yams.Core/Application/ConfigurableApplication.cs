@@ -17,8 +17,8 @@ namespace Etg.Yams.Application
         /// <param name="appConfig">exe name, args, etc.</param>
         /// <param name="processFactory">A factory to create a process to run the exe</param>
         /// <param name="processStopper">Used to stop a process</param>
-        public ConfigurableApplication(string path, ApplicationConfig appConfig, IProcessFactory processFactory, IProcessStopper processStopper) 
-            : base(appConfig.Identity, path)
+        public ConfigurableApplication(string path, ApplicationConfig appConfig, IProcessFactory processFactory,
+            IProcessStopper processStopper) : base(appConfig.Identity, path)
         {
             _appConfig = appConfig;
             _processFactory = processFactory;
@@ -27,8 +27,9 @@ namespace Etg.Yams.Application
 
         public override Task<bool> Start()
         {
-            _process = _processFactory.CreateProcess(System.IO.Path.Combine(Path, _appConfig.ExeName), _appConfig.ExeArgs);
-            return StartProcess(_process);
+            _process = _processFactory.CreateProcess(System.IO.Path.Combine(Path, _appConfig.ExeName),
+            _appConfig.MonitorInitialization, _appConfig.MonitorHealth, _appConfig.GracefulShutdown);
+            return StartProcess(_process, _appConfig.ExeArgs);
         }
 
         public override Task Stop()

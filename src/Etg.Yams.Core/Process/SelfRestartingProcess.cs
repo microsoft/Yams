@@ -10,7 +10,6 @@ namespace Etg.Yams.Process
     /// </summary>
     public class SelfRestartingProcess : IProcess
     {
-
         private bool _stopped = false;
         private int _restartCount=0;
         private readonly IProcess _process;
@@ -29,11 +28,11 @@ namespace Etg.Yams.Process
             _maximumRestartAttempts = maximumRestartAttempts;
         }
 
-        public Task Start()
+        public Task Start(string args)
         {
             _process.Exited += ExitedTryRestart;
             _stopped = false;
-            return _process.Start();
+            return _process.Start(args);
         }
 
         public Task Close()
@@ -78,7 +77,7 @@ namespace Etg.Yams.Process
             {
                 try
                 {
-                    await _process.Start();
+                    await _process.Start(ExeArgs);
                     ++_restartCount;
                 }
                 catch (Exception)

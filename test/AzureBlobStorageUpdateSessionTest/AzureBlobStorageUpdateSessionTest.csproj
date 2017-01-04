@@ -43,7 +43,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Etg.SimpleStubs, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Etg.SimpleStubs.2.0.0\lib\net46\Etg.SimpleStubs.dll</HintPath>
+      <HintPath>..\..\packages\Etg.SimpleStubs.2.3.1\lib\net46\Etg.SimpleStubs.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -144,6 +144,10 @@
       <Project>{84c08621-2c78-4b19-9454-7b9019e68326}</Project>
       <Name>AzureTestUtils</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Stubs\Stubs.csproj">
+      <Project>{68cd41f8-a6c3-4d43-93ca-92e898254cbd}</Project>
+      <Name>Stubs</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TestUtils\TestUtils.csproj">
       <Project>{c25452e1-aff2-4579-b6b4-f040cad02fda}</Project>
       <Name>TestUtils</Name>
@@ -175,12 +179,12 @@
   </Choose>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\packages\Etg.SimpleStubs.2.0.0\build\Etg.SimpleStubs.targets" Condition="Exists('..\..\packages\Etg.SimpleStubs.2.0.0\build\Etg.SimpleStubs.targets')" />
+  <Import Project="..\..\packages\Etg.SimpleStubs.2.3.1\build\Etg.SimpleStubs.targets" Condition="Exists('..\..\packages\Etg.SimpleStubs.2.3.1\build\Etg.SimpleStubs.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Etg.SimpleStubs.2.0.0\build\Etg.SimpleStubs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Etg.SimpleStubs.2.0.0\build\Etg.SimpleStubs.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Etg.SimpleStubs.2.3.1\build\Etg.SimpleStubs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Etg.SimpleStubs.2.3.1\build\Etg.SimpleStubs.targets'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

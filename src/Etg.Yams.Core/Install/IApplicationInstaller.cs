@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
-using Etg.Yams.Storage.Config;
-using Semver;
 
 namespace Etg.Yams.Install
 {

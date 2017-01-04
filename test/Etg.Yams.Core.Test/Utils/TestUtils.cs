@@ -7,9 +7,11 @@ namespace Etg.Yams.Test.Utils
 {
     public static class TestUtils
     {
-        public static string GetTestApplicationOutput(string applicationRootPath, AppIdentity appIdentity)
+        public static string GetTestApplicationOutput(string applicationRootPath, AppIdentity appIdentity,
+            string exeName)
         {
-            string processOutputPath = Path.Combine(Path.Combine(applicationRootPath,ApplicationUtils.GetApplicationRelativePath(appIdentity)), "TestProcess.exe.out");
+            string processOutputPath = Path.Combine(Path.Combine(applicationRootPath,
+                ApplicationUtils.GetApplicationRelativePath(appIdentity)), $"{exeName}.exe.out");
 
             int maxRetry = 10;
             while (maxRetry-- > 0)
@@ -35,6 +37,11 @@ namespace Etg.Yams.Test.Utils
         public static void CopyExe(string exeName, string destPath)
         {
             File.Copy(Path.Combine(GetTestExesDirPath(), exeName), Path.Combine(destPath, exeName), overwrite: true);
+        }
+
+        public static void CopyExesTestDir(string destPath)
+        {
+            FileUtils.CopyDir(GetTestExesDirPath(), destPath, overwrite: true);
         }
     }
 }

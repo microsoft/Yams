@@ -1,0 +1,5 @@
+﻿{
+  "ExeName": "GracefullShutdownProcess.exe",
+  "ExeArgs": "foo1 foo2 4",
+  "GracefulShutdown": true
+}

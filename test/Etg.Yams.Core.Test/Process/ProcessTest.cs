@@ -10,7 +10,6 @@ namespace Etg.Yams.Test.Process
 {
     public class ProcessTestFixture
     {
-        private readonly string _testDirPath;
         public readonly string SuicidalExePath;
         public readonly string HangingExePath;
 
@@ -19,37 +18,29 @@ namespace Etg.Yams.Test.Process
 
         public ProcessTestFixture()
         {
-            _testDirPath = Path.Combine(Directory.GetCurrentDirectory(), "ProcessTest");
-            SuicidalExePath = Path.Combine(_testDirPath, SuicidalProcessExeName);
-            HangingExePath = Path.Combine(_testDirPath, HangingProcessExeName);
+            var testDirPath = Path.Combine(Directory.GetCurrentDirectory(), "ProcessTest");
+            SuicidalExePath = Path.Combine(testDirPath, SuicidalProcessExeName);
+            HangingExePath = Path.Combine(testDirPath, HangingProcessExeName);
 
-            Directory.CreateDirectory(_testDirPath);
-
-            string[] exes = { SuicidalProcessExeName, HangingProcessExeName };
-            foreach (string exeName in exes)
-            {
-                TestUtils.CopyExe(exeName, _testDirPath);
-            }
+            Directory.CreateDirectory(testDirPath);
+            TestUtils.CopyExesTestDir(testDirPath);
         }
     }
 
     public class ProcessTest : IClassFixture<ProcessTestFixture>
     {
-        private string _hangingExePath;
-        private string _suicidalExePath;
-
+        readonly ProcessTestFixture _fixture;
         public ProcessTest(ProcessTestFixture fixture)
         {
-            _hangingExePath = fixture.HangingExePath;
-            _suicidalExePath = fixture.SuicidalExePath;
+            _fixture = fixture;
         }
 
         [Fact]
         public async Task TestIsRunning()
         {
-            IProcess hangingProcess = new Yams.Process.Process(_hangingExePath, "", false);
+            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingExePath, false);
             Assert.False(hangingProcess.IsRunning);
-            await hangingProcess.Start();
+            await hangingProcess.Start(string.Empty);
             Assert.True(hangingProcess.IsRunning);
             await hangingProcess.Kill();
             Assert.True(await ProcessUtils.SpinWaitForExit(hangingProcess, 5));
@@ -59,11 +50,11 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestThatProcessCannotBeStartedMoreThanOnce()
         {
-            IProcess hangingProcess = new Yams.Process.Process(_hangingExePath, "", false);
-            await hangingProcess.Start();
+            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingExePath, false);
+            await hangingProcess.Start(string.Empty);
             Assert.True(hangingProcess.IsRunning);
 
-            await Assert.ThrowsAnyAsync<Exception>(async () => await hangingProcess.Start());
+            await Assert.ThrowsAnyAsync<Exception>(async () => await hangingProcess.Start(string.Empty));
             await hangingProcess.Kill();
             await hangingProcess.ReleaseResources();
         }
@@ -71,9 +62,9 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestReleaseResources()
         {
-            IProcess hangingProcess = new Yams.Process.Process(_hangingExePath, "", false);
+            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingExePath, false);
             await hangingProcess.ReleaseResources(); // should do nothing
-            await hangingProcess.Start();
+            await hangingProcess.Start(string.Empty);
             Assert.True(hangingProcess.IsRunning);
 
             await Assert.ThrowsAnyAsync<Exception>(async () => await hangingProcess.ReleaseResources());
@@ -85,24 +76,25 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestThatExitedEventIsFired()
         {
-            IProcess suicidalProcess = new Yams.Process.Process(_suicidalExePath, "", false);
+            IProcess suicidalProcess = new Yams.Process.Process(_fixture.SuicidalExePath, false);
             bool exitedFired = false;
             suicidalProcess.Exited += (sender, args) =>
             {
                 exitedFired = true;
             };
-            await suicidalProcess.Start();
+            await suicidalProcess.Start(string.Empty);
             Assert.True(await ProcessUtils.SpinWaitForExit(suicidalProcess, 5));
             Assert.True(exitedFired);
             await suicidalProcess.ReleaseResources();
         }
 
         [Fact]
-        public void TestProperties()
+        public async Task TestProperties()
         {
             const string exeArgs = "arggg";
-            IProcess suicidalProcess = new Yams.Process.Process(_suicidalExePath, exeArgs, false);
-            Assert.Equal(_suicidalExePath, suicidalProcess.ExePath);
+            IProcess suicidalProcess = new Yams.Process.Process(_fixture.SuicidalExePath, false);
+            await suicidalProcess.Start(exeArgs);
+            Assert.Equal(_fixture.SuicidalExePath, suicidalProcess.ExePath);
             Assert.Equal(exeArgs, suicidalProcess.ExeArgs);
         }
     }
