@@ -287,7 +287,7 @@ The app source code will also need to be updated so that the app can communicate
 	    // ...
 ```
 
-## Heat beats
+## Heart beats
 With this feature enabled, the app is expected to send heart beat messages to Yams at steady intervals. If heart beats are not received in time, errors will be logged (more complex handling will be added in the future). To enable this feature, update the `AppConfig.json` and your app source code as shown below:
 
 ```json
