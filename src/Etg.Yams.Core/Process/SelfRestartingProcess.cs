@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
 {
-    using System.Threading;
-
     /// <summary>
     /// A process that automatically restarts itself if it exists unexpectedly (for a finite number of trials).
     /// If <see cref="Close"/> or <see cref="Kill"/> is called, the process won't attempt to restart itself.

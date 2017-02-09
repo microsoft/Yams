@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
 {
-    using System.Threading;
-
     /// <summary>
     /// A Wrapper around the <see cref="System.Diagnostics.Process"/>.
     /// </summary>
