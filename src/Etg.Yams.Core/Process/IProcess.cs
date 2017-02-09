@@ -7,6 +7,8 @@ namespace Etg.Yams.Process
     {
         Task Start();
 
+        void StopGracefully();
+
         Task Close();
 
         Task Kill();

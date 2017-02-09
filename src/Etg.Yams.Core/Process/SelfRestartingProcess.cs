@@ -36,6 +36,12 @@ namespace Etg.Yams.Process
             return _process.Start();
         }
 
+        public void StopGracefully()
+        {
+            _stopped = true;
+            _process.StopGracefully();
+        }
+
         public Task Close()
         {
             _stopped = true;

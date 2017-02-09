@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
@@ -72,6 +73,20 @@ namespace Etg.Yams.Process
                 }
                 _isRunning = true;
             });
+        }
+
+        public void StopGracefully()
+        {
+            if (_process == null) return;
+
+            _process.Exited -= ProcessExited;
+
+            Trace.TraceInformation("Attempting to gracefully stop the process");
+            var stopEvent = new EventWaitHandle(
+                false,
+                EventResetMode.AutoReset,
+                ExePath.Replace("\\", string.Empty));
+            stopEvent.Set();
         }
 
         public async Task Close()

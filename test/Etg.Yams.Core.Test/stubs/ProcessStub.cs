@@ -36,6 +36,11 @@ namespace Etg.Yams.Test.stubs
             return Task.FromResult(true);
         }
 
+        public void StopGracefully()
+        {
+            IsRunning = false;
+        }
+
         public Task Close()
         {
             IsRunning = false;

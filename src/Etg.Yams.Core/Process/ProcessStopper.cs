@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using Etg.Yams.Utils;
 
@@ -53,10 +52,7 @@ namespace Etg.Yams.Process
 
         private Task<bool> StopGracefully(IProcess process)
         {
-            string exePath = process.ExePath;
-            Trace.TraceInformation("Attempting to gracefully stop the process");
-            var stopEvent = new EventWaitHandle(false, EventResetMode.AutoReset, exePath.Replace("\\", string.Empty));
-            stopEvent.Set();
+            process.StopGracefully();
 
             return ProcessUtils.SpinWaitForExit(process, _waitForExitInSeconds);
         }
