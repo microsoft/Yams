@@ -12,7 +12,7 @@ namespace Etg.Yams.Process
         public AbstractProcessDecorator(IProcess process)
         {
             _process = process;
-            _process.Exited += Exited;
+            _process.Exited += InvokeExited;
         }
 
         public string ExePath => _process.ExePath;
@@ -32,25 +32,30 @@ namespace Etg.Yams.Process
 
         public virtual Task Close()
         {
-            _process.Exited -= Exited;
+            UnsubscribeFromExited();
             return _process.Close();
         }
 
         public virtual Task Kill()
         {
-            _process.Exited -= Exited;
+            UnsubscribeFromExited();
             return _process.Kill();
         }
 
         public virtual Task ReleaseResources()
         {
-            _process.Exited -= Exited;
+            UnsubscribeFromExited();
             return _process.ReleaseResources();
         }
 
-        protected void InvokeExited(ProcessExitedArgs args)
+        protected void InvokeExited(object sender, ProcessExitedArgs args)
         {
-            Exited?.Invoke(this, args);
+            Exited?.Invoke(sender, args);
+        }
+
+        protected void UnsubscribeFromExited()
+        {
+            _process.Exited -= InvokeExited;
         }
     }
 }

@@ -101,6 +101,7 @@
     <Compile Include="Application\ApplicationTest.cs" />
     <Compile Include="EndToEndTest.cs" />
     <Compile Include="Install\ApplicationInstallerTest.cs" />
+    <Compile Include="Process\GracefulShutdownProcessDecoratorTest.cs" />
     <Compile Include="Process\ProcessStopperTest.cs" />
     <Compile Include="Process\ProcessTest.cs" />
     <Compile Include="Process\SelfRestartingProcessTest.cs" />

@@ -38,6 +38,8 @@ namespace Etg.Yams.Process
             Trace.TraceInformation("Yams is sending an exit message to the app");
             try
             {
+                UnsubscribeFromExited();
+
                 await _ipcConnection.SendMessage("[EXIT]").Timeout(_config.GracefulShutdownMessageTimeout);
 
                 Trace.TraceInformation("Exit message sent!");
