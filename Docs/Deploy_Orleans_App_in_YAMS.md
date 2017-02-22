@@ -137,12 +137,12 @@ To deploy both apps to YAMS follow the steps below:
 		{
 			"Id": "hello.orleans",
 			"Version": "1.0.0",
-			"DeploymentIds": [ "MY_YAMS_BACKEND_CLUSTER_ID" ]
+			"TargetClusters": [ "MY_YAMS_BACKEND_CLUSTER_ID" ]
 		},	
 		{
 			"Id": "hello.webapp",
 			"Version": "1.0.0",
-			"DeploymentIds": [ "MY_YAMS_FRONTEND_CLUSTER_ID" ]
+			"TargetClusters": [ "MY_YAMS_FRONTEND_CLUSTER_ID" ]
 		},			
 	]
 }
