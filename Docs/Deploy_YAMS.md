@@ -146,12 +146,12 @@ YAMS expects to find a Storage Container called `applications` at the root of th
         {
             "Id": "hello.webapi",
             "Version": "1.0.1",
-            "DeploymentIds": [ "YAMS_CLUSTER_ID" ]
+            "TargetClusters": [ "YAMS_CLUSTER_ID" ]
         },	
 		{
             "Id": "hello.backend",
 			"Version": "1.0.0",
-            "DeploymentIds": [ "YAMS_CLUSTER_ID" ]
+            "TargetClusters": [ "YAMS_CLUSTER_ID" ]
 		},
 	]
 }
