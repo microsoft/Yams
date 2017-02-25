@@ -1,7 +1,6 @@
 ﻿using Etg.Yams.Client;
 using System;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace HeartBeatProcess
@@ -16,7 +15,7 @@ namespace HeartBeatProcess
         private static async Task Run(string[] args)
         {
             Console.WriteLine("args " + string.Join(" ", args));
-            int heartBeatPeriod = 1000 * Convert.ToInt32(args[2]);
+            var heartBeatPeriod = TimeSpan.FromSeconds(Convert.ToInt32(args[2]));
 
             var yamsClientConfig = new YamsClientConfigBuilder(args).Build();
             var yamsClientFactory = new YamsClientFactory();
