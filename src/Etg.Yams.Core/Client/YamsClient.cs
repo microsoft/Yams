@@ -66,7 +66,7 @@ namespace Etg.Yams.Client
                     "Health monitoring is not supported for this app. Check your AppConfig.json file");
                 return;
             }
-            Trace.TraceInformation("Sending hear beat message to Yams..");
+            Trace.TraceInformation("Sending heart beat message to Yams..");
             await _healthConnection.SendMessage("[HEALTH_OK]")
                 .Timeout(_config.HeartBeatMessageTimeout, "Send heart beat message to Yams has timed out");
             Trace.TraceInformation("Heart beat message has been sent to Yams successfully!");
