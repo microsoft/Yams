@@ -31,16 +31,18 @@ namespace Etg.Yams.Client
             if (_initConnection != null)
             {
                 await _initConnection.Connect().Timeout(_config.ConnectTimeout, "IPC connection failed to connect");
+                Trace.TraceInformation("IPC init connection connected!");
             }
             if(_exitConnection != null)
             {
                 await _exitConnection.Connect().Timeout(_config.ConnectTimeout, "IPC connection failed to connect");
+                Trace.TraceInformation("IPC exit connection connected!");
             }
             if (_healthConnection != null)
             {
                 await _healthConnection.Connect().Timeout(_config.ConnectTimeout, "IPC connection failed to connect");
+                Trace.TraceInformation("IPC health connection connected!");
             }
-            Trace.TraceInformation("IPC connections connected!");
             _waitForExit = WaitForExit();
         }
 
