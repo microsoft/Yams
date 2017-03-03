@@ -30,18 +30,18 @@ namespace Etg.Yams.Client
             Trace.TraceInformation($"Connecting IPC connections..");
             if (_initConnection != null)
             {
-                await _initConnection.Connect().Timeout(_config.ConnectTimeout, "IPC connection failed to connect");
-                Trace.TraceInformation("IPC init connection connected!");
+                await _initConnection.Connect().Timeout(_config.ConnectTimeout, "IPC Monitored Initialization connection failed to connect");
+                Trace.TraceInformation("IPC Monitored Initialization connection connected!");
             }
             if(_exitConnection != null)
             {
-                await _exitConnection.Connect().Timeout(_config.ConnectTimeout, "IPC connection failed to connect");
-                Trace.TraceInformation("IPC exit connection connected!");
+                await _exitConnection.Connect().Timeout(_config.ConnectTimeout, "IPC Graceful Shutdown connection failed to connect");
+                Trace.TraceInformation("IPC Graceful Shutdown connection connected!");
             }
             if (_healthConnection != null)
             {
-                await _healthConnection.Connect().Timeout(_config.ConnectTimeout, "IPC connection failed to connect");
-                Trace.TraceInformation("IPC health connection connected!");
+                await _healthConnection.Connect().Timeout(_config.ConnectTimeout, "IPC Health connection failed to connect");
+                Trace.TraceInformation("IPC Health connection connected!");
             }
             _waitForExit = WaitForExit();
         }
