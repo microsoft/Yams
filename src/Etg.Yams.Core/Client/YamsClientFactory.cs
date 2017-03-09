@@ -6,10 +6,20 @@ namespace Etg.Yams.Client
 {
     public class YamsClientFactory : IYamsClientFactory
     {
+        private readonly IProcessArgsParser _processArgsParser;
+
+        public YamsClientFactory() : this(new ProcessArgsParser())
+        {
+        }
+
+        public YamsClientFactory(IProcessArgsParser processArgsParser)
+        {
+            _processArgsParser = processArgsParser;
+        }
+
         public IYamsClient CreateYamsClient(YamsClientConfig config)
         {
-            var options = new YamsClientOptions();
-            bool isValid = Parser.Default.ParseArgumentsStrict(config.ProcessArgs, options);
+            var options = _processArgsParser.ParseArgs(config.ProcessArgs);
 
             IpcConnection initConnection = null;
             IpcConnection exitConnection = null;

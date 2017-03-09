@@ -73,11 +73,13 @@
     <Compile Include="Application\IApplicationPool.cs" />
     <Compile Include="Client\IYamsClient.cs" />
     <Compile Include="Client\IYamsClientFactory.cs" />
+    <Compile Include="Client\IProcessArgsParser.cs" />
     <Compile Include="Client\YamsClient.cs" />
     <Compile Include="Client\YamsClientConfig.cs" />
     <Compile Include="Client\YamsClientConfigBuilder.cs" />
     <Compile Include="Client\YamsClientFactory.cs" />
     <Compile Include="Client\YamsClientOptions.cs" />
+    <Compile Include="Client\ProcessArgsParser.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Deploy\AndDeploymentMatcher.cs" />
     <Compile Include="Deploy\ClusterIdDeploymentMatcher.cs" />
@@ -141,10 +143,7 @@
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Process" />
-    <Folder Include="Process\Ipc" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
