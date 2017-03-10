@@ -99,6 +99,7 @@
     <Compile Include="Application\ApplicationConfigSymbolResolverTest.cs" />
     <Compile Include="Application\ApplicationPoolTest.cs" />
     <Compile Include="Application\ApplicationTest.cs" />
+    <Compile Include="Client\YamsProcessArgsParserTest.cs" />
     <Compile Include="EndToEndTest.cs" />
     <Compile Include="Install\ApplicationInstallerTest.cs" />
     <Compile Include="Process\GracefulShutdownProcessDecoratorTest.cs" />
