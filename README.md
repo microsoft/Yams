@@ -26,6 +26,11 @@ Documentation
 * [Deploy and host Orleans applications in YAMS](Docs/Deploy_Orleans_App_in_YAMS.md).
 * [Yams Storage Api](Docs/YAMS_Storage.md).
 
+Videos
+=======
+* [Nehme Bilal and Reuben Bond talk about deploying Orleans with YAMS and Service Fabric](https://www.youtube.com/watch?v=w__D7gnqeZ0&feature=youtu.be).
+* [Jakub Konecki talk about deploying Orleans with YAMS](https://github.com/OrleansContrib/meetups#meetup-12-deploying-orleans-with-jakub-konecki).
+
 Contribute!
 =======
 We welcome contributions of all sorts including pull requests, suggestions, documentation, etc. Please feel free to open an issue to discuss any matter.
