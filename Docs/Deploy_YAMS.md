@@ -10,7 +10,7 @@ This tutorial will show you how to configure YAMS and deploy it to a cloud servi
 ```csharp
 private IYamsService _yamsService;
 
-private static string GetDeploymentId()
+private static string GetYamsClusterId()
 {
     if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
     {
