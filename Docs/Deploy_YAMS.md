@@ -48,11 +48,11 @@ private async Task RunAsync(CancellationToken cancellationToken)
     catch (Exception e)
     {
         Trace.TraceError($"Failed to start the Yams cluster {GetYamsClusterId()}", e);
+	return;
     }
 
     while (!cancellationToken.IsCancellationRequested)
     {
-        Trace.TraceInformation("Working");
         await Task.Delay(1000);
     }
 }
