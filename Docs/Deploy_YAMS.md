@@ -3,137 +3,103 @@
 This tutorial will show you how to configure YAMS and deploy it to a cloud service. If you already have a YAMS cluster deployed, skip to [Deploy and Host an App in YAMS](Deploy&Host_an_App_in_YAMS.md) tutorial.
 
 ## Deploy YAMS
-1. Create a cloud service and a Worker Role.
-2. Install the latest version of Etg.Yams from the NuGet gallery to the worker role.
-3. Add a `WorkerRoleConfig` class as follows:
+1. Create a cloud service and add a Worker Role to it.
+2. Install the latest version of `Etg.Yams` from the NuGet gallery to the worker role.
+3. Add the following private members to your `WorkerRoles.cs` class:
 
-  ```csharp
-      public class WorkerRoleConfig
-      {
-          public WorkerRoleConfig()
-          {
-              StorageDataConnectionString = RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString");
-              CurrentRoleInstanceLocalStoreDirectory = RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath;
-          }
+```csharp
+private IYamsService _yamsService;
 
-          public string StorageDataConnectionString { get; }
+private static string GetYamsClusterId()
+{
+    if (!RoleEnvironment.IsAvailable || RoleEnvironment.IsEmulated)
+    {
+        return "testdeploymentid";
+    }
 
-          public string CurrentRoleInstanceLocalStoreDirectory { get; }
-      }
-  ```
+    return RoleEnvironment.DeploymentId;
+}
+```
+4. Replace the content of the `RunAsync` method with the following:
 
-4. Add a `Utils` folder to the Worker Role. Add an `AzureUtils` class and a `DeploymentIdUtils` class to the folder with the following content:
+```csharp
+private async Task RunAsync(CancellationToken cancellationToken)
+{
+    YamsConfig yamsConfig = new YamsConfigBuilder(
+        // mandatory configs
+        clusterId: GetYamsClusterId(),
+        instanceUpdateDomain: RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
+        instanceId: RoleEnvironment.CurrentRoleInstance.Id,
+        applicationInstallDirectory: RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath)
+        // optional configs
+        .SetCheckForUpdatesPeriodInSeconds(5)
+        .SetApplicationRestartCount(3)
+        .Build();
+    _yamsService = YamsServiceFactory.Create(yamsConfig,
+        deploymentRepositoryStorageConnectionString: RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString"),
+        updateSessionStorageConnectionString: RoleEnvironment.GetConfigurationSettingValue("StorageDataConnectionString"));
 
-  ```csharp
-      public static class AzureUtils
-      {
-          public static bool IsEmulator()
-          {
-              return RoleEnvironment.IsAvailable && RoleEnvironment.IsEmulated;
-          }
-      }
-  ```
+    try
+    {
+        Trace.TraceInformation("Yams is starting");
+        await _yamsService.Start();
+        Trace.TraceInformation("Yams has started. Looking for apps with clusterId:" + GetYamsClusterId());
+    }
+    catch (Exception e)
+    {
+        Trace.TraceError($"Failed to start the Yams cluster {GetYamsClusterId()}", e);
+    }
 
-  ```csharp
-      public static class DeploymentIdUtils
-      {
-          public static string GetYamsClusterId(bool isSingleClusterDeployment)
-          {
-              if (!RoleEnvironment.IsAvailable)
-              {
-                  return Constants.TestDeploymentId;
-              }
+    while (!cancellationToken.IsCancellationRequested)
+    {
+        Trace.TraceInformation("Working");
+        await Task.Delay(1000);
+    }
+}
+```
 
-              return RoleEnvironment.IsEmulated
-                  ? Constants.TestDeploymentId
-                  : RoleEnvironment.DeploymentId;
-          }
-      }
-  ```
+5. Add the following configuration to your `ServiceDefinition.csdef`
 
-5. Configure and start YAMS in your Worker Role as follows:
+```xml
+  <WorkerRole name="YamsWorkerRole" vmsize="Small">
 
-  ```csharp
-      public class YamsWorkerRole : RoleEntryPoint
-      {
-          private IYamsService _yamsService;
+    <!-- Make sure that YAMS has elevated permissions -->
+    <Runtime executionContext="elevated" />
+    
+    <ConfigurationSettings>
+      <!--blob storage connection string needed so that Yams can access the deployment storage -->
+      <Setting name="StorageDataConnectionString" />
+    </ConfigurationSettings>
 
-          [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-          public override void Run()
-          {
-              RunAsync().Wait();
-          }
+    <LocalResources>
+      <!--Needed to tell Yams where to install apps -->
+      <LocalStorage name="LocalStoreDirectory" cleanOnRoleRecycle="false" />
+    </LocalResources>
+    
+  </WorkerRole>
+```
 
-          public async Task RunAsync()
-          {
-              WorkerRoleConfig config = new WorkerRoleConfig();
-              YamsConfig yamsConfig = new YamsConfigBuilder(
-                  // mandatory configs
-                  DeploymentIdUtils.GetYamsClusterId(this.IsSingleClusterDeployment),
-                  RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
-                  RoleEnvironment.CurrentRoleInstance.Id,
-                  config.CurrentRoleInstanceLocalStoreDirectory)
-                  // optional configs
-                  .SetCheckForUpdatesPeriodInSeconds(5)
-                  .SetApplicationRestartCount(3)
-                  .Build();
-              _yamsService = YamsServiceFactory.Create(yamsConfig,
-                  deploymentRepositoryStorageConnectionString: config.StorageDataConnectionString,
-                  updateSessionStorageConnectionString: config.StorageDataConnectionString);
+Don't forget to add the corresponding values to your `ServiceConfiguration.Cloud.cscfg` and `ServiceConfiguration.Local.cscfg`
 
-              try
-              {
-                  Trace.TraceInformation("Yams is starting");
-                  await _yamsService.Start();
-                  Trace.TraceInformation("Yams has started. Looking for apps with deploymentId:" + yamsConfig.ClusterDeploymentId);
-                  while (true)
-                  {
-                      await Task.Delay(1000);
-                  }
-              }
-              catch (Exception ex)
-              {
-                  Trace.TraceError(ex.ToString());
-              }
-          }
+6. Configure EndPoints to be used by YAMS apps
 
-          public override bool OnStart()
-          {
-              Trace.TraceInformation("Yams WorkerRole is starting");
-              ServicePointManager.DefaultConnectionLimit = 1000;
-              RoleEnvironment.Changing += RoleEnvironmentChanging;
-              var result = base.OnStart();
-              Trace.TraceInformation("Yams WorkerRole has started");
-              return result;
-          }
+To allow applications to access endpoints, YAMS must register those endpoints in Azure when the cloud service containing YAMS is deployed. Fortunately, it is possible in Azure to register a range of endpoints. To do so, add the following to the **ServiceConfiguration.csdef** file:
 
-          public override void OnStop()
-          {
-              StopAsync().Wait();
-          }
+```xml
+    <Endpoints>
+      <InputEndpoint name="HttpsIn" protocol="https" port="443" certificate="your-certificate.net"/>
+      <InputEndpoint name="HttpIn" protocol="http" port="80"/>
+      <InternalEndpoint name="TcpEndpoints" protocol="tcp">
+        <FixedPortRange min="81" max="400"/>
+      </InternalEndpoint>
+    </Endpoints>
+```
 
-          public async Task StopAsync()
-          {
-              Trace.TraceInformation("Yams WorkerRole is stopping");
-              RoleEnvironment.Changing -= RoleEnvironmentChanging;
-              if (_yamsService != null)
-              {
-                  await _yamsService.Stop();
-              }
-              base.OnStop();
-              Trace.TraceInformation("Yams has stopped");
-          }
+In this case, port 443 will be available for **https** connections, port 80 will be available for **http** connections and all ports from 81 to 400 will be open for **tcp** connections.
 
-          private void RoleEnvironmentChanging(object sender, RoleEnvironmentChangingEventArgs e)
-          {
-              // If a configuration setting is changing);
-              if (e.Changes.Any(change => change is RoleEnvironmentConfigurationSettingChange))
-              {
-                  e.Cancel = true;
-              }
-          }
-      }
-  ```
+7. Publish the cloud service to Azure and start using YAMS. You should only need to publish the cloud service hosting YAMS once.
+
+## Deployment Storage
 
 YAMS relies on Azure blob storage to deploy applications. It uses the `dataConnectionString` provided in the `YamsConfig` to connect to the appropriate blob storage.
 
@@ -194,46 +160,3 @@ Notice the `${Id}` symbol in the `ExeArgs` that was substituted with the actual 
 * ${Version.Build}
 * ${DeploymentId}: the cloud service deployment id.
 * ${InstanceId}: the current role instance id.
-
-
-# EndPoints configuration
-
-To allow applications to access endpoints, YAMS must register those endpoints in Azure when the cloud service containing YAMS is deployed. Fortunately, it is possible in Azure to register a range of endpoints. To do so, add the following to the **ServiceConfiguration.csdef** file:
-
-```xml
-    <Endpoints>
-      <InputEndpoint name="HttpsIn" protocol="https" port="443" certificate="your-certificate.net"/>
-      <InputEndpoint name="HttpIn" protocol="http" port="80"/>
-      <InternalEndpoint name="TcpEndpoints" protocol="tcp">
-        <FixedPortRange min="81" max="400"/>
-      </InternalEndpoint>
-    </Endpoints>
-```
-
-In this case, port 443 will be available for **https** connections, port 80 will be available for **http** connections and all ports from 81 to 400 will be open for **tcp** connections.
-
-The **ServiceConfiguration.csdef** file should also contain the following configuration settings:
-
-```xml
-    <ConfigurationSettings>
-      <Setting name="StorageDataConnectionString" />
-      <Setting name="UpdateFrequencyInSeconds" />
-      <Setting name="ApplicationRestartCount" />
-      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"/>
-    </ConfigurationSettings>
-```
-
-### Execution context
-
-Execution context should be set to elevated in order to host apps reserving incoming ports (Web API, frontend etc.). Following line should be added to worker role section in ServiceDefinition file.
-
-``` xml
-    <Runtime executionContext="elevated" />
-```
-
-# Sample project
-A sample cloud service project that can be used to deploy YAMS is available in the [Samples/Etg.Yams.Cloud](../Samples/Etg.Yams.Cloud) directory. The sample project uses an existing storage account and cloud services which you should replace with you own! 
-
-# Publish the cloud service
-
-Once you're done configuring the cloud service, simply publish it to Azure and start using YAMS. You should only need to publish the cloud service hosting YAMS once.
