@@ -85,7 +85,7 @@ namespace Etg.Yams.Azure.Utils
         public static Task UploadFile(string localPath, CloudBlobContainer blobContainer, string blobPath)
         {
             CloudBlockBlob blob = blobContainer.GetBlockBlobReference(blobPath);
-            return blob.UploadFromFileAsync(localPath, FileMode.Open);
+            return blob.UploadFromFileAsync(localPath);
         }
 
         public static Task UploadDirectory(string localDirPath, CloudBlobContainer blobContainer, string blobDirPath)
