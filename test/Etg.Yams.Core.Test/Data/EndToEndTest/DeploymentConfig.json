@@ -26,7 +26,7 @@
       "TargetClusters": [ "clusterId2" ]
     },
     {
-      "Id": "test.app5",
+      "Id": "test.app5", // this app has no associated binaries
       "Version": "1.0.0",
       "TargetClusters": [ "clusterId1" ]
     }

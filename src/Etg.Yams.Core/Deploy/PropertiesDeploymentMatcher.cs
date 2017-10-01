@@ -17,13 +17,12 @@ namespace Etg.Yams.Deploy
             foreach (var kvp in _matchProperties)
             {
                 string value;
-                if (!appDeploymentConfig.Properties.TryGetValue(kvp.Key, out value))
+                if (appDeploymentConfig.Properties.TryGetValue(kvp.Key, out value))
                 {
-                    return false;
-                }
-                if (value != kvp.Value)
-                {
-                    return false;
+                    if (value != kvp.Value)
+                    {
+                        return false;
+                    }
                 }
             }
             return true;
