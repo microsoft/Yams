@@ -15,6 +15,7 @@ using Newtonsoft.Json.Serialization;
 using Semver;
 using Etg.Yams.Storage;
 using Etg.Yams.Install;
+using System.Collections.Generic;
 
 namespace Etg.Yams.Test
 {
@@ -149,12 +150,11 @@ namespace Etg.Yams.Test
                 .AddClusterProperty("NodeType", "Test")
                 .AddClusterProperty("Region", "East").Build();
 
-            AppInstallConfig appInstallConfig = null;
+            var installedApps = new List<AppInstallConfig>();
             var applicationInstallerStub = new StubIApplicationInstaller().Install(
                 (config) => 
                 {
-                    Assert.Null(appInstallConfig);
-                    appInstallConfig = config;
+                    installedApps.Add(config);
                     return Task.CompletedTask;
                 });
 
@@ -164,7 +164,12 @@ namespace Etg.Yams.Test
 
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
+            
+            Assert.Equal(2, installedApps.Count);
+            Assert.True(installedApps.Any(config => config.AppIdentity == new AppIdentity("test.app1", "1.0.0")));
+            Assert.True(installedApps.Any(config => config.AppIdentity == new AppIdentity("test.app2", "2.0.0-beta")));
 
+            AppInstallConfig appInstallConfig = installedApps.Find(config => config.AppIdentity.Id == "test.app1");
             Assert.Equal(new AppIdentity("test.app1", new SemVersion(1, 0, 0)), appInstallConfig.AppIdentity);
             Assert.True(appInstallConfig.Properties.ContainsKey("NodeType"));
             Assert.Equal("Test", appInstallConfig.Properties["NodeType"]);
