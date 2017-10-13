@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Etg.Yams.Powershell</id>
+    <version>1.0.3</version>
+    <title>YAMS Powershell</title>
+    <authors>Nehme Bilal</authors>
+    <owners>Microsoft</owners>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Exposes the IDeploymentRepository interface to Powershell so that YAMS storage can be manipulated from a Powershell script</description>
+    <copyright>Copyright (c) Microsoft Corporation</copyright>
+  </metadata>
+    <files>
+    <file src="bin\$configuration$\**" target="content" />
+  </files>
+</package>

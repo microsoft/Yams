@@ -15,6 +15,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json.Serialization;
 using Semver;
 using Xunit;
+using Etg.Yams.Storage.Status;
 
 namespace Etg.Yams.Azure.Storage.Test
 {
@@ -31,16 +32,20 @@ namespace Etg.Yams.Azure.Storage.Test
             "DeploymentConfig.json");
 
         private static CloudBlobClient _blobClient;
-        private static IDeploymentRepository _deploymentRepository;
+        private static BlobStorageDeploymentRepository _deploymentRepository;
         private readonly IDeploymentConfigSerializer _serializer;
+        private readonly IDeploymentStatusSerializer _deploymentStatusSerializer;
 
         public BlobStorageDeploymentRepositoryTest(AzureStorageEmulatorTestFixture fixture)
         {
             fixture.ClearBlobStorage();
             _blobClient = fixture.BlobClient;
 
-            _serializer = new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter()));
-            _deploymentRepository = new BlobStorageDeploymentRepository(EmulatorDataConnectionString, _serializer);
+            JsonSerializer jsonSerializer = new JsonSerializer(new DiagnosticsTraceWriter());
+            _serializer = new JsonDeploymentConfigSerializer(jsonSerializer);
+            _deploymentStatusSerializer = new JsonDeploymentStatusSerializer(jsonSerializer);
+            _deploymentRepository = new BlobStorageDeploymentRepository(EmulatorDataConnectionString, _serializer, 
+                _deploymentStatusSerializer);
         }
 
         [Fact]

@@ -1,0 +1,1 @@
+nuget pack Etg.Yams.Powershell.csproj -Prop Configuration=Release

@@ -89,6 +89,10 @@
       <Project>{894b7986-5aa4-42a7-8eb0-6dfd1f604505}</Project>
       <Name>AzureBlobStorageUpdateSession</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\AzureUtils\AzureUtils.csproj">
+      <Project>{1c890e49-5a9b-4eab-9f69-6a6e78d82610}</Project>
+      <Name>AzureUtils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\Etg.Yams.Core\Etg.Yams.Core.csproj">
       <Project>{7145e485-34fa-4632-89b0-bd27c96af69c}</Project>
       <Name>Etg.Yams.Core</Name>

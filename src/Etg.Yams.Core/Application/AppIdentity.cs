@@ -1,5 +1,6 @@
 ﻿using System;
 using Semver;
+using Newtonsoft.Json;
 
 namespace Etg.Yams.Application
 {
@@ -19,24 +20,26 @@ namespace Etg.Yams.Application
             _version = version;
         }
 
-		public AppIdentity(string id, string version)
-		{
-			_id = id;
-			_version = SemVersion.Parse(version);
-		}
+        [JsonConstructor]
+        public AppIdentity(string id, string version)
+        {
+            _id = id;
+            _version = SemVersion.Parse(version);
+        }
 
-		public override string ToString()
+        public override string ToString()
         {
             return string.Format("Id: {0}, Version: {1}", Id, Version);
         }
 
         public string Id
         {
-            get { return _id;}
+            get { return _id; }
         }
 
-        public SemVersion Version {
-            get { return _version;}
+        public SemVersion Version
+        {
+            get { return _version; }
         }
 
         public bool Equals(AppIdentity other)
@@ -51,14 +54,14 @@ namespace Etg.Yams.Application
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((AppIdentity) obj);
+            return Equals((AppIdentity)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return ((_id != null ? _id.GetHashCode() : 0)*397) ^ (_version != null ? _version.GetHashCode() : 0);
+                return ((_id != null ? _id.GetHashCode() : 0) * 397) ^ (_version != null ? _version.GetHashCode() : 0);
             }
         }
 

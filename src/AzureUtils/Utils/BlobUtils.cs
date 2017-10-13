@@ -54,7 +54,6 @@ namespace Etg.Yams.Azure.Utils
             return ListBlobsFlat(blobDirectory, useFlatBlobListing);
         }
 
-
         private static string GetLocalRelativePath(ICloudBlob blob, dynamic blobDirectory)
         {
             return GetBlobRelativePath(blob, blobDirectory).Replace('/', '\\');
@@ -73,6 +72,22 @@ namespace Etg.Yams.Azure.Utils
         public static string GetBlobRelativePath(ICloudBlob blob, CloudBlobContainer container)
         {
             return GetBlobRelativePathInternal(blob, container);
+        }
+
+        public static async Task CreateBlobIfNotExists(ICloudBlob blob)
+        {
+            var emptyByteArray = new byte[] { };
+            try
+            {
+                await blob.UploadFromByteArrayAsync(emptyByteArray, 0, emptyByteArray.Length,
+                    AccessCondition.GenerateIfNotExistsCondition(), new BlobRequestOptions(), new OperationContext());
+            } catch(StorageException e)
+            {
+                if(e.RequestInformation.HttpStatusCode != 409)
+                {
+                    throw;
+                }
+            }
         }
 
         public static async Task CreateEmptyBlob(ICloudBlob blob)
@@ -112,24 +127,21 @@ namespace Etg.Yams.Azure.Utils
             return blobContainer;
         }
 
-        public static Task<bool> ExistsAsync(this CloudBlobDirectory dir)
+        public static async Task<bool> ExistsAsync(this CloudBlobDirectory dir)
         {
-            return Task.Run(() => dir.ListBlobs().Any());
+            return (await dir.ListBlobsAsync()).Any();
         }
 
-        public static Task DeleteAsync(this CloudBlobDirectory dir)
+        public static async Task DeleteAsync(this CloudBlobDirectory dir)
         {
-            return Task.Run(() =>
+            IEnumerable<IListBlobItem> blobs = await dir.ListBlobsAsync(useFlatBlobListing:true);
+            var tasks = new List<Task>();
+            foreach (IListBlobItem blobItem in blobs)
             {
-                IEnumerable<IListBlobItem> blobs = dir.ListBlobs(true);
-                var tasks = new List<Task>();
-                foreach (IListBlobItem blobItem in blobs)
-                {
-                    CloudBlockBlob blob = (CloudBlockBlob) blobItem;
-                    tasks.Add(blob.DeleteAsync());
-                }
-                return Task.WhenAll(tasks);
-            });
+                CloudBlockBlob blob = (CloudBlockBlob) blobItem;
+                tasks.Add(blob.DeleteAsync());
+            }
+            await Task.WhenAll(tasks);
         }
     }
 }

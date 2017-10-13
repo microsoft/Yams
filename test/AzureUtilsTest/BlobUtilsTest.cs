@@ -7,6 +7,7 @@ using Etg.Yams.AzureTestUtils.Fixtures;
 using Etg.Yams.Utils;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Xunit;
+using System.Text;
 
 namespace Etg.Yams.Azure.Test
 {
@@ -96,6 +97,21 @@ namespace Etg.Yams.Azure.Test
 
             // Then verify that the hierachy on the blob storage matches the one the local file system
             VerifyThatAllFilesAreThere(relativePathSet, "/");
+        }
+
+        [Fact]
+        public async Task TestCreateBlobIfNotExists()
+        {
+            var container = _blobClient.GetContainerReference("container");
+            container.CreateIfNotExists();
+            var blob = container.GetBlockBlobReference("createIfNotExistsTestBlob.txt");
+            await BlobUtils.CreateBlobIfNotExists(blob);
+            Assert.True(await blob.ExistsAsync());
+            string text = "test content";
+            await blob.UploadTextAsync(text);
+
+            await BlobUtils.CreateBlobIfNotExists(blob);
+            Assert.Equal(text, await blob.DownloadTextAsync());
         }
 
         private static void VerifyThatAllFilesAreThere(ISet<string> relativePathSet, string separator)
