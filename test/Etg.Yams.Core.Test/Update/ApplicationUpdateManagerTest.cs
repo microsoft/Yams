@@ -12,6 +12,8 @@ using Etg.Yams.Test.stubs;
 using Etg.Yams.Update;
 using Semver;
 using Xunit;
+using Etg.Yams.Storage;
+using Etg.Yams.Storage.Status;
 
 namespace Etg.Yams.Test.Update
 {
@@ -54,44 +56,66 @@ namespace Etg.Yams.Test.Update
                 }
             );
 
-            var installedApps = new List<AppIdentity>();
-            var uninstalledApps = new List<AppIdentity>();
-            string updatedAppId = null;
-            IEnumerable<SemVersion> versionsRemoved = null;
-            IEnumerable<SemVersion> versionsAdded = null;
             IApplicationInstaller applicationInstaller = new StubIApplicationInstaller()
                 .Install(config => 
                 {
-                    installedApps.Add(config.AppIdentity);
+                    applicationPool.AddApplication(new ApplicationStub(config.AppIdentity, "path"));
                     return Task.FromResult(true);
                 })
                 .UnInstall(appIdentity =>
                 {
-                    uninstalledApps.Add(appIdentity);
+                    applicationPool.RemoveApplication(appIdentity);
                     return Task.FromResult(true);
                 })
                 .Update((applicationsToRemove, applicationsToInstall) => 
                 {
-	                updatedAppId = applicationsToInstall.First().AppIdentity.Id;
-	                versionsRemoved = applicationsToRemove.Select(identity => identity.Version);
-	                versionsAdded = applicationsToInstall.Select(config => config.AppIdentity.Version);
+                    foreach(var appIdentity in applicationsToRemove)
+                    {
+                        applicationPool.RemoveApplication(appIdentity);
+                    }
+                    foreach(var appInstallConfig in applicationsToInstall)
+                    {
+                        applicationPool.AddApplication(new ApplicationStub(appInstallConfig.AppIdentity, "path"));
+                    }
 	                return Task.FromResult(true);
                 }
             );
 
-            ApplicationUpdateManager applicationUpdateManager = new ApplicationUpdateManager("clusterId", applicationDeploymentDirectory, applicationPool, applicationDownloader, applicationInstaller);
+            var instanceDeploymentStatus = new InstanceDeploymentStatus();
+            IDeploymentStatusWriter deploymentStatusWriterStub = new StubIDeploymentStatusWriter()
+                .PublishInstanceDeploymentStatus((clusterId, instanceId, status) =>
+                {
+                    instanceDeploymentStatus = status;
+                    return Task.CompletedTask;
+                });
+
+            const string ClusterId = "clusterId";
+            const string InstanceId = "instanceId";
+            ApplicationUpdateManager applicationUpdateManager = new ApplicationUpdateManager(ClusterId, InstanceId, 
+                applicationDeploymentDirectory, applicationPool, applicationDownloader, applicationInstaller,
+                deploymentStatusWriterStub);
             await applicationUpdateManager.CheckForUpdates();
 
-            Assert.Equal(2, downloadedApps.Count);
-            Assert.True(downloadedApps.Contains(app1v4));
-            Assert.True(downloadedApps.Contains(app1v5));
+            Assert.Equal(3, applicationPool.Applications.Count());
+            Assert.True(applicationPool.HasApplication(app1v3));
+            Assert.True(applicationPool.HasApplication(app1v4));
+            Assert.True(applicationPool.HasApplication(app1v5));
 
-            Assert.False(installedApps.Any());
-            Assert.False(uninstalledApps.Any());
+            Assert.Equal(3, instanceDeploymentStatus.Applications.Count());
+            VerifyThatDeploymentStatusHasBeenUpdated(instanceDeploymentStatus, app1v3, ClusterId, InstanceId);
+            VerifyThatDeploymentStatusHasBeenUpdated(instanceDeploymentStatus, app1v4, ClusterId, InstanceId);
+            VerifyThatDeploymentStatusHasBeenUpdated(instanceDeploymentStatus, app1v5, ClusterId, InstanceId);
+        }
 
-            Assert.Equal(id1, updatedAppId);
-            Assert.Equal(new [] { v1, v2 }, versionsRemoved.ToList());
-            Assert.Equal(new[] { v4, v5 }, versionsAdded.ToList());
+        private void VerifyThatDeploymentStatusHasBeenUpdated(InstanceDeploymentStatus deploymentStatus, 
+            AppIdentity appIdentity, string clusterId, string instanceId)
+        {
+            var appDeploymentStatus = deploymentStatus.GetAppDeploymentStatus(appIdentity);
+            Assert.NotNull(appDeploymentStatus);
+            Assert.Equal(appIdentity, appDeploymentStatus.AppIdentity);
+            Assert.Equal(clusterId, appDeploymentStatus.ClusterId);
+            Assert.Equal(instanceId, appDeploymentStatus.InstanceId);
+            Assert.NotNull(appDeploymentStatus.UtcTimeStamp);
         }
     }
 }

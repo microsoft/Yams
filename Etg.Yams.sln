@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Etg.Yams", "src\Etg.Yams\Etg.Yams.csproj", "{E1A6854F-6C0D-4F93-9B8D-D6981727D15B}"
 EndProject
@@ -46,6 +46,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeartBeatProcess", "test\HeartBeatProcess\HeartBeatProcess.csproj", "{257044FB-F7A8-499D-8EF2-B5CAD76D617A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullIpcProcess", "test\FullIpcProcess\FullIpcProcess.csproj", "{99F3A36C-7930-4670-A8B3-7137D891671D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Etg.Yams.Powershell", "src\Etg.Yams.Powershell\Etg.Yams.Powershell.csproj", "{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureTableDeploymentStatusManager", "AzureTableDeploymentStatusManager\AzureTableDeploymentStatusManager.csproj", "{8ACD9ED9-8C96-4AFD-B790-F5E836720539}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,6 +137,14 @@ Global
 		{99F3A36C-7930-4670-A8B3-7137D891671D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99F3A36C-7930-4670-A8B3-7137D891671D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99F3A36C-7930-4670-A8B3-7137D891671D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,8 +170,11 @@ Global
 		{706E37D7-B148-4734-9695-0D1AE6D4B3D5} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
 		{257044FB-F7A8-499D-8EF2-B5CAD76D617A} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
 		{99F3A36C-7930-4670-A8B3-7137D891671D} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
+		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
+		{8ACD9ED9-8C96-4AFD-B790-F5E836720539} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7A9645D4-78F9-451C-B788-6EC41CA3BF59}
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8
 	EndGlobalSection
 EndGlobal

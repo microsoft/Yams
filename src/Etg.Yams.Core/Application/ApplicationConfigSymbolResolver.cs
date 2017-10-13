@@ -49,10 +49,6 @@ namespace Etg.Yams.Application
                 case "ClusterId":
                     symbolValue = _clusterId;
                     break;
-                // TODO: This has been kept for backward compatibility; remove at some point
-                case "DeploymentId":
-                    symbolValue = _clusterId;
-                    break;
                 case "InstanceId":
                     symbolValue = _instanceId;
                     break;

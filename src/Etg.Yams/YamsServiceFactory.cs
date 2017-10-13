@@ -1,10 +1,7 @@
 ﻿using Etg.Yams.Azure.Storage;
 using Etg.Yams.Azure.UpdateSession;
-using Etg.Yams.Json;
 using Etg.Yams.Storage;
-using Etg.Yams.Storage.Config;
 using Etg.Yams.Update;
-using Newtonsoft.Json.Serialization;
 
 namespace Etg.Yams
 {
@@ -19,8 +16,8 @@ namespace Etg.Yams
                 yamsConfig.InstanceUpdateDomain,
                 updateSessionStorageConnectionString).UpdateSessionManager;
 
-            IDeploymentRepository deploymentRepository = BlobStorageDeploymentRepository.Create(deploymentRepositoryStorageConnectionString);
-            return new YamsDiModule(yamsConfig, deploymentRepository, updateSessionManager).YamsService;
+            var deploymentRepository = BlobStorageDeploymentRepository.Create(deploymentRepositoryStorageConnectionString);
+            return new YamsDiModule(yamsConfig, deploymentRepository, deploymentRepository, updateSessionManager).YamsService;
         }
     }
 }

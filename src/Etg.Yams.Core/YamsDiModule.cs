@@ -20,10 +20,12 @@ namespace Etg.Yams
     {
         private readonly IContainer _container;
 
-        public YamsDiModule(YamsConfig config, IDeploymentRepository deploymentRepository, 
+        public YamsDiModule(YamsConfig config, IDeploymentRepository deploymentRepository,
+            IDeploymentStatusWriter deploymentStatusWriter,
             IUpdateSessionManager updateSessionManager)
         {
-            _container = RegisterTypes(config, deploymentRepository, updateSessionManager).Build();
+            _container = RegisterTypes(config, deploymentRepository, deploymentStatusWriter, 
+                updateSessionManager).Build();
         }
 
         public YamsDiModule(IContainer container)
@@ -36,7 +38,8 @@ namespace Etg.Yams
         public IContainer Container => _container;
 
         public static ContainerBuilder RegisterTypes(YamsConfig config, 
-            IDeploymentRepository deploymentRepository, IUpdateSessionManager updateSessionManager)
+            IDeploymentRepository deploymentRepository, IDeploymentStatusWriter deploymentStatusWriter,
+            IUpdateSessionManager updateSessionManager)
         {
             var builder = new ContainerBuilder();
 
@@ -67,6 +70,7 @@ namespace Etg.Yams
             builder.RegisterInstance(updateSessionManager);
 
             builder.RegisterInstance(deploymentRepository);
+            builder.RegisterInstance(deploymentStatusWriter);
 
             builder.RegisterType<YamsService>().As<IYamsService>().SingleInstance();
 
@@ -74,6 +78,7 @@ namespace Etg.Yams
 
             builder.RegisterType<DiagnosticsTraceWriter>().As<ITraceWriter>().SingleInstance();
             builder.RegisterType<JsonSerializer>().As<IJsonSerializer>().SingleInstance();
+
 
             return builder;
         }
@@ -105,9 +110,10 @@ namespace Etg.Yams
                 c =>
                 {
                     var config = c.Resolve<YamsConfig>();
-                    return new ApplicationUpdateManager(config.ClusterId,
+                    return new ApplicationUpdateManager(config.ClusterId, config.InstanceId,
                         c.Resolve<IApplicationDeploymentDirectory>(), c.Resolve<IApplicationPool>(),
-                        c.Resolve<IApplicationDownloader>(), c.Resolve<IApplicationInstaller>());
+                        c.Resolve<IApplicationDownloader>(), c.Resolve<IApplicationInstaller>(),
+                        c.Resolve<IDeploymentStatusWriter>());
                 }).SingleInstance();
         }
 

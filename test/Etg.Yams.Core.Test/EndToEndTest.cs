@@ -16,6 +16,7 @@ using Semver;
 using Etg.Yams.Storage;
 using Etg.Yams.Install;
 using System.Collections.Generic;
+using Etg.Yams.Storage.Status;
 
 namespace Etg.Yams.Test
 {
@@ -27,6 +28,7 @@ namespace Etg.Yams.Test
         private readonly string _deploymentDirPath;
         private IYamsService _yamsService;
         private YamsDiModule _yamsDiModule;
+        private LocalDeploymentRepository _deploymentRepository;
 
         public EndToEndTest()
         {
@@ -58,10 +60,12 @@ namespace Etg.Yams.Test
                 .TryStartUpdateSession(applicationId => Task.FromResult(true))
                 .EndUpdateSession(applicationId => Task.FromResult(true));
 
-            IDeploymentRepository deploymentRepository = new LocalDeploymentRepository(_deploymentDirPath,
-                new JsonDeploymentConfigSerializer(new JsonSerializer(new DiagnosticsTraceWriter())));
+            JsonSerializer jsonSerializer = new JsonSerializer(new DiagnosticsTraceWriter());
+            _deploymentRepository = new LocalDeploymentRepository(_deploymentDirPath,
+                new JsonDeploymentConfigSerializer(jsonSerializer),
+                new JsonDeploymentStatusSerializer(jsonSerializer));
             
-            return YamsDiModule.RegisterTypes(yamsConfig, deploymentRepository, updateSessionManager);
+            return YamsDiModule.RegisterTypes(yamsConfig, _deploymentRepository, _deploymentRepository, updateSessionManager);
         }
 
         private void CopyTestProcessExeToTestApps()
@@ -101,12 +105,14 @@ namespace Etg.Yams.Test
         /// - test.app2.2.0.0-beta is still there
         /// - test.app3.1.0.0 is added
         /// - test.app3.1.1.0 is still there
-        /// - test.app4.1.0.0 deployment id now matches the fabric deployment id (i.e. the app is added)
+        /// - test.app4.1.0.0 deployment id now matches the cluster deployment id (i.e. the app is added)
         /// </summary>
         [Fact]
         public async Task TestMultipleUpdates()
         {
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+            const string ClusterId = "clusterId1";
+            const string InstanceId = "instanceId";
+            var yamsConfig = new YamsConfigBuilder(ClusterId, "1", InstanceId,
                 _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
 
             InitializeYamsService(yamsConfig);
@@ -126,13 +132,37 @@ namespace Etg.Yams.Test
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 0)));
             AssertThatApplicationIsNotRunning(new AppIdentity("test.app2", new SemVersion(1, 1, 0)));
 
-            AssertThatApplicationIsRunning(new AppIdentity("test.app1", new SemVersion(1, 0, 1)), "TestProcess");
-            AssertThatApplicationIsRunning(new AppIdentity("test.app2", new SemVersion(2, 0, 0,"beta")), "TestProcess");
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 0, 0)), "TestProcess");
-            AssertThatApplicationIsRunning(new AppIdentity("test.app3", new SemVersion(1, 1, 0)), "TestProcess");
-            AssertThatApplicationIsRunning(new AppIdentity("test.app4", new SemVersion(1, 0, 0)), "TestProcess");
+            AppIdentity app1v101 = new AppIdentity("test.app1", new SemVersion(1, 0, 1));
+            AppIdentity app2v200beta = new AppIdentity("test.app2", new SemVersion(2, 0, 0, "beta"));
+            AppIdentity app3v100 = new AppIdentity("test.app3", new SemVersion(1, 0, 0));
+            AppIdentity app3v110 = new AppIdentity("test.app3", new SemVersion(1, 1, 0));
+            AppIdentity app4v100 = new AppIdentity("test.app4", new SemVersion(1, 0, 0));
+
+            AssertThatApplicationIsRunning(app1v101, "TestProcess");
+            AssertThatApplicationIsRunning(app2v200beta, "TestProcess");
+            AssertThatApplicationIsRunning(app3v100, "TestProcess");
+            AssertThatApplicationIsRunning(app3v110, "TestProcess");
+            AssertThatApplicationIsRunning(app4v100, "TestProcess");
 
             AssertThatNumberOfApplicationsRunningIs(5);
+
+            InstanceDeploymentStatus deploymentStatus = await _deploymentRepository.FetchInstanceDeploymentStatus(ClusterId, InstanceId);
+            VerifyThatDeploymentStatusHasBeenUpdated(deploymentStatus, app1v101, ClusterId, InstanceId);
+            VerifyThatDeploymentStatusHasBeenUpdated(deploymentStatus, app2v200beta, ClusterId, InstanceId);
+            VerifyThatDeploymentStatusHasBeenUpdated(deploymentStatus, app3v100, ClusterId, InstanceId);
+            VerifyThatDeploymentStatusHasBeenUpdated(deploymentStatus, app3v110, ClusterId, InstanceId);
+            VerifyThatDeploymentStatusHasBeenUpdated(deploymentStatus, app4v100, ClusterId, InstanceId);
+        }
+
+        private void VerifyThatDeploymentStatusHasBeenUpdated(InstanceDeploymentStatus instanceDeploymentStatus, 
+            AppIdentity appIdentity, string clusterId, string instanceId)
+        {
+            var appDeploymentStatus = instanceDeploymentStatus.GetAppDeploymentStatus(appIdentity);
+            Assert.NotNull(appDeploymentStatus);
+            Assert.Equal(appIdentity, appDeploymentStatus.AppIdentity);
+            Assert.Equal(clusterId, appDeploymentStatus.ClusterId);
+            Assert.Equal(instanceId, appDeploymentStatus.InstanceId);
+            Assert.NotNull(appDeploymentStatus.UtcTimeStamp);
         }
 
         private void UploadDeploymentConfig(string deploymentConfigFileName)

@@ -22,7 +22,7 @@ namespace Etg.Yams.Azure.UpdateSession
         {
             string updateBlobName = GetUpdateBlobName(appId);
             ICloudBlob blob = GetBlob(updateBlobName);
-            await CreateBlobIfNoneExists(blob);
+            await BlobUtils.CreateBlobIfNotExists(blob);
 
             UpdateBlob updateBlob = new UpdateBlob(blob, _blobLeaseFactory);
             bool locked = await updateBlob.TryLock();
@@ -41,14 +41,6 @@ namespace Etg.Yams.Azure.UpdateSession
         private CloudBlockBlob GetBlob(string updateBlobName)
         {
             return _blobContainer.GetBlockBlobReference(updateBlobName);
-        }
-
-        private static async Task CreateBlobIfNoneExists(ICloudBlob updateBlob)
-        {
-            if (!await updateBlob.ExistsAsync())
-            {
-                await BlobUtils.CreateEmptyBlob(updateBlob);
-            }
         }
     }
 }

@@ -5,10 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
-using Etg.Yams.Storage.Config;
 using Etg.Yams.Update;
 using Etg.Yams.Utils;
-using Semver;
 
 namespace Etg.Yams.Install
 {
@@ -19,8 +17,8 @@ namespace Etg.Yams.Install
         private readonly IApplicationFactory _applicationFactory;
         private readonly IApplicationPool _applicationPool;
 
-        public ApplicationInstaller(string applicationsRootPath, IUpdateSessionManager updateSessionManager, IApplicationFactory applicationFactory,
-            IApplicationPool applicationPool)
+        public ApplicationInstaller(string applicationsRootPath, IUpdateSessionManager updateSessionManager, 
+            IApplicationFactory applicationFactory, IApplicationPool applicationPool)
         {
             _applicationsRootPath = applicationsRootPath;
             _updateSessionManager = updateSessionManager;
@@ -35,6 +33,7 @@ namespace Etg.Yams.Install
             try
             {
                 await _applicationPool.AddApplication(application);
+                
             }
             catch (Exception)
             {
@@ -83,11 +82,7 @@ namespace Etg.Yams.Install
 
             await _updateSessionManager.EndUpdateSession(appId);
 
-            if(failed)
-            {
-                return false;
-            }
-            return true;
+            return !failed;
         }
 
         private async Task DeleteAppBinaries(AppIdentity appIdentity)

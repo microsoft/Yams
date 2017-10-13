@@ -110,6 +110,11 @@ namespace Etg.Yams.Storage.Config
             return deploymentConfig.SetApplicationConfig(appDeploymentConfig);
         }
 
+        public DeploymentConfig AddApplication(string appId, string version, string clusterId)
+        {
+            return AddApplication(new AppIdentity(appId, version), clusterId);
+        }
+
         public DeploymentConfig SetApplicationConfig(AppDeploymentConfig appDeploymentConfig)
         {
             var apps = CopyApps();

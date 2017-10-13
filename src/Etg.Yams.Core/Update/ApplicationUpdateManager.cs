@@ -9,29 +9,37 @@ using Etg.Yams.Download;
 using Etg.Yams.Install;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Utils;
+using Etg.Yams.Storage;
+using Etg.Yams.Storage.Status;
 
 namespace Etg.Yams.Update
 {
     public class ApplicationUpdateManager : IApplicationUpdateManager
     {
         private readonly string _clusterId;
+        private readonly string _instanceId;
         private readonly IApplicationDeploymentDirectory _applicationDeploymentDirectory;
         private readonly IApplicationPool _applicationPool;
         private readonly IApplicationDownloader _applicationDownloader;
         private readonly IApplicationInstaller _applicationInstaller;
+        private readonly IDeploymentStatusWriter _deploymentStatusWriter;
 
         public ApplicationUpdateManager(
             string clusterId,
+            string instanceId,
             IApplicationDeploymentDirectory applicationDeploymentDirectory,
             IApplicationPool applicationPool, 
             IApplicationDownloader applicationDownloader, 
-            IApplicationInstaller applicationInstaller)
+            IApplicationInstaller applicationInstaller,
+            IDeploymentStatusWriter deploymentStatusWriter)
         {
             _clusterId = clusterId;
+            this._instanceId = instanceId;
             _applicationDeploymentDirectory = applicationDeploymentDirectory;
             _applicationPool = applicationPool;
             _applicationDownloader = applicationDownloader;
             _applicationInstaller = applicationInstaller;
+            _deploymentStatusWriter = deploymentStatusWriter;
         }
 
         public async Task CheckForUpdates()
@@ -41,7 +49,7 @@ namespace Etg.Yams.Update
                 Trace.TraceInformation("Checking for updates");
 
                 IEnumerable<AppDeploymentConfig> applicationDeployments = await _applicationDeploymentDirectory.FetchDeployments();
-                IEnumerable<AppIdentity> runningApplications = _applicationPool.Applications.Select(app => app.Identity);
+                IEnumerable<AppIdentity> runningApplications = _applicationPool.Applications.Select(app => app.Identity).ToList();
 
                 IEnumerable<AppIdentity> applicationsToRemove = FindApplicationsToRemove(runningApplications, applicationDeployments);
                 IEnumerable<AppDeploymentConfig> applicationsToDeploy = FindApplicationsToDeploy(runningApplications, applicationDeployments);
@@ -76,6 +84,7 @@ namespace Etg.Yams.Update
                     }
                 }
                 await Task.WhenAll(tasks);
+                await UpdateDeploymentStatus();
             }
             catch (AggregateException e)
             {
@@ -85,6 +94,18 @@ namespace Etg.Yams.Update
             {
                 Trace.TraceError("Failed to perform update; Exception was: {0}", e);
             }
+        }
+
+        private async Task UpdateDeploymentStatus()
+        {
+            DateTime utcNow = DateTime.UtcNow;
+            var instanceDeploymentStatus = new InstanceDeploymentStatus();
+            foreach (IApplication app in _applicationPool.Applications)
+            {
+                var appDeploymentStatus = new AppDeploymentStatus(app.Identity, _clusterId, _instanceId, utcNow);
+                instanceDeploymentStatus.SetAppDeploymentStatus(appDeploymentStatus);
+            }
+            await _deploymentStatusWriter.PublishInstanceDeploymentStatus(_clusterId, _instanceId, instanceDeploymentStatus);
         }
 
         private Task DownloadApplications(IEnumerable<AppDeploymentConfig> appDeployments)
