@@ -102,7 +102,70 @@ Note that if an update fails, Yams will not try to revert back to the old versio
 
 To revert a deployment, simply edit the `DeploymentConfig.json` file and replace the current version of the app (the version to be reverted) with the old version (the version to revert to).
 
-## Health monitoring and graceful shutdown
+## Monitoring YAMS Deployments
+
+Similarly to the `DeploymentConfig.json` blob that instructs YAMS on what applications to deploy, YAMS exposes status blobs that expose the current status of the YAMS cluster to the outside world (for monitoring and visualization purposes).
+
+When using blob storage, the deployment status blobs are published at:
+
+```
+applications/status/clusters/clusterName/instances/
+```
+
+The blob storage deployment repository looks as follows:
+```
+applications
+|___ app1
+|   |___ 1.0.0
+|___ app2
+|   |___ 1.0.1
+|
+|___ DeploymentConfig.json 
+|
+|___ status
+|   	|___ clusters
+|				|___ clusterName
+|						|___ instances
+|								|___ instance_1
+|								|___ instance_2
+|								|___ ...
+|								|___ instance_n
+```
+
+`instance_i` is the id of a given node in the cluster (aka instance id). The instance id is chosen when YAMS itself is deployed (e.g. when using a cloud service to deploy YAMS, the instance ids from the cloud service are passed down to YAMS). The content of the `instance_i` blob is as follows:
+
+```json
+{
+  "Applications": [
+    {
+      "Id": "app1",
+      "Version": "1.0.0",
+      "ClusterId": "MY_CLUSTER_ID",
+      "InstanceId": "instance_i",
+      "UtcTimeStamp": "2017-10-13T02:48:17.0168224Z"
+    },
+    {
+      "Id": "app2",
+      "Version": "1.0.1",
+      "ClusterId": "MY_CLUSTER_ID",
+      "InstanceId": "instance_i",
+      "UtcTimeStamp": "2017-10-13T02:48:17.0168224Z"
+    }    
+  ]
+}
+```
+
+The above instance status confirms that the listed applications are currently running in the YAMS cluster as of `UtcTimeStamp`. The `UtcTimeStamp` is updated by YAMS every time YAMS checks for updates (default is 5 seconds).
+* The `UtcTimeStamp` is updated periodically even if the app has not been updated.
+* If an app is removed from the cluster, it will removed from the instance status blob.
+* If the `UtcTimeStamp` corresponding to a given app is old, it's an indication that the YAMS instance is experiencing issues.
+* Usually, all `UtcTimeStamp` values in the blob corresponding to a given instance are equal.
+
+In addition to providing information about the status of the cluster, the deployment status blob can be used to monitor the health of YAMS nodes.
+
+Another main use case of the deployment status feature is to allow continueous deployment tools (e.g. VSTS) to ensure that the new version of a given application is up and running before finishing the deployment.
+
+## Health monitoring of applications and graceful shutdown
 
 Apps deployed with Yams can optionally enable health monitoring and/or graceful shutdown. Yams uses inter-process-communication (currently [named pipes](https://msdn.microsoft.com/en-us/library/bb546085(v=vs.110).aspx)) to communicate with apps. 
 
@@ -167,4 +230,3 @@ To address this issue, microservices can be deployed to different Yams clusters 
 ```
 
 In the above case, CPU resources needed for `Microservice2` and `Microservice3` are scaled together (by scaling the number of VMs in cluster 2) while `Microservice1` is scaled independently (cluster 1). 
-
