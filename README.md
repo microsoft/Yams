@@ -27,6 +27,14 @@ Documentation
 * [Deploy and host Orleans applications in YAMS](Docs/Deploy_Orleans_App_in_YAMS.md).
 * [Yams Storage Api](Docs/YAMS_Storage.md).
 
+NuGets
+=======
+
+| Module  | NuGet |
+| ------------- | ------------- |
+| Etg.Yams  | [![NuGet](https://img.shields.io/nuget/v/Etg.Yams.svg?style=flat)](https://www.nuget.org/packages/Etg.Yams/)  |
+| Etg.Yams.Powershell  | [![NuGet](https://img.shields.io/nuget/v/Etg.Yams.Powershell.svg?style=flat)](https://www.nuget.org/packages/Etg.Yams.Powershell/)  |
+
 Videos
 =======
 * [Nehme Bilal and Reuben Bond talk about deploying Orleans with YAMS and Service Fabric](https://www.youtube.com/watch?v=w__D7gnqeZ0&feature=youtu.be).
