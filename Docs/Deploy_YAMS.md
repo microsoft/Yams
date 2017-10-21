@@ -97,7 +97,39 @@ To allow applications to access endpoints, YAMS must register those endpoints in
 
 In this case, port 443 will be available for **https** connections, port 80 will be available for **http** connections and all ports from 81 to 400 will be open for **tcp** connections.
 
-7. Publish the cloud service to Azure and start using YAMS. You should only need to publish the cloud service hosting YAMS once.
+
+7. Bind SSL Certificate
+
+If you're using HTTPS, you probably want to bind an SSL certificate to your 443 port.
+To Do so in your WorkerRole, simply add the following to your **ServiceConfiguration.csdef** file:
+
+```xml
+    </Certificates>
+    <Startup>
+      <Task commandLine="Scripts\BindSSLCertificate.cmd" executionContext="elevated" taskType="simple">
+        <Environment>
+          <Variable name="IsEmulated">
+            <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+          </Variable>
+        </Environment>
+      </Task>
+    </Startup>
+```
+
+The corresponding script is shown below:
+
+```
+IF NOT DEFINED IsEmulated SET IsEmulated=false
+IF %IsEmulated%==true (
+    exit /b 0
+)
+
+netsh http delete sslcert ipport=0.0.0.0:443
+netsh http add sslcert ipport=0.0.0.0:443 appid={MY_APP_ID} certhash=MY_CERT_HASH
+```
+To make sure the script is copied to your package, simply go to file properties in Visual Studio and set the `Copy to Output Directory` property to `Copy if newer` or `Copy always`.
+
+8. Publish the cloud service to Azure and start using YAMS. You should only need to publish the cloud service hosting YAMS once.
 
 ## Deployment Storage
 

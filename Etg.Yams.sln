@@ -49,8 +49,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullIpcProcess", "test\Full
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Etg.Yams.Powershell", "src\Etg.Yams.Powershell\Etg.Yams.Powershell.csproj", "{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureTableDeploymentStatusManager", "AzureTableDeploymentStatusManager\AzureTableDeploymentStatusManager.csproj", "{8ACD9ED9-8C96-4AFD-B790-F5E836720539}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -141,10 +139,6 @@ Global
 		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8ACD9ED9-8C96-4AFD-B790-F5E836720539}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -171,10 +165,9 @@ Global
 		{257044FB-F7A8-499D-8EF2-B5CAD76D617A} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
 		{99F3A36C-7930-4670-A8B3-7137D891671D} = {2A52BDC8-4B16-43FE-9E9D-A7D0A72C17C8}
 		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
-		{8ACD9ED9-8C96-4AFD-B790-F5E836720539} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {7A9645D4-78F9-451C-B788-6EC41CA3BF59}
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8
+		SolutionGuid = {7A9645D4-78F9-451C-B788-6EC41CA3BF59}
 	EndGlobalSection
 EndGlobal
