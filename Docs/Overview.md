@@ -123,13 +123,13 @@ applications
 |___ DeploymentConfig.json 
 |
 |___ status
-|   	|___ clusters
-|				|___ clusterName
-|						|___ instances
-|								|___ instance_1
-|								|___ instance_2
-|								|___ ...
-|								|___ instance_n
+|   |___ clusters
+|       |___ clusterName
+|           |___ instances
+|               |___ instance_1
+|                   |___ instance_2
+|                   |___ ...
+|                   |___ instance_n
 ```
 
 `instance_i` is the id of a given node in the cluster (aka instance id). The instance id is chosen when YAMS itself is deployed (e.g. when using a cloud service to deploy YAMS, the instance ids from the cloud service are passed down to YAMS). The content of the `instance_i` blob is as follows:
