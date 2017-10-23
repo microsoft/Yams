@@ -33,6 +33,7 @@ NuGets
 | Module  | NuGet |
 | ------------- | ------------- |
 | Etg.Yams  | [![NuGet](https://img.shields.io/nuget/v/Etg.Yams.svg?style=flat)](https://www.nuget.org/packages/Etg.Yams/)  |
+| Etg.Yams.Client  | [![NuGet](https://img.shields.io/nuget/v/Etg.Yams.Client.svg?style=flat)](https://www.nuget.org/packages/Etg.Yams.Client/)  |
 | Etg.Yams.Powershell  | [![NuGet](https://img.shields.io/nuget/v/Etg.Yams.Powershell.svg?style=flat)](https://www.nuget.org/packages/Etg.Yams.Powershell/)  |
 
 Videos
