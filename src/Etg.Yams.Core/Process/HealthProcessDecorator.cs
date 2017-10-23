@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Etg.Yams.Client;
-using Etg.Yams.Process.Ipc;
+using Etg.Yams.Ipc;
 using Etg.Yams.Utils;
 
 namespace Etg.Yams.Process
@@ -23,7 +22,7 @@ namespace Etg.Yams.Process
 
         public override async Task Start(string args)
         {
-            await _process.Start($"{args} --{nameof(YamsClientOptions.HealthPipeName)} {_ipcConnection.ConnectionId}");
+            await _process.Start($"{args} --HealthPipeName {_ipcConnection.ConnectionId}");
 
             await _ipcConnection.Connect().Timeout(_config.IpcConnectTimeout,
                 "Connecting to health pipe has timed out, make sure that the app is connecting to the same pipe");

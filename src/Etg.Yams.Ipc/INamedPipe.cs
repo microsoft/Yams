@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Etg.Yams.Process.Ipc
+namespace Etg.Yams.Ipc
 {
     public interface INamedPipe : IDisposable
     {

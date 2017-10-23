@@ -1,6 +1,6 @@
 using System;
 using CommandLine;
-using Etg.Yams.Process.Ipc;
+using Etg.Yams.Ipc;
 
 namespace Etg.Yams.Client
 {

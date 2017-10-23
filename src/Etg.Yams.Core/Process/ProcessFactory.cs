@@ -1,5 +1,5 @@
-﻿using System;
-using Etg.Yams.Process.Ipc;
+﻿using Etg.Yams.Ipc;
+using System;
 
 namespace Etg.Yams.Process
 {

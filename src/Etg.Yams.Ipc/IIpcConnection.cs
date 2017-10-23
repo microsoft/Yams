@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Etg.Yams.Process.Ipc
+namespace Etg.Yams.Ipc
 {
     public interface IIpcConnection : IDisposable
     {

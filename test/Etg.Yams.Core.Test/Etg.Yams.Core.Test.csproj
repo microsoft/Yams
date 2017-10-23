@@ -220,9 +220,17 @@
       <Project>{3e982150-5b43-44da-8d96-66cf07a9a14c}</Project>
       <Name>Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Etg.Yams.Client\Etg.Yams.Client.csproj">
+      <Project>{d4624b9b-67a1-46d5-9468-58995b2720f9}</Project>
+      <Name>Etg.Yams.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\Etg.Yams.Core\Etg.Yams.Core.csproj">
       <Project>{7145e485-34fa-4632-89b0-bd27c96af69c}</Project>
       <Name>Etg.Yams.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Etg.Yams.Ipc\Etg.Yams.Ipc.csproj">
+      <Project>{c7c03d37-f2d2-4115-8423-86c1bf1b8a18}</Project>
+      <Name>Etg.Yams.Ipc</Name>
     </ProjectReference>
     <ProjectReference Include="..\AzureTestUtils\AzureTestUtils.csproj">
       <Project>{84C08621-2C78-4B19-9454-7B9019E68326}</Project>

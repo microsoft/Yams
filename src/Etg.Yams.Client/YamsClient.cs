@@ -1,4 +1,4 @@
-﻿using Etg.Yams.Process.Ipc;
+﻿using Etg.Yams.Ipc;
 using Etg.Yams.Utils;
 using System;
 using System.Diagnostics;

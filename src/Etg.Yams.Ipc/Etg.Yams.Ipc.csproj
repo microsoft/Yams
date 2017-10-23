@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3E982150-5B43-44DA-8D96-66CF07A9A14C}</ProjectGuid>
+    <ProjectGuid>{C7C03D37-F2D2-4115-8423-86C1BF1B8A18}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Etg.Yams</RootNamespace>
-    <AssemblyName>Etg.Yams.Common</AssemblyName>
+    <RootNamespace>Etg.Yams.Ipc</RootNamespace>
+    <AssemblyName>Etg.Yams.Ipc</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,24 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Json\IJsonSerializer.cs" />
-    <Compile Include="Json\JsonSerializer.cs" />
+    <Compile Include="IIpcConnection.cs" />
+    <Compile Include="INamedPipe.cs" />
+    <Compile Include="INamedPipeFactory.cs" />
+    <Compile Include="IpcConnection.cs" />
+    <Compile Include="NamedPipeClientAdapter.cs" />
+    <Compile Include="NamedPipeFactory.cs" />
+    <Compile Include="NamedPipeServerAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\DictionaryUtils.cs" />
-    <Compile Include="Utils\FileUtils.cs" />
-    <Compile Include="Utils\HashCodeUtils.cs" />
-    <Compile Include="Utils\TaskExtensions.cs" />
-    <Compile Include="Utils\TraceUtils.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

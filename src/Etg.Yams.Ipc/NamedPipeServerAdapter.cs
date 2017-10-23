@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.IO.Pipes;
 
-namespace Etg.Yams.Process.Ipc
+namespace Etg.Yams.Ipc
 {
     public class NamedPipeServerAdapter : INamedPipe
     {

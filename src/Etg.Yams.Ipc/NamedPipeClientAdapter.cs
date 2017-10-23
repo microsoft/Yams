@@ -2,7 +2,7 @@
 using System.IO;
 using System.IO.Pipes;
 
-namespace Etg.Yams.Process.Ipc
+namespace Etg.Yams.Ipc
 {
     // This class is excluded from code coverage because it's being covered by E2E tests but the code coverage
     // analyzer cannot see it because it's being run in a separate test process.

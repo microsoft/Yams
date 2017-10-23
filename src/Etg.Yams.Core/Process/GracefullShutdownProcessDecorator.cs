@@ -1,9 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Etg.Yams.Client;
-using Etg.Yams.Process.Ipc;
 using Etg.Yams.Utils;
+using Etg.Yams.Ipc;
 
 namespace Etg.Yams.Process
 {
@@ -28,7 +27,7 @@ namespace Etg.Yams.Process
         public override async Task Start(string args)
         {
             var startProcessTask =
-                _process.Start($"{args} --{nameof(YamsClientOptions.ExitPipeName)} {_ipcConnection.ConnectionId}");
+                _process.Start($"{args} --ExitPipeName {_ipcConnection.ConnectionId}");
             await Task.WhenAll(startProcessTask, _ipcConnection.Connect().Timeout(_config.IpcConnectTimeout,
                 "Connecting to graceful exit pipe has timed out, make sure that the app is connecting to the same pipe"));
         }

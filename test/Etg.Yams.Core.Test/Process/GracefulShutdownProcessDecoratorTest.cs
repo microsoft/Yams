@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Etg.Yams.Process;
-using Etg.Yams.Process.Ipc;
-using Etg.Yams.Test.stubs;
 using Xunit;
+using Etg.Yams.Ipc;
 
 namespace Etg.Yams.Test.Process
 {

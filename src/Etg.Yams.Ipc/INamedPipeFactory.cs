@@ -1,4 +1,4 @@
-﻿namespace Etg.Yams.Process.Ipc
+﻿namespace Etg.Yams.Ipc
 {
     public interface INamedPipeFactory
     {

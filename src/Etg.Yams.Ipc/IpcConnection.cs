@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Etg.Yams.Process.Ipc
+namespace Etg.Yams.Ipc
 {
     public class IpcConnection : IIpcConnection
     {

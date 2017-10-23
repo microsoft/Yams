@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Etg.Yams.Client;
-using Etg.Yams.Process.Ipc;
 using Etg.Yams.Utils;
+using Etg.Yams.Ipc;
 
 namespace Etg.Yams.Process
 {
@@ -27,7 +26,7 @@ namespace Etg.Yams.Process
 
         public override async Task Start(string args)
         {
-            await _process.Start($"{args} --{nameof(YamsClientOptions.InitializationPipeName)} {_ipcConnection.ConnectionId}");
+            await _process.Start($"{args} --InitializationPipeName {_ipcConnection.ConnectionId}");
 
             try
             {

@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3E982150-5B43-44DA-8D96-66CF07A9A14C}</ProjectGuid>
+    <ProjectGuid>{D4624B9B-67A1-46D5-9468-58995B2720F9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Etg.Yams</RootNamespace>
-    <AssemblyName>Etg.Yams.Common</AssemblyName>
+    <RootNamespace>Etg.Yams.Client</RootNamespace>
+    <AssemblyName>Etg.Yams.Client</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -31,9 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="CommandLine, Version=1.9.71.2, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -45,24 +44,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Json\IJsonSerializer.cs" />
-    <Compile Include="Json\JsonSerializer.cs" />
+    <Compile Include="IProcessArgsParser.cs" />
+    <Compile Include="IYamsClient.cs" />
+    <Compile Include="IYamsClientFactory.cs" />
+    <Compile Include="ProcessArgsParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\DictionaryUtils.cs" />
-    <Compile Include="Utils\FileUtils.cs" />
-    <Compile Include="Utils\HashCodeUtils.cs" />
-    <Compile Include="Utils\TaskExtensions.cs" />
-    <Compile Include="Utils\TraceUtils.cs" />
+    <Compile Include="YamsClient.cs" />
+    <Compile Include="YamsClientConfig.cs" />
+    <Compile Include="YamsClientConfigBuilder.cs" />
+    <Compile Include="YamsClientFactory.cs" />
+    <Compile Include="YamsClientOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{3E982150-5B43-44DA-8D96-66CF07A9A14C}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Etg.Yams.Ipc\Etg.Yams.Ipc.csproj">
+      <Project>{c7c03d37-f2d2-4115-8423-86c1bf1b8a18}</Project>
+      <Name>Etg.Yams.Ipc</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
