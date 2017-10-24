@@ -15,11 +15,12 @@ namespace Etg.Yams.Host
     {
         private static string _clusterId;
         private static string _updateDomain;
-        private static int _updateFrequencyInSeconds;
-        private static int _applicationRestartCount;
         private static string _deploymentRepositoryStorageConnectionString;
         private static string _updateSessionStorageConnectionString;
+
         private static IDictionary<string, string> _clusterProperties;
+        private static int? _updateFrequencyInSeconds;
+        private static int? _applicationRestartCount;
 
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         static void Main(string[] args)
@@ -54,17 +55,24 @@ namespace Etg.Yams.Host
                         if (string.IsNullOrWhiteSpace(_updateDomain))
                             throw new ArgumentNullException(nameof(_updateDomain));
 
-                        YamsConfig yamsConfig = new YamsConfigBuilder(
-                                // mandatory configs
+                        // mandatory configs
+                        YamsConfigBuilder yamsConfigBuilder = new YamsConfigBuilder(
                                 _clusterId,
                                 _updateDomain,
                                 Environment.MachineName,
-                                Environment.CurrentDirectory + "\\LocalStore")
-                            // optional configs
-                            .SetCheckForUpdatesPeriodInSeconds(_updateFrequencyInSeconds)
-                            .SetApplicationRestartCount(_applicationRestartCount)
-                            .AddClusterProperties(_clusterProperties)
-                            .Build();
+                                Environment.CurrentDirectory + "\\LocalStore");
+                            
+                        // optional configs;
+                        if (_updateFrequencyInSeconds.HasValue)
+                            yamsConfigBuilder.SetCheckForUpdatesPeriodInSeconds(_updateFrequencyInSeconds.Value);
+                        
+                        if (_applicationRestartCount.HasValue)
+                            yamsConfigBuilder.SetApplicationRestartCount(_applicationRestartCount.Value);
+
+                        if (_clusterProperties!=null)
+                            yamsConfigBuilder.AddClusterProperties(_clusterProperties);
+
+                        var yamsConfig = yamsConfigBuilder.Build();
 
                         return YamsServiceFactory.Create(yamsConfig,
                             deploymentRepositoryStorageConnectionString: _deploymentRepositoryStorageConnectionString,
