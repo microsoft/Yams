@@ -76,7 +76,7 @@ namespace Etg.Yams.Host
                 x.RunAsLocalSystem();
 
                 x.SetDescription("Yams Service Host");
-                x.SetDisplayName($"Yams Service");
+                x.SetDisplayName("Yams Service");
                 x.SetServiceName("Yams");
                 x.StartAutomatically();
             });
