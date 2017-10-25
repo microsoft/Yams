@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Permissions;
+using System.Text;
+using Microsoft.Win32;
 using Topshelf;
+using Topshelf.HostConfigurators;
 
 #endregion
 
@@ -57,15 +60,15 @@ namespace Etg.Yams.Host
 
                         // mandatory configs
                         YamsConfigBuilder yamsConfigBuilder = new YamsConfigBuilder(
-                                _clusterId,
-                                _updateDomain,
-                                Environment.MachineName,
-                                Environment.CurrentDirectory + "\\LocalStore");
-                            
+                            _clusterId,
+                            _updateDomain,
+                            Environment.MachineName,
+                            Environment.CurrentDirectory + "\\LocalStore");
+
                         // optional configs;
                         if (_updateFrequencyInSeconds.HasValue)
                             yamsConfigBuilder.SetCheckForUpdatesPeriodInSeconds(_updateFrequencyInSeconds.Value);
-                        
+
                         if (_applicationRestartCount.HasValue)
                             yamsConfigBuilder.SetApplicationRestartCount(_applicationRestartCount.Value);
 
@@ -82,10 +85,17 @@ namespace Etg.Yams.Host
                     s.WhenStopped(yep => yep.Stop().Wait());
                 });
                 x.RunAsLocalSystem();
+                x.AddCommandLineArgumentsToStartupParameters();
 
                 x.SetDescription("Yams Service Host");
-                x.SetDisplayName("Yams Service");
+                x.SetDisplayName($"Yams Service [{_clusterId} - {_updateDomain}]");
                 x.SetServiceName("Yams");
+
+                x.EnableServiceRecovery(configurator =>
+                {
+                    configurator.OnCrashOnly();
+                    configurator.RestartService(0);
+                });
                 x.StartAutomatically();
             });
         }
@@ -102,6 +112,39 @@ namespace Etg.Yams.Host
             }
 
             return yamsConfigBuilder;
+        }
+    }
+
+    public static class HostConfigurationExtensions
+    {
+        private static readonly string[] TopShelfArguments =
+            {"install", "-instance", "-displayname", "-servicename", "-description", "--"};
+
+        public static void AddCommandLineArgumentsToStartupParameters(this HostConfigurator hostConfigurator)
+        {
+            hostConfigurator.AfterInstall(settings =>
+            {
+                using (RegistryKey system = Registry.LocalMachine.OpenSubKey("System"))
+                using (RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet"))
+                using (RegistryKey services = currentControlSet.OpenSubKey("Services"))
+                using (RegistryKey service = services.OpenSubKey(settings.ServiceName, true))
+                {
+                    var arguments = Environment.GetCommandLineArgs();
+                    var imagePath = service.GetValue("ImagePath");
+
+                    var newImagePath = arguments
+                        .Skip(1)
+                        .Where(a => !IsTopShelfArgument(a))
+                        .Aggregate(imagePath, (o1, o2) => $"{o1} {o2}");
+
+                    service.SetValue("ImagePath", newImagePath, RegistryValueKind.String);
+                }
+            });
+        }
+
+        private static bool IsTopShelfArgument(string argument)
+        {
+            return TopShelfArguments.Any(w => argument.StartsWith(w, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
