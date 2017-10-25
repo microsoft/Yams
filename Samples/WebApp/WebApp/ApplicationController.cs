@@ -10,13 +10,14 @@ namespace WebApp
         [Route("info")]
         public JObject GetInfo()
         {
-            string json = string.Format(@"
+            string json = $@"
                 {{
-                    'Id': '{0}',
-                    'Version': '{1}',
-                    'Cloud Service Deployment Id': '{2}'
+                    'Id': '{App.Id}',
+                    'Version': '{App.Version}',
+                    'ClusterId': '{App.ClusterId}',
+                    'InstanceId': '{App.InstanceId}'
                 }}
-                ", App.Id, App.Version, App.ClusterId);
+                ";
 
             return JObject.Parse(json);
         }
