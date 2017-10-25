@@ -90,6 +90,12 @@ namespace Etg.Yams.Host
                 x.SetDescription("Yams Service Host");
                 x.SetDisplayName($"Yams Service [{_clusterId} - {_updateDomain}]");
                 x.SetServiceName("Yams");
+
+                x.EnableServiceRecovery(configurator =>
+                {
+                    configurator.OnCrashOnly();
+                    configurator.RestartService(0);
+                });
                 x.StartAutomatically();
             });
         }
