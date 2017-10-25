@@ -1,4 +1,7 @@
 ﻿{
-    "ExeName": "WebApp.exe",
-    "ExeArgs": "${Id} ${Version} ${ClusterId}"
+  "ExeName": "WebApp.exe",
+  "ExeArgs": "${Id} ${Version} ${ClusterId} ${InstanceId}",
+  "GracefulShutdown": true,
+  "MonitorHealth": true,
+  "MonitorInitialization": true
 }
