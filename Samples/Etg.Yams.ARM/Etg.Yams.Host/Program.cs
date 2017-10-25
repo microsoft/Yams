@@ -60,15 +60,15 @@ namespace Etg.Yams.Host
 
                         // mandatory configs
                         YamsConfigBuilder yamsConfigBuilder = new YamsConfigBuilder(
-                                _clusterId,
-                                _updateDomain,
-                                Environment.MachineName,
-                                Environment.CurrentDirectory + "\\LocalStore");
-                            
+                            _clusterId,
+                            _updateDomain,
+                            Environment.MachineName,
+                            Environment.CurrentDirectory + "\\LocalStore");
+
                         // optional configs;
                         if (_updateFrequencyInSeconds.HasValue)
                             yamsConfigBuilder.SetCheckForUpdatesPeriodInSeconds(_updateFrequencyInSeconds.Value);
-                        
+
                         if (_applicationRestartCount.HasValue)
                             yamsConfigBuilder.SetApplicationRestartCount(_applicationRestartCount.Value);
 
@@ -114,8 +114,12 @@ namespace Etg.Yams.Host
             return yamsConfigBuilder;
         }
     }
+
     public static class HostConfigurationExtensions
     {
+        private static readonly string[] TopShelfArguments =
+            {"install", "-instance", "-displayname", "-servicename", "-description", "--"};
+
         public static void AddCommandLineArgumentsToStartupParameters(this HostConfigurator hostConfigurator)
         {
             hostConfigurator.AfterInstall(settings =>
@@ -125,39 +129,22 @@ namespace Etg.Yams.Host
                 using (RegistryKey services = currentControlSet.OpenSubKey("Services"))
                 using (RegistryKey service = services.OpenSubKey(settings.ServiceName, true))
                 {
-
                     var arguments = Environment.GetCommandLineArgs();
+                    var imagePath = service.GetValue("ImagePath");
 
-                    string programName = null;
-                    StringBuilder argumentsList = new StringBuilder();
+                    var newImagePath = arguments
+                        .Skip(1)
+                        .Where(a => !IsTopShelfArgument(a))
+                        .Aggregate(imagePath, (o1, o2) => $"{o1} {o2}");
 
-                    for (int i = 0; i < arguments.Length; i++)
-                    {
-                        if (i == 0)
-                        {
-                            // program name is the first argument
-                            programName = arguments[i];
-                        }
-                        else
-                        {
-                            // Remove these servicename and instance arguments as TopShelf adds them as well
-                            // Remove install switch
-                            if (arguments[i].StartsWith("-servicename", StringComparison.InvariantCultureIgnoreCase) |
-                                arguments[i].StartsWith("-instance", StringComparison.InvariantCultureIgnoreCase) |
-                                arguments[i].StartsWith("install", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                continue;
-                            }
-                            argumentsList.Append(" ");
-                            argumentsList.Append(arguments[i]);
-                        }
-                    }
-
-                    // Apply the arguments to the ImagePath value under the service Registry key
-                    var imageName = $"\"{Environment.CurrentDirectory}\\{programName}\" {argumentsList}";
-                    service.SetValue("ImagePath", imageName, RegistryValueKind.String);
+                    service.SetValue("ImagePath", newImagePath, RegistryValueKind.String);
                 }
             });
+        }
+
+        private static bool IsTopShelfArgument(string argument)
+        {
+            return TopShelfArguments.Any(w => argument.StartsWith(w, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
