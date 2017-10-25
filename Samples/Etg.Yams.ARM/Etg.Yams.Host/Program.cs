@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Permissions;
+using System.Text;
+using Microsoft.Win32;
 using Topshelf;
+using Topshelf.HostConfigurators;
 
 #endregion
 
@@ -82,9 +85,10 @@ namespace Etg.Yams.Host
                     s.WhenStopped(yep => yep.Stop().Wait());
                 });
                 x.RunAsLocalSystem();
+                x.AddCommandLineArgumentsToStartupParameters();
 
                 x.SetDescription("Yams Service Host");
-                x.SetDisplayName("Yams Service");
+                x.SetDisplayName($"Yams Service [{_clusterId} - {_updateDomain}]");
                 x.SetServiceName("Yams");
                 x.StartAutomatically();
             });
@@ -102,6 +106,52 @@ namespace Etg.Yams.Host
             }
 
             return yamsConfigBuilder;
+        }
+    }
+    public static class HostConfigurationExtensions
+    {
+        public static void AddCommandLineArgumentsToStartupParameters(this HostConfigurator hostConfigurator)
+        {
+            hostConfigurator.AfterInstall(settings =>
+            {
+                using (RegistryKey system = Registry.LocalMachine.OpenSubKey("System"))
+                using (RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet"))
+                using (RegistryKey services = currentControlSet.OpenSubKey("Services"))
+                using (RegistryKey service = services.OpenSubKey(settings.ServiceName, true))
+                {
+
+                    var arguments = Environment.GetCommandLineArgs();
+
+                    string programName = null;
+                    StringBuilder argumentsList = new StringBuilder();
+
+                    for (int i = 0; i < arguments.Length; i++)
+                    {
+                        if (i == 0)
+                        {
+                            // program name is the first argument
+                            programName = arguments[i];
+                        }
+                        else
+                        {
+                            // Remove these servicename and instance arguments as TopShelf adds them as well
+                            // Remove install switch
+                            if (arguments[i].StartsWith("-servicename", StringComparison.InvariantCultureIgnoreCase) |
+                                arguments[i].StartsWith("-instance", StringComparison.InvariantCultureIgnoreCase) |
+                                arguments[i].StartsWith("install", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                continue;
+                            }
+                            argumentsList.Append(" ");
+                            argumentsList.Append(arguments[i]);
+                        }
+                    }
+
+                    // Apply the arguments to the ImagePath value under the service Registry key
+                    var imageName = $"\"{Environment.CurrentDirectory}\\{programName}\" {argumentsList}";
+                    service.SetValue("ImagePath", imageName, RegistryValueKind.String);
+                }
+            });
         }
     }
 }
