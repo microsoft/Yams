@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Etg.Yams.Client", "src\Etg.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Etg.Yams.Ipc", "src\Etg.Yams.Ipc\Etg.Yams.Ipc.csproj", "{C7C03D37-F2D2-4115-8423-86C1BF1B8A18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Etg.Yams.Host", "src\Etg.Yams.Host\Etg.Yams.Host.csproj", "{C9A993F7-E3E2-4FDC-AA1E-01348B023D16}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +153,10 @@ Global
 		{C7C03D37-F2D2-4115-8423-86C1BF1B8A18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7C03D37-F2D2-4115-8423-86C1BF1B8A18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7C03D37-F2D2-4115-8423-86C1BF1B8A18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9A993F7-E3E2-4FDC-AA1E-01348B023D16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9A993F7-E3E2-4FDC-AA1E-01348B023D16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9A993F7-E3E2-4FDC-AA1E-01348B023D16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9A993F7-E3E2-4FDC-AA1E-01348B023D16}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -179,6 +185,7 @@ Global
 		{CDFBE3EE-AFD7-467F-BE9C-F9EAFC7A05CE} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
 		{D4624B9B-67A1-46D5-9468-58995B2720F9} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
 		{C7C03D37-F2D2-4115-8423-86C1BF1B8A18} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
+		{C9A993F7-E3E2-4FDC-AA1E-01348B023D16} = {5925E681-1BEA-456D-B9E0-CA175ABBFA9D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8
