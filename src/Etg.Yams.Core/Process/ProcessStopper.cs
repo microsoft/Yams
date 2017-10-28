@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using Etg.Yams.Utils;
 
@@ -45,8 +44,16 @@ namespace Etg.Yams.Process
 
         private async Task<bool> Close(IProcess process)
         {
-            await process.Close();
-            return await ProcessUtils.SpinWaitForExit(process, _waitForExitInSeconds);
+            try
+            {
+                await process.Close();
+                return await ProcessUtils.SpinWaitForExit(process, _waitForExitInSeconds);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Failed to close process {process.ExePath}, Exception: {e}");
+                return false;
+            }
         }
     }
 }

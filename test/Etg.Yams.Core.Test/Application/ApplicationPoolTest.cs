@@ -143,6 +143,25 @@ namespace Etg.Yams.Test.Application
         }
 
         [Fact]
+        public async Task TestRemoveApplicationThatThrowsWhenStopped()
+        {
+            AppIdentity appIdentity = new AppIdentity("test.myapp", new SemVersion(1, 0, 0));
+            IApplication application = new StubIApplication()
+                .Start(() => Task.FromResult(true))
+                .Stop(() => throw new Exception("Exception thrown on Stop"))
+                .Dispose(() => throw new Exception("Exception thrown on Dispose"))
+                .Identity_Get(() => appIdentity);
+
+            _applicationPool = new ApplicationPool();
+
+            await _applicationPool.AddApplication(application);
+            Assert.True(_applicationPool.HasApplication(appIdentity));
+
+            await _applicationPool.RemoveApplication(appIdentity);
+            Assert.False(_applicationPool.HasApplication(appIdentity));
+        }
+
+        [Fact]
         public async Task TestThatAnExceptionIsThrownIfApplicationFailsToStart()
         {
             await Assert.ThrowsAsync<Exception>(async () =>
