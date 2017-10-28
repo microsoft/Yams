@@ -26,6 +26,7 @@ Documentation
 * [Continuous Integration with YAMS and VSTS](Docs/Continuous_Integration.md).
 * [Deploy and host Orleans applications in YAMS](Docs/Deploy_Orleans_App_in_YAMS.md).
 * [Yams Storage Api](Docs/YAMS_Storage.md).
+* [Contributor Guide](Docs/Contributor_Guide.md).
 
 NuGets
 =======
