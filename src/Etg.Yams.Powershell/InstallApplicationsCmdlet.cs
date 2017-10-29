@@ -15,7 +15,7 @@ namespace Etg.Yams.Powershell
     [OutputType(typeof(DeploymentConfig))]
     public class InstallApplicationsCmdlet : Cmdlet
     {
-        [Parameter]
+        [Parameter(Mandatory = true, HelpMessage = "The connection string of the Yams storage")]
         public string ConnectionString { get; set; }
 
         [Parameter(Mandatory = true, HelpMessage = "The ids of the apps to publish")]
@@ -29,7 +29,7 @@ namespace Etg.Yams.Powershell
                                                    "Entries order should correspond to entries in AppsIds")]
         public string[] Versions { get; set; }
 
-        [Parameter(Mandatory = true, HelpMessage = "The paths where binaries are located" +
+        [Parameter(HelpMessage = "The paths where binaries are located" +
                                                    "Entries order should correspond to entries in AppsIds")]
         public string[] BinariesPath { get; set; }
 
@@ -37,136 +37,171 @@ namespace Etg.Yams.Powershell
                                  "which indicates that the corresponding apps have been started")]
         public bool WaitForDeploymentsToComplete { get; set; }
 
+        [Parameter(HelpMessage = "Defines the behaviour when the binaries to upload already exist." +
+                                 "The Default behaviour is to do nothing")]
+        public ConflictResolutionMode BinariesConflictResolutionMode { get; set; } = ConflictResolutionMode.DoNothingIfBinariesExist;
+
+        [Parameter(HelpMessage = "Indicates whether the DeploymentConfig.json should be uploaded" +
+                                 "which will trigger deployment")]
+        public bool Deploy { get; set; } = true;
+
         protected override void ProcessRecord()
         {
-            if (string.IsNullOrWhiteSpace(ConnectionString))
+            try
             {
-                throw new ArgumentException(nameof(ConnectionString));
-            }
-            if (ClustersIds.Length != AppsIds.Length)
-            {
-                throw new ArgumentException(nameof(ClustersIds));
-            }
-            if (Versions.Length != AppsIds.Length)
-            {
-                throw new ArgumentException(nameof(Versions));
-            }
-            if (BinariesPath.Length != AppsIds.Length)
-            {
-                throw new ArgumentException(nameof(BinariesPath));
-            }
-            if (AppsIds.Length == 0)
-            {
-                throw new ArgumentException(nameof(AppsIds));
-            }
-
-            int activityId = 0;
-            var progressRecord = new ProgressRecord(activityId++, "Connect to blob storage", "Connecting to blob storage");
-            WriteProgress(progressRecord);
-            var deploymentRepository = BlobStorageDeploymentRepository.Create(ConnectionString);
-            progressRecord.RecordType = ProgressRecordType.Completed;
-            WriteProgress(progressRecord);
-
-            progressRecord = new ProgressRecord(activityId++, "FetchDeploymentConfig",
-                "Fetching DeploymentConfig.json from blob storage");
-            WriteProgress(progressRecord);
-            var deploymentConfig = deploymentRepository.FetchDeploymentConfig().Result;
-            progressRecord.RecordType = ProgressRecordType.Completed;
-            WriteProgress(progressRecord);
-
-
-            progressRecord = new ProgressRecord(activityId++, "UploadApplicationBinaries", "Uploading binaries to blob storage");
-            WriteProgress(progressRecord);
-            var tasks = new List<Task>();
-            for (int i = 0; i < AppsIds.Length; ++i)
-            {
-                string appId = AppsIds[i];
-                string version = Versions[i];
-                string clusterId = ClustersIds[i];
-                string binariesPath = BinariesPath[i];
-                if (deploymentConfig.HasApplication(appId))
+                if (string.IsNullOrWhiteSpace(ConnectionString))
                 {
-                    deploymentConfig = deploymentConfig.RemoveApplication(appId);
+                    throw new ArgumentException(nameof(ConnectionString));
                 }
-                var newAppIdentity = new AppIdentity(appId, version);
-                deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, clusterId);
-
-                tasks.Add(deploymentRepository.UploadApplicationBinaries(newAppIdentity, binariesPath,
-                    ConflictResolutionMode.FailIfBinariesExist));
-            }
-            Task.WhenAll(tasks).Wait();
-            progressRecord.RecordType = ProgressRecordType.Completed;
-            WriteProgress(progressRecord);
-
-            progressRecord = new ProgressRecord(activityId++, "PublishDeploymentConfig",
-                "Publishing DeploymentConfig.json to blob storage");
-            WriteProgress(progressRecord);
-            deploymentRepository.PublishDeploymentConfig(deploymentConfig).Wait();
-            progressRecord.RecordType = ProgressRecordType.Completed;
-            WriteProgress(progressRecord);
-
-            if (WaitForDeploymentsToComplete)
-            {
-                var waitForDeploymentsProgressRecord = new ProgressRecord(activityId++, "WaitForDeploymentsToComplete",
-                    "Waiting for all deployments to complete");
-                WriteProgress(waitForDeploymentsProgressRecord);
-
-                List<AppInfo> pendingApps = new List<AppInfo>();
-                for (int i = 0; i < AppsIds.Length; ++i)
+                if (ClustersIds.Length != AppsIds.Length)
                 {
-                    AppInfo app = new AppInfo
-                    {
-                        Id = AppsIds[i],
-                        Version = Versions[i],
-                        ClusterId = ClustersIds[i]
-                    };
-                    pendingApps.Add(app);
+                    throw new ArgumentException(nameof(ClustersIds));
+                }
+                if (Versions.Length != AppsIds.Length)
+                {
+                    throw new ArgumentException(nameof(Versions));
+                }
+                if (BinariesPath != null && BinariesPath.Length != AppsIds.Length)
+                {
+                    throw new ArgumentException(nameof(BinariesPath));
+                }
+                if (AppsIds.Length == 0)
+                {
+                    throw new ArgumentException(nameof(AppsIds));
                 }
 
-                while (pendingApps.Any())
-                {
-                    var appDeployments = new List<AppDeploymentStatus>();
-                    var fetchTasks = new List<Task<ClusterDeploymentStatus>>();
+                int activityId = 0;
+                var progressRecord = new ProgressRecord(activityId++, "Connect to blob storage",
+                    "Connecting to blob storage");
+                WriteProgress(progressRecord);
+                var deploymentRepository = BlobStorageDeploymentRepository.Create(ConnectionString);
+                progressRecord.RecordType = ProgressRecordType.Completed;
+                WriteProgress(progressRecord);
 
-                    progressRecord = new ProgressRecord(activityId++, "FetchClusterDeploymentStatus",
-                        "Fetching deployments status");
-                    WriteProgress(progressRecord);
-                    foreach (string clusterId in ClustersIds)
+                if (BinariesPath != null)
+                {
+                    var tasks = new List<Task>();
+                    for (int i = 0; i < AppsIds.Length; ++i)
                     {
-                        fetchTasks.Add(
-                            deploymentRepository.FetchClusterDeploymentStatus(clusterId, ttlSeconds: 60));
+                        string appId = AppsIds[i];
+                        string version = Versions[i];
+                        string binariesPath = BinariesPath[i];
+
+                        var newAppIdentity = new AppIdentity(appId, version);
+
+                        if (BinariesPath != null)
+                        {
+                            tasks.Add(deploymentRepository.UploadApplicationBinaries(newAppIdentity, binariesPath,
+                                BinariesConflictResolutionMode));
+                        }
                     }
+                    progressRecord = new ProgressRecord(activityId++, "UploadApplicationBinaries",
+                        "Uploading binaries to blob storage");
+                    WriteProgress(progressRecord);
+                    Task.WhenAll(tasks).Wait();
+                    progressRecord.RecordType = ProgressRecordType.Completed;
+                    WriteProgress(progressRecord);
+                }
+
+                if (Deploy)
+                {
+                    progressRecord = new ProgressRecord(activityId++, "FetchDeploymentConfig",
+                        "Fetching DeploymentConfig.json from blob storage");
+                    WriteProgress(progressRecord);
+                    var deploymentConfig = deploymentRepository.FetchDeploymentConfig().Result;
                     progressRecord.RecordType = ProgressRecordType.Completed;
                     WriteProgress(progressRecord);
 
-                    ClusterDeploymentStatus[] result = Task.WhenAll(fetchTasks).Result;
-                    foreach (var clusterDeploymentStatus in result)
+                    for (int i = 0; i < AppsIds.Length; ++i)
                     {
-                        appDeployments.AddRange(clusterDeploymentStatus.ListAll());
+                        string appId = AppsIds[i];
+                        string version = Versions[i];
+                        string clusterId = ClustersIds[i];
+
+                        if (deploymentConfig.HasApplication(appId))
+                        {
+                            deploymentConfig = deploymentConfig.RemoveApplication(appId);
+                        }
+                        var newAppIdentity = new AppIdentity(appId, version);
+                        deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, clusterId);
                     }
 
-                    foreach (var appDeploymentStatus in appDeployments)
-                    {
-                        AppInfo app = pendingApps.FirstOrDefault(
-                            appInfo => appInfo.ClusterId == appDeploymentStatus.ClusterId &&
-                                       appInfo.Id == appDeploymentStatus.Id &&
-                                       appInfo.Version == appDeploymentStatus.Version);
-                        if (app != null)
-                        {
-                            pendingApps.Remove(app);
-                            float quotient = (float) (AppsIds.Length - pendingApps.Count) / AppsIds.Length;
-                            waitForDeploymentsProgressRecord.PercentComplete = (int) (100 * quotient);
-                            WriteProgress(waitForDeploymentsProgressRecord);
-                        }
-                    }
-                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                    progressRecord = new ProgressRecord(activityId++, "PublishDeploymentConfig",
+                        "Publishing DeploymentConfig.json to blob storage");
+                    WriteProgress(progressRecord);
+                    deploymentRepository.PublishDeploymentConfig(deploymentConfig).Wait();
+                    progressRecord.RecordType = ProgressRecordType.Completed;
+                    WriteProgress(progressRecord);
+
+                    WriteObject(deploymentConfig);
                 }
 
-                waitForDeploymentsProgressRecord.RecordType = ProgressRecordType.Completed;
-                WriteProgress(waitForDeploymentsProgressRecord);
-            }
+                if (WaitForDeploymentsToComplete)
+                {
+                    var waitForDeploymentsProgressRecord = new ProgressRecord(activityId++,
+                        "WaitForDeploymentsToComplete",
+                        "Waiting for all deployments to complete");
+                    WriteProgress(waitForDeploymentsProgressRecord);
 
-            WriteObject(deploymentConfig);
+                    List<AppInfo> pendingApps = new List<AppInfo>();
+                    for (int i = 0; i < AppsIds.Length; ++i)
+                    {
+                        AppInfo app = new AppInfo
+                        {
+                            Id = AppsIds[i],
+                            Version = Versions[i],
+                            ClusterId = ClustersIds[i]
+                        };
+                        pendingApps.Add(app);
+                    }
+
+                    while (pendingApps.Any())
+                    {
+                        var appDeployments = new List<AppDeploymentStatus>();
+                        var fetchTasks = new List<Task<ClusterDeploymentStatus>>();
+
+                        progressRecord = new ProgressRecord(activityId++, "FetchClusterDeploymentStatus",
+                            "Fetching deployments status");
+                        WriteProgress(progressRecord);
+                        foreach (string clusterId in ClustersIds)
+                        {
+                            fetchTasks.Add(
+                                deploymentRepository.FetchClusterDeploymentStatus(clusterId, ttlSeconds: 60));
+                        }
+                        progressRecord.RecordType = ProgressRecordType.Completed;
+                        WriteProgress(progressRecord);
+
+                        ClusterDeploymentStatus[] result = Task.WhenAll(fetchTasks).Result;
+                        foreach (var clusterDeploymentStatus in result)
+                        {
+                            appDeployments.AddRange(clusterDeploymentStatus.ListAll());
+                        }
+
+                        foreach (var appDeploymentStatus in appDeployments)
+                        {
+                            AppInfo app = pendingApps.FirstOrDefault(
+                                appInfo => appInfo.ClusterId == appDeploymentStatus.ClusterId &&
+                                           appInfo.Id == appDeploymentStatus.Id &&
+                                           appInfo.Version == appDeploymentStatus.Version);
+                            if (app != null)
+                            {
+                                pendingApps.Remove(app);
+                                float quotient = (float) (AppsIds.Length - pendingApps.Count) / AppsIds.Length;
+                                waitForDeploymentsProgressRecord.PercentComplete = (int) (100 * quotient);
+                                WriteProgress(waitForDeploymentsProgressRecord);
+                            }
+                        }
+                        Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                    }
+
+                    waitForDeploymentsProgressRecord.RecordType = ProgressRecordType.Completed;
+                    WriteProgress(waitForDeploymentsProgressRecord);
+                }
+            }
+            catch (Exception e)
+            {
+                ThrowTerminatingError(new ErrorRecord(e, "0", ErrorCategory.OperationStopped, null));
+            }
         }
 
         private class AppInfo
