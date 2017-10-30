@@ -66,9 +66,10 @@ namespace Etg.Yams.Powershell
                     string version = Versions[i];
                     string clusterId = ClustersIds[i];
 
-                    if (deploymentConfig.HasApplication(appId))
+                    var toRemove = new AppIdentity(appId, version);
+                    if (deploymentConfig.HasApplication(toRemove))
                     {
-                        deploymentConfig = deploymentConfig.RemoveApplication(new AppIdentity(appId, version));
+                        deploymentConfig = deploymentConfig.RemoveApplication(toRemove);
                     }
                 }
 
