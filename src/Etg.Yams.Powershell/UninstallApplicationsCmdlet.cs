@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Management.Automation;
+using Etg.Yams.Application;
 using Etg.Yams.Azure.Storage;
 using Etg.Yams.Storage.Config;
 
@@ -67,7 +68,7 @@ namespace Etg.Yams.Powershell
 
                     if (deploymentConfig.HasApplication(appId))
                     {
-                        deploymentConfig = deploymentConfig.RemoveApplication(appId);
+                        deploymentConfig = deploymentConfig.RemoveApplication(new AppIdentity(appId, version));
                     }
                 }
 
