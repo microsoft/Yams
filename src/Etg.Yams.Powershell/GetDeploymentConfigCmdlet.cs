@@ -1,22 +1,16 @@
 ﻿using System;
-using System.Linq;
 using System.Management.Automation;
 using Etg.Yams.Azure.Storage;
+using Etg.Yams.Storage.Config;
 
 namespace Etg.Yams.Powershell
 {
-    [Cmdlet(VerbsCommon.Get, "ApplicationVersions")]
-    [OutputType(typeof(string[]))]
-    public class GetApplicationVersionsCmdlet : Cmdlet
+    [Cmdlet(VerbsCommon.Get, "DeploymentConfig")]
+    [OutputType(typeof(DeploymentConfig))]
+    public class GetDeploymentConfigCmdlet : Cmdlet
     {
         [Parameter(Mandatory = true, HelpMessage = "The connection string of the Yams storage")]
         public string ConnectionString { get; set; }
-
-        [Parameter(Mandatory = true, HelpMessage = "The id of the app")]
-        public string AppId { get; set; }
-
-        [Parameter(Mandatory = true, HelpMessage = "The id of the cluster")]
-        public string ClusterId { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -42,12 +36,7 @@ namespace Etg.Yams.Powershell
                 progressRecord.RecordType = ProgressRecordType.Completed;
                 WriteProgress(progressRecord);
 
-                var versions = from app in deploymentConfig
-                               where app.AppIdentity.Id == AppId &&
-                                     app.TargetClusters.Contains(ClusterId)
-                               select app.AppIdentity.Version.ToString();
-
-                WriteObject(versions.ToArray(), true);
+                WriteObject(deploymentConfig);
             }
             catch (Exception e)
             {
