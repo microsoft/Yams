@@ -61,9 +61,16 @@ namespace Etg.Yams.Application
                     $"Cannot remove application {appIdentity} because it doesn't exist in the pool");
             }
             application.Exited -= OnApplicationExited;
-            await application.Stop();
-            application.Dispose();
-            await Task.Delay(5000);
+            try
+            {
+                await application.Stop();
+                application.Dispose();
+                await Task.Delay(5000);
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError($"Exception occured while stopping Application {appIdentity}, Exception: {e}");
+            }
         }
 
         private static async Task<bool> StartApplication(IApplication application)
@@ -83,7 +90,7 @@ namespace Etg.Yams.Application
             Trace.TraceError($"Application {appIdentity} exited unexpectedly with message {args.Message}");
             if (_applications.ContainsKey(appIdentity))
             {
-                RemoveApplication(appIdentity).Wait();
+                RemoveApplication(appIdentity).GetAwaiter().GetResult();
             }
         }
 
