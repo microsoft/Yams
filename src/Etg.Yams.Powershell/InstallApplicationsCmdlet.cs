@@ -45,6 +45,9 @@ namespace Etg.Yams.Powershell
                                  "which will trigger deployment")]
         public bool Deploy { get; set; } = true;
 
+        [Parameter(HelpMessage = "Remove previously deployed version(s) of the app (Defaults to 'true')")]
+        public bool RemoveOldVersions { get; set; } = true;
+
         protected override void ProcessRecord()
         {
             try
@@ -118,7 +121,7 @@ namespace Etg.Yams.Powershell
                         string version = Versions[i];
                         string clusterId = ClustersIds[i];
 
-                        if (deploymentConfig.HasApplication(appId))
+                        if (RemoveOldVersions && deploymentConfig.HasApplication(appId))
                         {
                             deploymentConfig = deploymentConfig.RemoveApplication(appId);
                         }
