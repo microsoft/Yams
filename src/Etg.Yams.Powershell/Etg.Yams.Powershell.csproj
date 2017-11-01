@@ -51,6 +51,7 @@
     <Compile Include="GetDeploymentConfigCmdlet.cs" />
     <Compile Include="InstallApplicationsCmdlet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SetDeploymentConfigCmdlet.cs" />
     <Compile Include="UninstallApplicationsCmdlet.cs" />
   </ItemGroup>
   <ItemGroup>
