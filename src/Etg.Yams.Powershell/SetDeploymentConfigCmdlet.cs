@@ -34,13 +34,10 @@ namespace Etg.Yams.Powershell
 
                 progressRecord = new ProgressRecord(activityId++, "PublishDeploymentConfig",
                     "Publishing DeploymentConfig.json to blob storage");
-                deploymentRepository.PublishDeploymentConfig(Config);
+                deploymentRepository.PublishDeploymentConfig(Config).Wait();
                 WriteProgress(progressRecord);
 
-                var deploymentConfig = deploymentRepository.FetchDeploymentConfig().Result;
-                progressRecord.RecordType = ProgressRecordType.Completed;
-                WriteProgress(progressRecord);
-                WriteObject(deploymentConfig);
+                WriteObject(Config);
             }
             catch (Exception e)
             {
