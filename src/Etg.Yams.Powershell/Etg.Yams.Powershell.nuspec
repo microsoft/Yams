@@ -2,13 +2,13 @@
 <package >
   <metadata>
     <id>Etg.Yams.Powershell</id>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <title>YAMS Powershell</title>
     <authors>Nehme Bilal</authors>
-    <owners>Microsoft</owners>
+    <owners>Microsoft Studios (BigPark)</owners>
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Exposes the IDeploymentRepository interface to Powershell so that YAMS storage can be manipulated from a Powershell script</description>
+    <description>Exposes several Powershell cmdlets that can be used to manage YAMS clusters.</description>
     <copyright>Copyright (c) Microsoft Corporation</copyright>
   </metadata>
     <files>
