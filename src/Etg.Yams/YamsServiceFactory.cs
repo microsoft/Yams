@@ -10,11 +10,12 @@ namespace Etg.Yams
         public static IYamsService Create(YamsConfig yamsConfig, string deploymentRepositoryStorageConnectionString,
             string updateSessionStorageConnectionString)
         {
-            IUpdateSessionManager updateSessionManager = new AzureBlobStorageUpdateSessionDiModule(
+            IUpdateSessionManager updateSessionManager = new AzureStorageUpdateSessionDiModule(
                 yamsConfig.ClusterId,
                 yamsConfig.InstanceId,
                 yamsConfig.InstanceUpdateDomain,
-                updateSessionStorageConnectionString).UpdateSessionManager;
+                updateSessionStorageConnectionString,
+                yamsConfig.UpdateSessionTtl).UpdateSessionManager;
 
             var deploymentRepository = BlobStorageDeploymentRepository.Create(deploymentRepositoryStorageConnectionString);
             return new YamsDiModule(yamsConfig, deploymentRepository, deploymentRepository, updateSessionManager).YamsService;

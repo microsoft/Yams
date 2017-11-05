@@ -119,7 +119,7 @@
     <Compile Include="UpdateSession\BlobBasedUpdateSessionTest.cs" />
     <Compile Include="UpdateSession\Retry\UpdateBlobFactoryRetryLockDecoratorTest.cs" />
     <Compile Include="UpdateSession\Retry\UpdateSessionManagerRetryDecoratorTest.cs" />
-    <Compile Include="UpdateSession\EndToEndTest.cs" />
+    <Compile Include="UpdateSession\AzureTableUpdateSessionManagerTests.cs" />
     <Compile Include="UpdateSession\UpdateBlobTest.cs" />
   </ItemGroup>
   <ItemGroup>

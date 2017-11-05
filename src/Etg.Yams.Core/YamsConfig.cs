@@ -23,6 +23,7 @@ namespace Etg.Yams
             TimeSpan appHeartBeatTimeout,
             TimeSpan ipcConnectTimeout,
             TimeSpan appInitTimeout,
+            TimeSpan updateSessionTtl,
             IReadOnlyDictionary<string, string> clusterProperties)
         {
             ClusterId = clusterId;
@@ -38,6 +39,7 @@ namespace Etg.Yams
             AppHeartBeatTimeout = appHeartBeatTimeout;
             IpcConnectTimeout = ipcConnectTimeout;
             AppInitTimeout = appInitTimeout;
+            UpdateSessionTtl = updateSessionTtl;
             ClusterProperties = clusterProperties;
         }
 
@@ -106,6 +108,11 @@ namespace Etg.Yams
         /// Time given to apps to finish initialization
         /// </summary>
         public TimeSpan AppInitTimeout { get; private set; }
+
+        /// <summary>
+        /// TTL after which an update session will be considered expired.
+        /// </summary>
+        public TimeSpan UpdateSessionTtl { get; }
 
         public IReadOnlyDictionary<string, string> ClusterProperties { get; private set; }
     }

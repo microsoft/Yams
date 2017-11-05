@@ -4,12 +4,12 @@ using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Etg.Yams.Azure.UpdateSession.Retry
 {
-    public class UpdateSessionManagerRetryDecorator : IUpdateSessionManager
+    public class StorageExceptionUpdateSessionRetryDecorator : IUpdateSessionManager
     {
         private readonly IUpdateSessionManager _updateSessionManager;
         private readonly RetryPolicy _retryPolicy;
 
-        public UpdateSessionManagerRetryDecorator(IUpdateSessionManager updateSessionManager,
+        public StorageExceptionUpdateSessionRetryDecorator(IUpdateSessionManager updateSessionManager,
             RetryStrategy retryStrategy,
             ITransientErrorDetectionStrategy errorDetectionStrategy)
         {
