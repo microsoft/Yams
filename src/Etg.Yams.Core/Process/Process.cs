@@ -61,9 +61,7 @@ namespace Etg.Yams.Process
 
                 if (!_showProcessWindow)
                 {
-                    _process.StartInfo.RedirectStandardOutput = true;
                     _process.StartInfo.UseShellExecute = false;
-                    _process.StartInfo.CreateNoWindow = true;
                 }
 
                 if (!_process.Start())
