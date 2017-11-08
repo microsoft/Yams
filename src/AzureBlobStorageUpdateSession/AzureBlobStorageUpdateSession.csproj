@@ -73,17 +73,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UpdateSession\AzureTableUpdateSessionManager.cs" />
     <Compile Include="UpdateSession\BlobBasedUpdateSessionManager.cs" />
-    <Compile Include="UpdateSession\AzureBlobStorageUpdateSessionDiModule.cs" />
+    <Compile Include="UpdateSession\AzureStorageUpdateSessionDiModule.cs" />
     <Compile Include="UpdateSession\IUpdateBlob.cs" />
     <Compile Include="UpdateSession\IUpdateBlobFactory.cs" />
+    <Compile Include="UpdateSession\IUpdateSessionTable.cs" />
     <Compile Include="UpdateSession\Retry\LockUpdateBlobErrorDetectionStrategy.cs" />
+    <Compile Include="UpdateSession\Retry\StartUpdateSessionRetryDecorator.cs" />
     <Compile Include="UpdateSession\Retry\StorageExceptionErrorDetectionStrategy.cs" />
     <Compile Include="UpdateSession\UpdateBlob.cs" />
     <Compile Include="UpdateSession\UpdateBlobFactory.cs" />
     <Compile Include="UpdateSession\Retry\UpdateBlobFactoryRetryLockDecorator.cs" />
     <Compile Include="UpdateSession\UpdateBlobUnavailableException.cs" />
-    <Compile Include="UpdateSession\Retry\UpdateSessionManagerRetryDecorator.cs" />
+    <Compile Include="UpdateSession\Retry\StorageExceptionUpdateSessionRetryDecorator.cs" />
+    <Compile Include="UpdateSession\UpdateDomainEntity.cs" />
+    <Compile Include="UpdateSession\UpdateSessionStatus.cs" />
+    <Compile Include="UpdateSession\UpdateSessionTable.cs" />
+    <Compile Include="UpdateSession\UpdateSessionTransaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AzureUtils\AzureUtils.csproj">

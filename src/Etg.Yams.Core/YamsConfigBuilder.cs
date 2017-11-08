@@ -21,6 +21,7 @@ namespace Etg.Yams
             _appHeartBeatTimeout = TimeSpan.FromSeconds(60);
             _ipcConnectTimeout = TimeSpan.FromSeconds(60);
             _appInitTimeout = TimeSpan.FromSeconds(60);
+            _updateSessionTtl = TimeSpan.FromHours(1);
         }
 
         public YamsConfigBuilder SetCheckForUpdatesPeriodInSeconds(int value)
@@ -83,6 +84,12 @@ namespace Etg.Yams
             return this;
         }
 
+        public YamsConfigBuilder SetUpdateSessionTtl(TimeSpan ttl)
+        {
+            _updateSessionTtl = ttl;
+            return this;
+        }
+
         public YamsConfig Build()
         {
             return new YamsConfig(
@@ -99,6 +106,7 @@ namespace Etg.Yams
                 _appHeartBeatTimeout,
                 _ipcConnectTimeout,
                 _appInitTimeout,
+                _updateSessionTtl,
                 _clusterProperties);
         }
 
@@ -116,5 +124,6 @@ namespace Etg.Yams
         private TimeSpan _ipcConnectTimeout;
         private TimeSpan _appInitTimeout;
         private readonly Dictionary<string, string> _clusterProperties = new Dictionary<string, string>();
+        private TimeSpan _updateSessionTtl;
     }
 }

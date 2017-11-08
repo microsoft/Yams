@@ -24,7 +24,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
 	        var updateSessionStub = new StubIUpdateSessionManager()
 		        .TryStartUpdateSession(id => sequence.Next(id));
 
-            IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
+            IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
@@ -42,7 +42,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
 	        var updateSessionStub = new StubIUpdateSessionManager()
 		        .EndUpdateSession(id => sequence.Next(id));
 
-            IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
+            IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
@@ -61,7 +61,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
 	        var updateSessionStub = new StubIUpdateSessionManager()
 		        .TryStartUpdateSession(id => sequence.Next(id));
 
-            IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
+            IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
@@ -75,7 +75,7 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
 	        var updateSessionStub = new StubIUpdateSessionManager()
 		        .TryStartUpdateSession(id => AsyncUtils.AsyncTaskThatThrows<bool>(new Exception()));
 
-            IUpdateSessionManager retryDecorator = new UpdateSessionManagerRetryDecorator(
+            IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
