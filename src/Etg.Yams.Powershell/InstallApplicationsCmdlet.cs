@@ -125,8 +125,15 @@ namespace Etg.Yams.Powershell
                         {
                             deploymentConfig = deploymentConfig.RemoveApplication(appId);
                         }
-                        var newAppIdentity = new AppIdentity(appId, version);
-                        deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, clusterId);
+
+                        if (RemoveOldVersions || 
+                            // Only AddApplication if this app/version combination does not already exist;
+                            // redundant check if 'RemoveOldVersions' is specified
+                            deploymentConfig.ListVersions(appId).Contains(version) == false)
+                        {
+                            var newAppIdentity = new AppIdentity(appId, version);
+                            deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, clusterId);
+                        }
                     }
 
                     progressRecord = new ProgressRecord(activityId++, "PublishDeploymentConfig",
