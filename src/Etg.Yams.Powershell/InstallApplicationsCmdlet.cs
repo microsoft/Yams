@@ -128,10 +128,7 @@ namespace Etg.Yams.Powershell
 
                         var newAppIdentity = new AppIdentity(appId, version);
 
-                        if (RemoveOldVersions || 
-                            // Only AddApplication if this app/version combination does not already exist;
-                            // redundant check if 'RemoveOldVersions' is specified
-                            deploymentConfig.HasApplication(newAppIdentity, clusterId) == false)
+                        if (deploymentConfig.HasApplication(newAppIdentity, clusterId) == false)
                         {
                             deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, clusterId);
                         }
