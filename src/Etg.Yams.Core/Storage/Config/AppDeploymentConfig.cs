@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Etg.Yams.Application;
@@ -28,7 +27,7 @@ namespace Etg.Yams.Storage.Config
         {
             if (TargetClusters.Contains(clusterId))
             {
-                throw new InvalidOperationException();
+                return this;
             }
             var clusterIds = new HashSet<string>(TargetClusters) {clusterId};
             return new AppDeploymentConfig(AppIdentity, clusterIds, Properties);
@@ -38,7 +37,7 @@ namespace Etg.Yams.Storage.Config
         {
             if (!TargetClusters.Contains(clusterId))
             {
-                throw new InvalidOperationException();
+                return this;
             }
             var clusterIds = TargetClusters.Where(c => c != clusterId);
             return new AppDeploymentConfig(AppIdentity, clusterIds, Properties);
@@ -57,7 +56,7 @@ namespace Etg.Yams.Storage.Config
 
         public AppDeploymentConfig RemoveProperty(string key)
         {
-            if (Properties.ContainsKey(key))
+            if (!Properties.ContainsKey(key))
             {
                 return this;
             }

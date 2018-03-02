@@ -171,7 +171,33 @@ namespace Etg.Yams.Storage.Config
             }
             return new DeploymentConfig(apps);
         }
-        
+
+        public DeploymentConfig RemoveApplication(string appId, string clusterId)
+        {
+            if (!HasApplication(appId))
+            {
+                throw new InvalidOperationException("Cannot remove an application that is not there");
+            }
+            var apps = CopyApps();
+            foreach (AppDeploymentConfig config in _apps.Values.Where(config => config.AppIdentity.Id == appId))
+            {
+                if (!config.TargetClusters.Contains(clusterId))
+                {
+                    continue;
+                }
+                var newConfig = config.RemoveClusterId(clusterId);
+                if (newConfig.TargetClusters.Any())
+                {
+                    apps[config.AppIdentity] = newConfig;
+                }
+                else
+                {
+                    apps.Remove(config.AppIdentity);
+                }
+            }
+            return new DeploymentConfig(apps);
+        }
+
         public DeploymentConfig RemoveApplication(AppIdentity appIdentity)
         {
             if (!_apps.ContainsKey(appIdentity))

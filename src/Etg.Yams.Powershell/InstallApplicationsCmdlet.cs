@@ -123,7 +123,7 @@ namespace Etg.Yams.Powershell
 
                         if (RemoveOldVersions && deploymentConfig.HasApplication(appId))
                         {
-                            deploymentConfig = deploymentConfig.RemoveApplication(appId);
+                            deploymentConfig = deploymentConfig.RemoveApplication(appId, clusterId);
                         }
 
                         var newAppIdentity = new AppIdentity(appId, version);
