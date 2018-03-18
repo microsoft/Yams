@@ -120,3 +120,34 @@ Note that this assumes that you already have a storage account configured for YA
 That's it! 
 
 All you need to do now is to configure your deployment triggers in VSTS (e.g. deploy on every check-in to master) and you should have 1-2 minute VSTS deployments!
+
+
+## Add Support for VIP Swaps
+
+In some cases, one may not feel confident using a rolling upgrade in a production environment because there is a chance that the deployed service will experience difficulties starting up. A popular approach to avoid such issues is to deploy first to a staging environment, test and warm up the deployment, and then perform a VIP swap.
+
+YAMS does not have native support for VIP swaps but one can easily achieve VIP swaps with YAMS when combined with Azure cloud services. The trick is to use the cloud service deployment id as a prefix in the Yams cluster id. Follow the following steps to achieve this.
+
+* Use the deployment id of your cloud service as a prefix to your YAMS cluster id when you start your worker role:
+```csharp
+string clusterId = $"{RoleEnvironment.GetConfigurationSettingValue("ClusterId")}_{RoleEnvironment.DeploymentId}";
+```
+* Use the same deployment id above in your VSTS task
+
+```powershell
+Param(
+  [string]$ConnectionString,
+  [string]$Version,
+  [string]$WorkingDir
+)
+
+$BinDir = "$WorkingDir\Build\drop"
+
+Import-Module $WorkingDir\YamsPowershell\content\Etg.Yams.Powershell.dll
+
+$DeploymentId = (Get-AzureDeployment -ServiceName $(ServiceName) -Slot Staging).DeploymentId
+
+Install-Applications -ConnectionString $ConnectionString -AppsIds "NotificationService","NotificationService.Silo" -ClustersIds "FrontEnd_$(DeploymentId)","Orleans_$(DeploymentId)" -BinariesPath "$BinDir\NotificationService","$BinDir\NotificationService.Silo\" -Versions $Version,$Version -WaitForDeploymentsToComplete $true
+```
+
+With this setup, the YAMS applications will be deployed to the *Staging* slot instead of the *Production* slot. Once the service is deployed, warmed up and tested, simply VIP swap using the cloud service portal or a powershell VSTS task.
