@@ -5,9 +5,10 @@ namespace Etg.Yams
 {
     public class YamsConfigBuilder
     {
-        public YamsConfigBuilder(string clusterId, string instanceUpdateDomain, 
+        public YamsConfigBuilder(string superClusterId, string clusterId, string instanceUpdateDomain, 
             string instanceId, string applicationInstallDirectory)
         {
+            this._superClusterId = superClusterId;
             _clusterId = clusterId;
             _instanceUpdateDomain = instanceUpdateDomain;
             _instanceId = instanceId;
@@ -93,6 +94,7 @@ namespace Etg.Yams
         public YamsConfig Build()
         {
             return new YamsConfig(
+                _superClusterId,
                 _clusterId,
                 _instanceUpdateDomain,
                 _instanceId,
@@ -110,6 +112,7 @@ namespace Etg.Yams
                 _clusterProperties);
         }
 
+        private readonly string _superClusterId;
         private readonly string _clusterId;
         private readonly string _instanceUpdateDomain;
         private readonly string _instanceId;

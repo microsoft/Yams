@@ -13,15 +13,13 @@ namespace Etg.Yams.Install
     public class ApplicationInstaller : IApplicationInstaller
     {
         private readonly string _applicationsRootPath;
-        private readonly IUpdateSessionManager _updateSessionManager;
         private readonly IApplicationFactory _applicationFactory;
         private readonly IApplicationPool _applicationPool;
 
-        public ApplicationInstaller(string applicationsRootPath, IUpdateSessionManager updateSessionManager, 
+        public ApplicationInstaller(string applicationsRootPath, 
             IApplicationFactory applicationFactory, IApplicationPool applicationPool)
         {
             _applicationsRootPath = applicationsRootPath;
-            _updateSessionManager = updateSessionManager;
             _applicationFactory = applicationFactory;
             _applicationPool = applicationPool;
         }
@@ -60,12 +58,6 @@ namespace Etg.Yams.Install
             bool failed = false;
             try
             {
-                if (!await _updateSessionManager.TryStartUpdateSession(appId))
-                {
-                    Trace.TraceInformation("Couldn't start update session for app {0}", appId);
-                    return false;
-                }
-
                 await UnInstallApplications(applicationsToRemove);
                 await InstallApplications(applicationsToDeploy);
             }
@@ -79,8 +71,6 @@ namespace Etg.Yams.Install
                 failed = true;
                 Trace.TraceError("Failed to update applications", e);
             }
-
-            await _updateSessionManager.EndUpdateSession(appId);
 
             return !failed;
         }

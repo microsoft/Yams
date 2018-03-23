@@ -76,7 +76,7 @@ namespace Etg.Yams.Process
                     Trace.TraceError(
                         $"Unexpected message received from App {ExePath} instead of heart beat");
                 }
-                else
+                else if(!cancellationToken.IsCancellationRequested)
                 {
                     Trace.TraceError($"Heart beat has not been received in time from {ExePath}; App is unhealthy");
                 }

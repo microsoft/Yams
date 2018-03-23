@@ -18,12 +18,12 @@ namespace Etg.Yams.Azure.UpdateSession.Retry
             _retryInterval = retryInterval;
         }
 
-        public async Task<bool> TryStartUpdateSession(string applicationId)
+        public async Task<bool> TryStartUpdateSession()
         {
             int count = 0;
             while (count <= _retryCount)
             {
-                if (await _updateSessionManager.TryStartUpdateSession(applicationId))
+                if (await _updateSessionManager.TryStartUpdateSession())
                 {
                     return true;
                 }
@@ -37,9 +37,9 @@ namespace Etg.Yams.Azure.UpdateSession.Retry
             return false;
         }
 
-        public Task EndUpdateSession(string applicationId)
+        public Task EndUpdateSession()
         {
-            return _updateSessionManager.EndUpdateSession(applicationId);
+            return _updateSessionManager.EndUpdateSession();
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -9,11 +8,12 @@ namespace Etg.Yams.Azure.UpdateSession
 {
     public class UpdateSessionTable : IUpdateSessionTable
     {
-        private readonly TimeSpan _ttl;
         private readonly CloudTable _table;
+        private readonly TimeSpan _ttl;
         public const string UpdateSessionTableName = "YamsUpdateSession";
         public const string UpdateDomainRowKey = "updateDomain";
         public const string ModifiedRowKey = "modified";
+
 
         /// <summary>
         /// </summary>
@@ -28,9 +28,9 @@ namespace Etg.Yams.Azure.UpdateSession
             _table.CreateIfNotExists();
         }
 
-        public Task<UpdateSessionStatus> FetchUpdateSessionStatus(string clusterId, string appId)
+        public Task<UpdateSessionStatus> FetchUpdateSessionStatus(string superClusterId)
         {
-            string partitionQuery = CreatePartitionQuery(clusterId, appId);
+            string partitionQuery = CreatePartitionQuery(superClusterId);
 
             TableQuery<UpdateDomainEntity> query = new TableQuery<UpdateDomainEntity>().Where(partitionQuery);
             UpdateDomainEntity updateDomainEntity = null;
@@ -62,7 +62,7 @@ namespace Etg.Yams.Azure.UpdateSession
                 // filter out entities that do not match the active update domain (were leftover for some reason)
                 instanceEntitiesDict.TryGetValue(updateDomain, out instancesEntities);
             }
-            if(instancesEntities == null)
+            if (instancesEntities == null)
             {
                 instancesEntities = new List<UpdateDomainEntity>();
             }
@@ -105,9 +105,9 @@ namespace Etg.Yams.Azure.UpdateSession
             return false;
         }
 
-        public async Task DeleteInstanceEntity(string clusterId, string instanceId, string appId)
+        public async Task DeleteInstanceEntity(string superClusterId, string instanceId)
         {
-            TableOperation retrieveOperation = TableOperation.Retrieve<UpdateDomainEntity>(GetPartitionKey(clusterId, appId), 
+            TableOperation retrieveOperation = TableOperation.Retrieve<UpdateDomainEntity>(superClusterId, 
                 instanceId);
             TableResult retrievedResult = await _table.ExecuteAsync(retrieveOperation);
             var instanceEntity = (UpdateDomainEntity)retrievedResult.Result;
@@ -118,9 +118,9 @@ namespace Etg.Yams.Azure.UpdateSession
             }
         }
 
-        public async Task<string> GetActiveUpdateDomain(string clusterId, string appId)
+        public async Task<string> GetActiveUpdateDomain(string superClusterId)
         {
-            TableOperation retrieveOperation = TableOperation.Retrieve<UpdateDomainEntity>(GetPartitionKey(clusterId, appId), 
+            TableOperation retrieveOperation = TableOperation.Retrieve<UpdateDomainEntity>(superClusterId, 
                 UpdateDomainRowKey);
 
             // Execute the retrieve operation.
@@ -130,15 +130,10 @@ namespace Etg.Yams.Azure.UpdateSession
             return entity?.UpdateDomain;
         }
 
-        private static string CreatePartitionQuery(string clusterId, string appId)
+        private static string CreatePartitionQuery(string superClusterId)
         {
             return TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal,
-                GetPartitionKey(clusterId, appId));
-        }
-
-        public static string GetPartitionKey(string clusterId, string appId)
-        {
-            return $"{clusterId}_{appId}";
+                superClusterId);
         }
     }
 }

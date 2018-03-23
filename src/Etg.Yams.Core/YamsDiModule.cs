@@ -113,7 +113,7 @@ namespace Etg.Yams
                     return new ApplicationUpdateManager(config.ClusterId, config.InstanceId,
                         c.Resolve<IApplicationDeploymentDirectory>(), c.Resolve<IApplicationPool>(),
                         c.Resolve<IApplicationDownloader>(), c.Resolve<IApplicationInstaller>(),
-                        c.Resolve<IDeploymentStatusWriter>());
+                        c.Resolve<IDeploymentStatusWriter>(), c.Resolve<IUpdateSessionManager>());
                 }).SingleInstance();
         }
 
@@ -168,7 +168,7 @@ namespace Etg.Yams
                 {
                     var config = c.Resolve<YamsConfig>();
                     return new ApplicationInstaller(Path.Combine(config.ApplicationInstallDirectory),
-                        c.Resolve<IUpdateSessionManager>(), c.Resolve<IApplicationFactory>(), c.Resolve<IApplicationPool>());
+                        c.Resolve<IApplicationFactory>(), c.Resolve<IApplicationPool>());
                 }).SingleInstance();
         }
 

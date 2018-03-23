@@ -17,14 +17,14 @@ namespace Etg.Yams.Azure.UpdateSession.Retry
             _retryPolicy = new RetryPolicy(errorDetectionStrategy, retryStrategy);
         }
 
-        public Task<bool> TryStartUpdateSession(string applicationId)
+        public Task<bool> TryStartUpdateSession()
         {
-            return _retryPolicy.ExecuteAsync(async () => await _updateSessionManager.TryStartUpdateSession(applicationId));
+            return _retryPolicy.ExecuteAsync(async () => await _updateSessionManager.TryStartUpdateSession());
         }
 
-        public Task EndUpdateSession(string applicationId)
+        public Task EndUpdateSession()
         {
-            return _retryPolicy.ExecuteAsync(async () => await _updateSessionManager.EndUpdateSession(applicationId));
+            return _retryPolicy.ExecuteAsync(async () => await _updateSessionManager.EndUpdateSession());
         }
     }
 }

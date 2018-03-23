@@ -1,6 +1,5 @@
 ﻿using System;
 using Autofac;
-using Etg.Yams.Azure.Lease;
 using Etg.Yams.Azure.UpdateSession.Retry;
 using Etg.Yams.Update;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
@@ -13,6 +12,7 @@ namespace Etg.Yams.Azure.UpdateSession
         private const string UpdateSessionRetryStrategyModuleName = "updateSessionRetryStrategy";
 
         public AzureStorageUpdateSessionDiModule(
+            string superClusterId,
             string clusterId,
             string instanceId,
             string updateDomain,
@@ -20,9 +20,9 @@ namespace Etg.Yams.Azure.UpdateSession
             TimeSpan updateSessionTtl,
             int storageExceptionRetryCount = 20,
             int storageExceptionRetryIntervalInSeconds = 1,
-            int startUpdateSessionRetryCount = 5,
-            int startUpdateSessionRetryIntervalInSeconds = 1) : this(RegisterTypes(
-                clusterId, instanceId, updateDomain, connectionString, updateSessionTtl,
+            int startUpdateSessionRetryCount = 20,
+            int startUpdateSessionRetryIntervalInSeconds = 5) : this(RegisterTypes(
+                superClusterId, clusterId, instanceId, updateDomain, connectionString, updateSessionTtl,
                 storageExceptionRetryCount, storageExceptionRetryIntervalInSeconds,
                 startUpdateSessionRetryCount, startUpdateSessionRetryIntervalInSeconds).Build())
         {
@@ -33,7 +33,9 @@ namespace Etg.Yams.Azure.UpdateSession
             _container = container;
         }
 
-        public static ContainerBuilder RegisterTypes(string clusterId,
+        public static ContainerBuilder RegisterTypes(
+            string superClusterId,
+            string clusterId,
             string instanceId,
             string updateDomain,
             string connectionString,

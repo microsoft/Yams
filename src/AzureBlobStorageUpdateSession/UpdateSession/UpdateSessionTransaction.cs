@@ -4,18 +4,16 @@ namespace Etg.Yams.Azure.UpdateSession
 {
     public class UpdateSessionTransaction
     {
-        private readonly string _clusterId;
+        private readonly string _superClusterId;
         private readonly string _instanceId;
         private readonly string _updateDomain;
-        private readonly string _appId;
         private readonly TableBatchOperation _batchOperation = new TableBatchOperation();
 
-        public UpdateSessionTransaction(string clusterId, string instanceId, string updateDomain, string appId)
+        public UpdateSessionTransaction(string superClusterId, string instanceId, string updateDomain)
         {
-            _clusterId = clusterId;
+            _superClusterId = superClusterId;
             _instanceId = instanceId;
             _updateDomain = updateDomain;
-            _appId = appId;
         }
 
         public UpdateSessionTransaction InsertUpdateDomain()
@@ -58,6 +56,6 @@ namespace Etg.Yams.Azure.UpdateSession
 
         public TableBatchOperation BatchOperation => _batchOperation;
 
-        private string PartitionKey => UpdateSessionTable.GetPartitionKey(_clusterId, _appId);
+        private string PartitionKey => _superClusterId;
     }
 }
