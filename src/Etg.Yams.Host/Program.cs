@@ -16,8 +16,11 @@ namespace Etg.Yams.Host
         static async Task MainAsync(string[] args)
         {
             string clusterId = "testClusterId";
+            string superClusterId = "testSuperClusterId";
+
             YamsConfig yamsConfig = new YamsConfigBuilder(
                     // mandatory configs
+                    superClusterId: superClusterId,
                     clusterId: clusterId,
                     instanceUpdateDomain: "0",
                     instanceId: "instance_0",

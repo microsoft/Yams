@@ -23,6 +23,7 @@ namespace Etg.Yams.Update
         private readonly IApplicationDownloader _applicationDownloader;
         private readonly IApplicationInstaller _applicationInstaller;
         private readonly IDeploymentStatusWriter _deploymentStatusWriter;
+        private readonly IUpdateSessionManager _updateSessionManager;
 
         public ApplicationUpdateManager(
             string clusterId,
@@ -31,7 +32,8 @@ namespace Etg.Yams.Update
             IApplicationPool applicationPool, 
             IApplicationDownloader applicationDownloader, 
             IApplicationInstaller applicationInstaller,
-            IDeploymentStatusWriter deploymentStatusWriter)
+            IDeploymentStatusWriter deploymentStatusWriter,
+            IUpdateSessionManager updateSessionManager)
         {
             _clusterId = clusterId;
             this._instanceId = instanceId;
@@ -40,6 +42,7 @@ namespace Etg.Yams.Update
             _applicationDownloader = applicationDownloader;
             _applicationInstaller = applicationInstaller;
             _deploymentStatusWriter = deploymentStatusWriter;
+            _updateSessionManager = updateSessionManager;
         }
 
         public async Task CheckForUpdates()
@@ -54,13 +57,25 @@ namespace Etg.Yams.Update
                 IEnumerable<AppIdentity> applicationsToRemove = FindApplicationsToRemove(runningApplications, applicationDeployments);
                 IEnumerable<AppDeploymentConfig> applicationsToDeploy = FindApplicationsToDeploy(runningApplications, applicationDeployments);
 
+                if (!applicationsToDeploy.Any() && !applicationsToRemove.Any())
+                {
+                    return;
+                }
+
                 // download applications first
                 await DownloadApplications(applicationsToDeploy);
 
                 var allAppsIds = new HashSet<string>(applicationsToRemove.Select(identity => identity.Id));
                 allAppsIds.UnionWith(applicationsToDeploy.Select(config => config.AppIdentity.Id));
 
+                if (!await _updateSessionManager.TryStartUpdateSession())
+                {
+                    Trace.TraceInformation("Couldn't start update session");
+                    return;
+                }
+
                 var tasks = new List<Task>();
+                
                 foreach (string appId in allAppsIds)
                 {
                     IEnumerable<AppIdentity> appRemovals = applicationsToRemove.Where(identity => identity.Id.Equals(appId));
@@ -84,7 +99,10 @@ namespace Etg.Yams.Update
                     }
                 }
                 await Task.WhenAll(tasks);
-                await UpdateDeploymentStatus();
+
+                // We will only end the update session if the update was successful. Otherwise, the update session will stay open and will prevent
+                // the deployment from moving to the next update domain.
+                await _updateSessionManager.EndUpdateSession(); 
             }
             catch (AggregateException e)
             {
@@ -93,6 +111,15 @@ namespace Etg.Yams.Update
             catch (Exception e)
             {
                 Trace.TraceError("Failed to perform update; Exception was: {0}", e);
+            }
+
+            try
+            {
+                await UpdateDeploymentStatus();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("Failed to update the deployment status; Exception was: {0}", e);
             }
         }
 

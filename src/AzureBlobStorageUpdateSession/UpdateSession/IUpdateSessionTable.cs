@@ -4,9 +4,9 @@ namespace Etg.Yams.Azure.UpdateSession
 {
     public interface IUpdateSessionTable
     {
-        Task<UpdateSessionStatus> FetchUpdateSessionStatus(string clusterId, string appId);
+        Task<UpdateSessionStatus> FetchUpdateSessionStatus(string clusterId);
         Task<bool> TryExecuteTransaction(UpdateSessionTransaction transaction);
-        Task DeleteInstanceEntity(string clusterId, string instanceId, string appId);
-        Task<string> GetActiveUpdateDomain(string clusterId, string appId);
+        Task DeleteInstanceEntity(string clusterId, string instanceId);
+        Task<string> GetActiveUpdateDomain(string clusterId);
     }
 }

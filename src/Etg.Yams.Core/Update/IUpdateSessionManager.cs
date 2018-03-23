@@ -9,18 +9,15 @@ namespace Etg.Yams.Update
     public interface IUpdateSessionManager
     {
         /// <summary>
-        /// Starts an update session for the given application. If the application is being updated on another instance in a different update domain,
+        /// Starts an update session for the current node. If any other node in a different update domain is being updated,
         /// no session will be started and false will be returned.
         /// </summary>
-        /// <param name="applicationId"></param>
-        /// <returns></returns>
-        Task<bool> TryStartUpdateSession(string applicationId);
+        /// <returns>True if the session started successfully, false otherwise</returns>
+        Task<bool> TryStartUpdateSession();
 
         /// <summary>
-        /// Ends the update session for the given application.
+        /// Ends the update session for the current node.
         /// </summary>
-        /// <param name="applicationId"></param>
-        /// <returns></returns>
-        Task EndUpdateSession(string applicationId);
+        Task EndUpdateSession();
     }
 }

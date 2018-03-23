@@ -28,7 +28,7 @@ namespace Etg.Yams.Test.Install
         {
             _applicationPool = new ApplicationPoolStub();
             IApplicationFactory applicationFactory = new ApplicationFactoryStub();
-            _applicationInstaller = new ApplicationInstaller(_applicationsRoot, null, applicationFactory, _applicationPool);
+            _applicationInstaller = new ApplicationInstaller(_applicationsRoot, applicationFactory, _applicationPool);
 
             AppIdentity appIdentity = new AppIdentity("test.app", new SemVersion(1,0,0));
             await _applicationInstaller.Install(new AppInstallConfig(appIdentity));
@@ -41,7 +41,7 @@ namespace Etg.Yams.Test.Install
         {
             _applicationPool = new ApplicationPoolStub();
             IApplicationFactory applicationFactory = new ApplicationFactoryStub();
-            _applicationInstaller = new ApplicationInstaller(_applicationsRoot, null, applicationFactory, _applicationPool);
+            _applicationInstaller = new ApplicationInstaller(_applicationsRoot, applicationFactory, _applicationPool);
 
             AppIdentity appIdentity = new AppIdentity("test.app", new SemVersion(1, 0, 0));
             _applicationInstaller.Install(new AppInstallConfig(appIdentity)).Wait();
@@ -61,17 +61,8 @@ namespace Etg.Yams.Test.Install
         [Fact]
         public async Task TestUpdateApplication()
         {
-            string updateSessionId = null;
-	        IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
-		        .TryStartUpdateSession(id =>
-		        {
-			        updateSessionId = id;
-			        return Task.FromResult(true);
-		        })
-		        .EndUpdateSession(id => Task.FromResult(true));
-
             IApplicationPool applicationPool = new ApplicationPoolStub();
-            IApplicationInstaller applicationInstaller = new ApplicationInstaller(_applicationsRoot, updateSessionManager, new ApplicationFactoryStub(), applicationPool);
+            IApplicationInstaller applicationInstaller = new ApplicationInstaller(_applicationsRoot, new ApplicationFactoryStub(), applicationPool);
 
             const string appId = "test.app";
             AppIdentity[] existingApps = { new AppIdentity(appId, new SemVersion(1, 0, 0)), new AppIdentity(appId, new SemVersion(1, 0, 1)) };
@@ -99,27 +90,6 @@ namespace Etg.Yams.Test.Install
             {
                 Assert.True(applicationPool.HasApplication(app));
             }
-
-            Assert.Equal(appId, updateSessionId);
-        }
-
-        [Fact]
-        public async Task TestThatUpdateReturnsIfCannotStartUpdateSession()
-        {
-	        IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
-		        .TryStartUpdateSession(id => Task.FromResult(false));
-
-            IApplicationPool applicationPool = new ApplicationPoolStub();
-            IApplicationInstaller applicationInstaller = new ApplicationInstaller(_applicationsRoot, updateSessionManager, new ApplicationFactoryStub(), applicationPool);
-
-            AppIdentity existingApp = new AppIdentity("test.app", new SemVersion(1, 0, 0));
-            await applicationInstaller.Install(new AppInstallConfig(existingApp));
-
-            AppIdentity newApp = new AppIdentity(existingApp.Id, new SemVersion(1, 1, 0));
-            await applicationInstaller.Update(new[] {existingApp}, new[] {new AppInstallConfig(newApp), });
-
-            Assert.True(applicationPool.HasApplication(existingApp));
-            Assert.False(applicationPool.HasApplication(newApp));
         }
     }
 }

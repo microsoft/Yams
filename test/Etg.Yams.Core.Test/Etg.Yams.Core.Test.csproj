@@ -110,9 +110,9 @@
     <Compile Include="Storage\DeploymentConfigTest.cs" />
     <Compile Include="Storage\LocalDeploymentRepository.cs" />
     <Compile Include="Stubs\ApplicationFactoryStub.cs" />
+    <Compile Include="Stubs\ApplicationInstallerStub.cs" />
     <Compile Include="Stubs\ApplicationPoolStub.cs" />
     <Compile Include="Stubs\ApplicationStub.cs" />
-    <Compile Include="Stubs\LockBaseUpdateSessionManager.cs" />
     <Compile Include="Stubs\ProcessStub.cs" />
     <Compile Include="Update\ApplicationUpdateManagerTest.cs" />
     <Compile Include="Utils\AssertUtils.cs" />

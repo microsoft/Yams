@@ -1,6 +1,5 @@
 ﻿using Etg.Yams.Azure.Storage;
 using Etg.Yams.Azure.UpdateSession;
-using Etg.Yams.Storage;
 using Etg.Yams.Update;
 
 namespace Etg.Yams
@@ -11,6 +10,7 @@ namespace Etg.Yams
             string updateSessionStorageConnectionString)
         {
             IUpdateSessionManager updateSessionManager = new AzureStorageUpdateSessionDiModule(
+                yamsConfig.SuperClusterId,
                 yamsConfig.ClusterId,
                 yamsConfig.InstanceId,
                 yamsConfig.InstanceUpdateDomain,

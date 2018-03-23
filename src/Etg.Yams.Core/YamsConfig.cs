@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Etg.Yams.Process;
 
 namespace Etg.Yams
 {
@@ -10,6 +9,7 @@ namespace Etg.Yams
     public class YamsConfig
     {
         public YamsConfig(
+            string superClusterId,
             string clusterId,
             string instanceUpdateDomain,
             string instanceId,
@@ -26,6 +26,7 @@ namespace Etg.Yams
             TimeSpan updateSessionTtl,
             IReadOnlyDictionary<string, string> clusterProperties)
         {
+            SuperClusterId = superClusterId;
             ClusterId = clusterId;
             InstanceUpdateDomain = instanceUpdateDomain;
             InstanceId = instanceId;
@@ -42,6 +43,14 @@ namespace Etg.Yams
             UpdateSessionTtl = updateSessionTtl;
             ClusterProperties = clusterProperties;
         }
+
+        /// <summary>
+        /// An id that uniquely identifies a set of clusters (should be the same for all nodes in all clusters).
+        /// You can use the clusterId if all your nodes are in the same cluster or if your clusters are independent.
+        /// Note that the superClusterId is used by YAMS to enforce that only one update domain is active at a time;
+        /// if your nodes have different superClusterId, they will update independently.
+        /// </summary>
+        public string SuperClusterId { get; }
 
         /// <summary>
         /// The cluster deployment id.

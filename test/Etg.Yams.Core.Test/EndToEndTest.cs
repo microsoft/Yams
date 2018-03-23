@@ -57,8 +57,8 @@ namespace Etg.Yams.Test
         private ContainerBuilder InitializeContainerBuilder(YamsConfig yamsConfig)
         {
             IUpdateSessionManager updateSessionManager = new StubIUpdateSessionManager()
-                .TryStartUpdateSession(applicationId => Task.FromResult(true))
-                .EndUpdateSession(applicationId => Task.FromResult(true));
+                .TryStartUpdateSession(() => Task.FromResult(true))
+                .EndUpdateSession(() => Task.CompletedTask);
 
             JsonSerializer jsonSerializer = new JsonSerializer(new DiagnosticsTraceWriter());
             _deploymentRepository = new LocalDeploymentRepository(_deploymentDirPath,
@@ -112,7 +112,7 @@ namespace Etg.Yams.Test
         {
             const string ClusterId = "clusterId1";
             const string InstanceId = "instanceId";
-            var yamsConfig = new YamsConfigBuilder(ClusterId, "1", InstanceId,
+            var yamsConfig = new YamsConfigBuilder("superClusterId", ClusterId, "1", InstanceId,
                 _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
 
             InitializeYamsService(yamsConfig);
@@ -175,7 +175,7 @@ namespace Etg.Yams.Test
         public async Task TestThatClusterPropertiesAreUsedToMatchDeployments()
         {
             UploadDeploymentConfig("DeploymentConfigWithProperties.json");
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+            var yamsConfig = new YamsConfigBuilder("superClusterId", "clusterId1", "1", "instanceId",
                 _applicationsInstallPath).SetShowApplicationProcessWindow(false)
                 .AddClusterProperty("NodeType", "Test")
                 .AddClusterProperty("Region", "East").Build();
@@ -228,7 +228,7 @@ namespace Etg.Yams.Test
             await CopyAppBinariesToAppDeploymentDir("HeartBeatApp", "HeartBeatProcess", "1.0.0");
             UploadDeploymentConfig("DeploymentConfigHeartBeatApp.json");
 
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+            var yamsConfig = new YamsConfigBuilder("superClusterId", "clusterId1", "1", "instanceId",
                     _applicationsInstallPath)
                 .SetAppHeartBeatTimeout(heartBeatTimeout)
                 .SetShowApplicationProcessWindow(false).Build();
@@ -250,7 +250,7 @@ namespace Etg.Yams.Test
             await CopyAppBinariesToAppDeploymentDir("MonitorInitApp", "MonitorInitProcess", "1.0.0");
             UploadDeploymentConfig("DeploymentConfigMonitorInitApp.json");
 
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+            var yamsConfig = new YamsConfigBuilder("superClusterId", "clusterId1", "1", "instanceId",
                 _applicationsInstallPath).SetAppInitTimeout(TimeSpan.FromSeconds(10))
                 .SetShowApplicationProcessWindow(false).Build();
 
@@ -268,7 +268,7 @@ namespace Etg.Yams.Test
             await CopyAppBinariesToAppDeploymentDir("MonitorInitApp", "MonitorInitProcess", "1.0.0");
             UploadDeploymentConfig("DeploymentConfigMonitorInitApp.json");
 
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+            var yamsConfig = new YamsConfigBuilder("superClusterId", "clusterId1", "1", "instanceId",
                     _applicationsInstallPath).SetAppInitTimeout(TimeSpan.FromSeconds(1))
                 .SetShowApplicationProcessWindow(false).Build();
 
@@ -297,7 +297,7 @@ namespace Etg.Yams.Test
             await CopyAppBinariesToAppDeploymentDir("GracefulShutdownApp", "GracefullShutdownProcess", "1.0.0");
             UploadDeploymentConfig("DeploymentConfigGracefulShutdownApp.json");
 
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+            var yamsConfig = new YamsConfigBuilder("superClusterId", "clusterId1", "1", "instanceId",
                     _applicationsInstallPath).SetAppGracefulShutdownTimeout(gracefulShutdownTimeout)
                 .SetShowApplicationProcessWindow(false).Build();
 
@@ -318,7 +318,7 @@ namespace Etg.Yams.Test
             await CopyAppBinariesToAppDeploymentDir("FullIpcApp", "FullIpcProcess", "1.0.0");
             UploadDeploymentConfig("DeploymentConfigFullIpcApp.json");
 
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
+            var yamsConfig = new YamsConfigBuilder("superClusterId", "clusterId1", "1", "instanceId",
                     _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
 
             InitializeYamsService(yamsConfig);

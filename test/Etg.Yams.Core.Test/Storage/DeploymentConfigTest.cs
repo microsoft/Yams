@@ -164,8 +164,7 @@ namespace Etg.Yams.Test.Storage
         [Fact]
         public void TestAddExistingDeployment()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            _deploymentConfig.AddApplication(new AppIdentity("app2", "1.0.0"), "clusterId1"));
+            _deploymentConfig.AddApplication(new AppIdentity("app2", "1.0.0"), "clusterId1");
         }
 
         [Fact]
@@ -249,8 +248,7 @@ namespace Etg.Yams.Test.Storage
         [Fact]
         public void TestRemoveADeploymentThatIsNotThere()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-           _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.0"), "clusterId13"));
+           _deploymentConfig.RemoveApplication(new AppIdentity("app1", "1.0.0"), "clusterId13");
         }
 
         [Fact]

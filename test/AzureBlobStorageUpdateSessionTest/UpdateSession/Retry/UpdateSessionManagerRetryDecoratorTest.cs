@@ -15,71 +15,65 @@ namespace Etg.Yams.Azure.Test.UpdateSession.Retry
         [Fact]
         public async Task TestThatStartUpdateSessionIsRetried()
         {
-            string appId = "appId";
-
-            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.TryStartUpdateSession_String_Delegate>()
-                .Once(id => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
-                .Once(id => AsyncUtils.AsyncTaskWithResult(true));
+            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.TryStartUpdateSession_Delegate>()
+                .Once(() => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
+                .Once(() => AsyncUtils.AsyncTaskWithResult(true));
 
 	        var updateSessionStub = new StubIUpdateSessionManager()
-		        .TryStartUpdateSession(id => sequence.Next(id));
+		        .TryStartUpdateSession(() => sequence.Next());
 
             IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
-            Assert.True(await retryDecorator.TryStartUpdateSession(appId));
+            Assert.True(await retryDecorator.TryStartUpdateSession());
         }
 
         [Fact]
         public async Task TestThatEndUpdateSessionIsRetried()
         {
-            string appId = "appId";
-            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.EndUpdateSession_String_Delegate>()
-                .Once(id => AsyncUtils.AsyncTaskThatThrows(new StorageException()))
-                .Once(id => Task.CompletedTask);
+            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.EndUpdateSession_Delegate>()
+                .Once(() => AsyncUtils.AsyncTaskThatThrows(new StorageException()))
+                .Once(() => Task.CompletedTask);
 
 	        var updateSessionStub = new StubIUpdateSessionManager()
-		        .EndUpdateSession(id => sequence.Next(id));
+		        .EndUpdateSession(() => sequence.Next());
 
             IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
-            await retryDecorator.EndUpdateSession(appId);
+            await retryDecorator.EndUpdateSession();
         }
 
         [Fact]
         public async Task TestThatExceptionIsThrownIfMaxRetryCountIsReached()
         {
-            string appId = "appId";
-
-            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.TryStartUpdateSession_String_Delegate>()
-                .Twice(id => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
-                .Once(id => AsyncUtils.AsyncTaskWithResult(true));
+            var sequence = StubsUtils.Sequence<StubIUpdateSessionManager.TryStartUpdateSession_Delegate>()
+                .Twice(() => AsyncUtils.AsyncTaskThatThrows<bool>(new StorageException()))
+                .Once(() => AsyncUtils.AsyncTaskWithResult(true));
 
 	        var updateSessionStub = new StubIUpdateSessionManager()
-		        .TryStartUpdateSession(id => sequence.Next(id));
+		        .TryStartUpdateSession(() => sequence.Next());
 
             IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
-            await Assert.ThrowsAsync<StorageException>(async () => await retryDecorator.TryStartUpdateSession(appId));
+            await Assert.ThrowsAsync<StorageException>(async () => await retryDecorator.TryStartUpdateSession());
         }
 
         [Fact]
         public async Task TestThatNotAllExceptionsAreRetried()
         {
-            string appId = "appId";
 	        var updateSessionStub = new StubIUpdateSessionManager()
-		        .TryStartUpdateSession(id => AsyncUtils.AsyncTaskThatThrows<bool>(new Exception()));
+		        .TryStartUpdateSession(() => AsyncUtils.AsyncTaskThatThrows<bool>(new Exception()));
 
             IUpdateSessionManager retryDecorator = new StorageExceptionUpdateSessionRetryDecorator(
                 updateSessionStub,
                 new FixedInterval(1, TimeSpan.Zero),
                 new StorageExceptionErrorDetectionStrategy());
-            await Assert.ThrowsAsync<Exception>(async () => await retryDecorator.TryStartUpdateSession(appId));
+            await Assert.ThrowsAsync<Exception>(async () => await retryDecorator.TryStartUpdateSession());
         }
     }
 }
