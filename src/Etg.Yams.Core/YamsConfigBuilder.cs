@@ -5,14 +5,14 @@ namespace Etg.Yams
 {
     public class YamsConfigBuilder
     {
-        public YamsConfigBuilder(string superClusterId, string clusterId, string instanceUpdateDomain, 
+        public YamsConfigBuilder(string clusterId, string instanceUpdateDomain, 
             string instanceId, string applicationInstallDirectory)
         {
-            this._superClusterId = superClusterId;
             _clusterId = clusterId;
             _instanceUpdateDomain = instanceUpdateDomain;
             _instanceId = instanceId;
             _applicationInstallDirectory = applicationInstallDirectory;
+            _superClusterId = null;
             _checkForUpdatesPeriodInSeconds = 10;
             _applicationRestartCount = 3;
             _processWaitForExitInSeconds = 5;
@@ -23,6 +23,12 @@ namespace Etg.Yams
             _ipcConnectTimeout = TimeSpan.FromSeconds(60);
             _appInitTimeout = TimeSpan.FromSeconds(60);
             _updateSessionTtl = TimeSpan.FromHours(1);
+        }
+
+        public YamsConfigBuilder SetSuperClusterId(string superClusterId)
+        {
+            _superClusterId = superClusterId;
+            return this;
         }
 
         public YamsConfigBuilder SetCheckForUpdatesPeriodInSeconds(int value)
@@ -94,7 +100,7 @@ namespace Etg.Yams
         public YamsConfig Build()
         {
             return new YamsConfig(
-                _superClusterId,
+                _superClusterId ?? _clusterId,
                 _clusterId,
                 _instanceUpdateDomain,
                 _instanceId,
@@ -112,11 +118,11 @@ namespace Etg.Yams
                 _clusterProperties);
         }
 
-        private readonly string _superClusterId;
         private readonly string _clusterId;
         private readonly string _instanceUpdateDomain;
         private readonly string _instanceId;
         private readonly string _applicationInstallDirectory;
+        private string _superClusterId;
         private int _checkForUpdatesPeriodInSeconds;
         private int _applicationRestartCount;
         private int _processWaitForExitInSeconds;

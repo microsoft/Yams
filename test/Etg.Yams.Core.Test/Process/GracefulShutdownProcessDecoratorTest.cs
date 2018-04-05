@@ -10,7 +10,7 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestThatExitedEventIsNotFiredOnGracefulShutdown()
         {
-            var yamsConfig = new YamsConfigBuilder("superClusterId", "clusterId", "1", "instanceId", "C:\\Foo").Build();
+            var yamsConfig = new YamsConfigBuilder("clusterId", "1", "instanceId", "C:\\Foo").Build();
             var process = new StubIProcess().HasExited_Get(() => true);
             IIpcConnection connection = new StubIIpcConnection()
                 .SendMessage(message =>
