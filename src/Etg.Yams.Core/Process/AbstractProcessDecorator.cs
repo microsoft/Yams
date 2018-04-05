@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Etg.Yams.Application;
+using System;
 using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
@@ -9,12 +10,14 @@ namespace Etg.Yams.Process
 
         public event EventHandler<ProcessExitedArgs> Exited;
 
-        public AbstractProcessDecorator(IProcess process)
+        public AbstractProcessDecorator(AppIdentity identity, IProcess process)
         {
+            Identity = identity;
             _process = process;
             _process.Exited += InvokeExited;
         }
 
+        public AppIdentity Identity { get; }
         public string ExePath => _process.ExePath;
         public string ExeArgs => _process.ExeArgs;
         public bool HasExited => _process.HasExited;

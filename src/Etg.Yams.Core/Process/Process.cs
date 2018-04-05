@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Etg.Yams.Application;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
@@ -11,6 +12,7 @@ namespace Etg.Yams.Process
     /// </summary>
     public class Process : IProcess
     {
+        private readonly AppIdentity _identity;
         private readonly string _exePath;
         private readonly bool _showProcessWindow;
         private System.Diagnostics.Process _process;
@@ -30,8 +32,9 @@ namespace Etg.Yams.Process
 
         public event EventHandler<ProcessExitedArgs> Exited;
 
-        public Process(string exePath, bool showProcessWindow)
+        public Process(AppIdentity identity, string exePath, bool showProcessWindow)
         {
+            _identity = identity;
             _exePath = exePath;
             _showProcessWindow = showProcessWindow;
         }
@@ -42,7 +45,7 @@ namespace Etg.Yams.Process
             {
                 throw new Exception("Cannot start a process that is already running");
             }
-            ExeArgs = args;
+            ExeArgs = $"{args} --AppName {_identity.Id} --AppVersion {_identity.Version}";
             await Task.Run(async () =>
             {
                 _process = new System.Diagnostics.Process

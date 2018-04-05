@@ -2,6 +2,7 @@
 using Etg.Yams.Process;
 using Xunit;
 using Etg.Yams.Ipc;
+using Etg.Yams.Application;
 
 namespace Etg.Yams.Test.Process
 {
@@ -19,7 +20,7 @@ namespace Etg.Yams.Test.Process
                     return Task.CompletedTask;
                 })
                 .Disconnect(() => Task.CompletedTask);
-            GracefulShutdownProcessDecorator decorator = new GracefulShutdownProcessDecorator(yamsConfig, process, connection);
+            GracefulShutdownProcessDecorator decorator = new GracefulShutdownProcessDecorator(new AppIdentity("app", "1.0.0"), yamsConfig, process, connection);
             bool hasExitedFired = false;
             decorator.Exited += (sender, args) =>
             {

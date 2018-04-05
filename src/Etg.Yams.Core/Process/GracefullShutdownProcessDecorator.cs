@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Etg.Yams.Utils;
 using Etg.Yams.Ipc;
+using Etg.Yams.Application;
 
 namespace Etg.Yams.Process
 {
@@ -11,8 +12,8 @@ namespace Etg.Yams.Process
         private readonly YamsConfig _config;
         private readonly IIpcConnection _ipcConnection;
 
-        public GracefulShutdownProcessDecorator(YamsConfig config, IProcess process, IIpcConnection ipcConnection)
-            : base(process)
+        public GracefulShutdownProcessDecorator(AppIdentity identity, YamsConfig config, IProcess process, IIpcConnection ipcConnection)
+            : base(identity, process)
         {
             _config = config;
             _ipcConnection = ipcConnection;

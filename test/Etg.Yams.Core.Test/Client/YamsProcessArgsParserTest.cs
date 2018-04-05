@@ -39,10 +39,30 @@ namespace Etg.Yams.Test.Client
         public void TestThatParseArgsIgnoresAdditionalArgs()
         {
             var parser = new ProcessArgsParser();
-            var options = parser.ParseArgs(new[] { "blabla", "--InitializationPipeName", "Foo", "--HealthPipeName", "Bar", "--ExitPipeName", "abc", "--Other", "Bar" });
+            var options = parser.ParseArgs(new[] { "blabla", "--InitializationPipeName", "Foo", "--HealthPipeName", "Bar", "--ExitPipeName", "abc", "--Other", "Bar", "--AppName", "App", "--AppVersion", "1.2.3-alpha4" });
+            Assert.Equal("App", options.AppName);
+            Assert.Equal("1.2.3-alpha4", options.AppVersion);
             Assert.Equal("Foo", options.InitializationPipeName);
             Assert.Equal("Bar", options.HealthPipeName);
             Assert.Equal("abc", options.ExitPipeName);
+        }
+
+        [Fact]
+        public void TestParseAppNameArg()
+        {
+            var parser = new ProcessArgsParser();
+            var options = parser.ParseArgs(new[] { "--AppName", "Foo" });
+            Assert.Equal("Foo", options.AppName);
+            Assert.Null(options.AppVersion);
+        }
+
+        [Fact]
+        public void TestParseAppVersionArg()
+        {
+            var parser = new ProcessArgsParser();
+            var options = parser.ParseArgs(new[] { "--AppVersion", "1.2.3-alpha4" });
+            Assert.Equal("1.2.3-alpha4", options.AppVersion);
+            Assert.Null(options.AppName);
         }
 
         [Fact]
@@ -50,6 +70,8 @@ namespace Etg.Yams.Test.Client
         {
             var parser = new ProcessArgsParser();
             var options = parser.ParseArgs(new string[] {});
+            Assert.Null(options.AppName);
+            Assert.Null(options.AppVersion);
             Assert.Null(options.InitializationPipeName);
             Assert.Null(options.HealthPipeName);
             Assert.Null(options.ExitPipeName);

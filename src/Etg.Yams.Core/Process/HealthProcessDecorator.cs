@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Etg.Yams.Application;
 using Etg.Yams.Ipc;
 using Etg.Yams.Utils;
 
@@ -13,8 +14,8 @@ namespace Etg.Yams.Process
         private CancellationTokenSource _watchProcessHealthCancellationTokenSource;
         private Task _watchProcessHealthTask;
 
-        public HealthProcessDecorator(YamsConfig config, IProcess process,
-            IIpcConnection ipcConnection) : base(process)
+        public HealthProcessDecorator(AppIdentity identity, YamsConfig config, IProcess process,
+            IIpcConnection ipcConnection) : base(identity, process)
         {
             _config = config;
             _ipcConnection = ipcConnection;
