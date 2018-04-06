@@ -12,7 +12,7 @@ namespace Etg.Yams
             _instanceUpdateDomain = instanceUpdateDomain;
             _instanceId = instanceId;
             _applicationInstallDirectory = applicationInstallDirectory;
-            _superClusterId = null;
+            _superClusterId = clusterId;
             _checkForUpdatesPeriodInSeconds = 10;
             _applicationRestartCount = 3;
             _processWaitForExitInSeconds = 5;
@@ -27,6 +27,11 @@ namespace Etg.Yams
 
         public YamsConfigBuilder SetSuperClusterId(string superClusterId)
         {
+            if (superClusterId == null)
+                throw new ArgumentNullException(
+                    nameof(superClusterId), 
+                    "SuperClusterId cannot be null. If you don't need to use SuperCluster feature than you don't have to set this setting - SuperClusterId will defaut to CluserId");
+
             _superClusterId = superClusterId;
             return this;
         }
@@ -100,7 +105,7 @@ namespace Etg.Yams
         public YamsConfig Build()
         {
             return new YamsConfig(
-                _superClusterId ?? _clusterId,
+                _superClusterId,
                 _clusterId,
                 _instanceUpdateDomain,
                 _instanceId,
