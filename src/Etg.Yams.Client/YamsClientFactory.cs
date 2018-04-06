@@ -37,7 +37,7 @@ namespace Etg.Yams.Client
             {
                 healthConnection = new IpcConnection(new NamedPipeClientAdapter(options.HealthPipeName));
             }
-            return new YamsClient(config, initConnection, exitConnection, healthConnection);
+            return new YamsClient(options, config, initConnection, exitConnection, healthConnection);
         }
     }
 }

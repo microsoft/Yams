@@ -1,1 +1,1 @@
-nuget pack Etg.Yams.client.csproj -IncludeReferencedProjects -Prop Configuration=Release
+nuget pack Etg.Yams.Client.csproj -IncludeReferencedProjects -Prop Configuration=Release

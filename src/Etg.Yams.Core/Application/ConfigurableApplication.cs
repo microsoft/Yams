@@ -27,7 +27,7 @@ namespace Etg.Yams.Application
 
         public override Task<bool> Start()
         {
-            _process = _processFactory.CreateProcess(System.IO.Path.Combine(Path, _appConfig.ExeName),
+            _process = _processFactory.CreateProcess(_appConfig.Identity, System.IO.Path.Combine(Path, _appConfig.ExeName),
             _appConfig.MonitorInitialization, _appConfig.MonitorHealth, _appConfig.GracefulShutdown);
             return StartProcess(_process, _appConfig.ExeArgs);
         }

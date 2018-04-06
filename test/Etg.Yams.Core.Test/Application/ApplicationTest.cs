@@ -53,7 +53,7 @@ namespace Etg.Yams.Test.Application
             );
 
             IProcessFactory processFactory = new StubIProcessFactory()
-                .CreateProcess((path, initialization, health, shutdown) =>
+                .CreateProcess((identity, path, initialization, health, shutdown) =>
                 {
                     exePath = path;
                     return process;
@@ -84,7 +84,7 @@ namespace Etg.Yams.Test.Application
                 .Start(args => { throw new Exception("Process failed to start"); });
 
             IProcessFactory processFactory = new StubIProcessFactory()
-                .CreateProcess((path, initialization, health, shutdown) => process);
+                .CreateProcess((identity, path, initialization, health, shutdown) => process);
 
             IProcessStopper processStopper = new StubIProcessStopper();
 
@@ -108,7 +108,7 @@ namespace Etg.Yams.Test.Application
             );
 
             IProcessFactory processFactory = new StubIProcessFactory()
-                .CreateProcess((path, initialization, health, shutdown) => process);
+                .CreateProcess((identity, path, initialization, health, shutdown) => process);
             ConfigurableApplication application = new ConfigurableApplication(
 				ApplicationTestFixture.AppPath, _appConfig, processFactory, processStopper);
             await application.Start();
@@ -122,7 +122,7 @@ namespace Etg.Yams.Test.Application
         {
             ProcessStub process = new ProcessStub("");
 	        IProcessFactory processFactory = new StubIProcessFactory()
-		        .CreateProcess((path, initialization, health, shutdown) => process);
+		        .CreateProcess((identity, path, initialization, health, shutdown) => process);
 
             ConfigurableApplication application = new ConfigurableApplication(ApplicationTestFixture.AppPath, _appConfig, processFactory, new StubIProcessStopper());
             ApplicationExitedArgs appExitedArgs = null;
@@ -138,6 +138,5 @@ namespace Etg.Yams.Test.Application
             Assert.Equal(1, exitedEventCount);
             Assert.Equal(_appConfig.Identity, appExitedArgs.AppIdentity);
         }
-
     }
 }

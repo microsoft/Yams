@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Etg.Yams.Application;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
@@ -11,6 +12,7 @@ namespace Etg.Yams.Process
     /// </summary>
     public class Process : IProcess
     {
+        private readonly AppIdentity _identity;
         private readonly string _exePath;
         private readonly bool _showProcessWindow;
         private System.Diagnostics.Process _process;
@@ -30,8 +32,9 @@ namespace Etg.Yams.Process
 
         public event EventHandler<ProcessExitedArgs> Exited;
 
-        public Process(string exePath, bool showProcessWindow)
+        public Process(AppIdentity identity, string exePath, bool showProcessWindow)
         {
+            _identity = identity;
             _exePath = exePath;
             _showProcessWindow = showProcessWindow;
         }
@@ -40,9 +43,9 @@ namespace Etg.Yams.Process
         {
             if (_isRunning)
             {
-                throw new Exception("Cannot start a process that is already running");
+                throw new Exception($"{_identity} Cannot start a process that is already running");
             }
-            ExeArgs = args;
+            ExeArgs = $"{args} --AppName {_identity.Id} --AppVersion {_identity.Version}";
             await Task.Run(async () =>
             {
                 _process = new System.Diagnostics.Process
@@ -68,7 +71,7 @@ namespace Etg.Yams.Process
                 {
                     await ReleaseResources();
                     throw new Exception(
-                        $"The OS failed to start the process at {_exePath} with arguments {ExeArgs}");
+                        $"{_identity} The OS failed to start the process at {_exePath} with arguments {ExeArgs}");
                 }
 
                 _isRunning = true;
@@ -110,7 +113,7 @@ namespace Etg.Yams.Process
             {
                 return;
             }
-            string msg = $"The process {_exePath} has exited with exit code {_process.ExitCode}";
+            string msg = $"{_identity} The process {_exePath} has exited with exit code {_process.ExitCode}";
             Trace.TraceInformation(msg);
             handler(this, new ProcessExitedArgs(this, msg));
         }
@@ -119,7 +122,7 @@ namespace Etg.Yams.Process
         {
             if (IsRunning)
             {
-                throw new Exception("You should stop the process before releasing resources");
+                throw new Exception($"{_identity} You should stop the process before releasing resources");
             }
             _isRunning = false;
             if (_process != null)
