@@ -29,7 +29,7 @@ namespace Etg.Yams.Application
 
         public override string ToString()
         {
-            return string.Format("Id: {0}, Version: {1}", Id, Version);
+            return string.Format("[{0} ({1})]", Id, Version);
         }
 
         public string Id

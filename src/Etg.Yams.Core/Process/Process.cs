@@ -43,7 +43,7 @@ namespace Etg.Yams.Process
         {
             if (_isRunning)
             {
-                throw new Exception("Cannot start a process that is already running");
+                throw new Exception($"{_identity} Cannot start a process that is already running");
             }
             ExeArgs = $"{args} --AppName {_identity.Id} --AppVersion {_identity.Version}";
             await Task.Run(async () =>
@@ -71,7 +71,7 @@ namespace Etg.Yams.Process
                 {
                     await ReleaseResources();
                     throw new Exception(
-                        $"The OS failed to start the process at {_exePath} with arguments {ExeArgs}");
+                        $"{_identity} The OS failed to start the process at {_exePath} with arguments {ExeArgs}");
                 }
 
                 _isRunning = true;
@@ -113,7 +113,7 @@ namespace Etg.Yams.Process
             {
                 return;
             }
-            string msg = $"The process {_exePath} has exited with exit code {_process.ExitCode}";
+            string msg = $"{_identity} The process {_exePath} has exited with exit code {_process.ExitCode}";
             Trace.TraceInformation(msg);
             handler(this, new ProcessExitedArgs(this, msg));
         }
@@ -122,7 +122,7 @@ namespace Etg.Yams.Process
         {
             if (IsRunning)
             {
-                throw new Exception("You should stop the process before releasing resources");
+                throw new Exception($"{_identity} You should stop the process before releasing resources");
             }
             _isRunning = false;
             if (_process != null)

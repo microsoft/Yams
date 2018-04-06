@@ -26,7 +26,7 @@ namespace Etg.Yams.Process
             await _process.Start($"{args} --HealthPipeName {_ipcConnection.ConnectionId}");
 
             await _ipcConnection.Connect().Timeout(_config.IpcConnectTimeout,
-                "Connecting to health pipe has timed out, make sure that the app is connecting to the same pipe");
+                $"Connecting to health pipe has timed out, make sure that the app {this.Identity} is connecting to the same pipe");
 
             MonitorProcessHealth();
         }
@@ -51,7 +51,7 @@ namespace Etg.Yams.Process
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    Trace.TraceInformation("Waiting for heart beat from app");
+                    Trace.TraceInformation($"Waiting for heart beat from app {this.Identity}");
                     Task<string> readMessageTask = _ipcConnection.ReadMessage();
 
                     await WaitForHeartBeat(cancellationToken, readMessageTask);
@@ -71,15 +71,15 @@ namespace Etg.Yams.Process
                     string msg = readMessageTask.Result;
                     if (msg == "[HEALTH_OK]")
                     {
-                        Trace.TraceInformation($"Heart beat received from App {ExePath}; App is healthy");
+                        Trace.TraceInformation($"Heart beat received from App {this.Identity}; App is healthy");
                         break;
                     }
                     Trace.TraceError(
-                        $"Unexpected message received from App {ExePath} instead of heart beat");
+                        $"Unexpected message '{msg}' received from App {this.Identity} instead of heart beat");
                 }
                 else if(!cancellationToken.IsCancellationRequested)
                 {
-                    Trace.TraceError($"Heart beat has not been received in time from {ExePath}; App is unhealthy");
+                    Trace.TraceError($"Heart beat has not been received in time from {this.Identity}; App is unhealthy");
                 }
             }
         }

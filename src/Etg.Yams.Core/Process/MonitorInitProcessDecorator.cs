@@ -32,15 +32,15 @@ namespace Etg.Yams.Process
             try
             {
                 await _ipcConnection.Connect().Timeout(_config.IpcConnectTimeout,
-                    "Connecting to initialization pipe has timed out, make sure that the app is connecting to the same pipe");
+                    $"Connecting to initialization pipe has timed out, make sure that the app {this.Identity} is connecting to the same pipe");
 
-                Trace.TraceInformation("Yams is waiting for the app to finish initializing");
+                Trace.TraceInformation($"Yams is waiting for the app {this.Identity} to finish initializing");
                 string msg = await _ipcConnection.ReadMessage()
                     .Timeout(_config.AppInitTimeout, $"Did not receive initialized message from the app {ExePath}");
 
                 if (msg != "[INITIALIZE_DONE]")
                 {
-                    throw new InvalidOperationException($"Unexpected message received from app: {msg}");
+                    throw new InvalidOperationException($"Unexpected message '{msg}' received from app {this.Identity}");
                 }
             }
             catch (Exception)
@@ -49,7 +49,7 @@ namespace Etg.Yams.Process
                 throw;
             }
 
-            Trace.TraceInformation($"Received initialized message from App {ExePath}; App is ready to receive requests");
+            Trace.TraceInformation($"Received initialized message from App {this.Identity}; App is ready to receive requests");
         }
 
         public override async Task Kill()
