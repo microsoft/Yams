@@ -17,7 +17,7 @@ namespace Etg.Yams.Client
 
         public event EventHandler ExitMessageReceived;
 
-        internal YamsClient(YamsClientOptions options, YamsClientConfig config, IIpcConnection initConnection, IIpcConnection exitConnection,
+        public YamsClient(YamsClientOptions options, YamsClientConfig config, IIpcConnection initConnection, IIpcConnection exitConnection,
             IIpcConnection healthConnection)
         {
             _options = options;
