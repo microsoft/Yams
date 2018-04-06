@@ -20,12 +20,12 @@ namespace Etg.Yams.Host
 
             YamsConfig yamsConfig = new YamsConfigBuilder(
                     // mandatory configs
-                    superClusterId: superClusterId,
                     clusterId: clusterId,
                     instanceUpdateDomain: "0",
                     instanceId: "instance_0",
                     applicationInstallDirectory: Directory.GetCurrentDirectory())
                 // optional configs
+                .SetSuperClusterId(superClusterId)
                 .SetCheckForUpdatesPeriodInSeconds(5)
                 .SetApplicationRestartCount(int.MaxValue)
                 .Build();

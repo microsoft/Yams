@@ -5,14 +5,14 @@ namespace Etg.Yams
 {
     public class YamsConfigBuilder
     {
-        public YamsConfigBuilder(string superClusterId, string clusterId, string instanceUpdateDomain, 
+        public YamsConfigBuilder(string clusterId, string instanceUpdateDomain, 
             string instanceId, string applicationInstallDirectory)
         {
-            this._superClusterId = superClusterId;
             _clusterId = clusterId;
             _instanceUpdateDomain = instanceUpdateDomain;
             _instanceId = instanceId;
             _applicationInstallDirectory = applicationInstallDirectory;
+            _superClusterId = clusterId;
             _checkForUpdatesPeriodInSeconds = 10;
             _applicationRestartCount = 3;
             _processWaitForExitInSeconds = 5;
@@ -23,6 +23,17 @@ namespace Etg.Yams
             _ipcConnectTimeout = TimeSpan.FromSeconds(60);
             _appInitTimeout = TimeSpan.FromSeconds(60);
             _updateSessionTtl = TimeSpan.FromHours(1);
+        }
+
+        public YamsConfigBuilder SetSuperClusterId(string superClusterId)
+        {
+            if (superClusterId == null)
+                throw new ArgumentNullException(
+                    nameof(superClusterId), 
+                    "SuperClusterId cannot be null. If you don't need to use SuperCluster feature than you don't have to set this setting - SuperClusterId will defaut to CluserId");
+
+            _superClusterId = superClusterId;
+            return this;
         }
 
         public YamsConfigBuilder SetCheckForUpdatesPeriodInSeconds(int value)
@@ -112,11 +123,11 @@ namespace Etg.Yams
                 _clusterProperties);
         }
 
-        private readonly string _superClusterId;
         private readonly string _clusterId;
         private readonly string _instanceUpdateDomain;
         private readonly string _instanceId;
         private readonly string _applicationInstallDirectory;
+        private string _superClusterId;
         private int _checkForUpdatesPeriodInSeconds;
         private int _applicationRestartCount;
         private int _processWaitForExitInSeconds;

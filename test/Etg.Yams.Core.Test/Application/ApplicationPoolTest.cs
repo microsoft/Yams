@@ -41,7 +41,7 @@ namespace Etg.Yams.Test.Application
                 TestUtils.CopyExe(exeName, Path.Combine(ApplicationsRootPath, testAppRelPath));
             }
 
-            YamsConfig config = new YamsConfigBuilder("superClusterId", "clusterId", "1", "instanceId", "C:\\")
+            YamsConfig config = new YamsConfigBuilder("clusterId", "1", "instanceId", "C:\\")
                 .SetShowApplicationProcessWindow(false).SetApplicationRestartCount(0).Build();
             ApplicationFactory =
                 new ConfigurableApplicationFactory(new ApplicationConfigParser(
