@@ -10,5 +10,6 @@ namespace Etg.Yams.Ipc
         Task Connect();
         Task Disconnect();
         string ConnectionId { get; }
+        bool IsConnected { get; }
     }
 }

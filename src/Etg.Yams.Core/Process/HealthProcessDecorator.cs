@@ -33,14 +33,14 @@ namespace Etg.Yams.Process
 
         public override async Task Close()
         {
-            await StopMonitoringProcessHealth();
             await base.Close();
+            await StopMonitoringProcessHealth();
         }
 
         public override async Task Kill()
         {
-            await StopMonitoringProcessHealth();
             await base.Kill();
+            await StopMonitoringProcessHealth();
         }
 
         private void MonitorProcessHealth()
@@ -72,6 +72,11 @@ namespace Etg.Yams.Process
                     if (msg == "[HEALTH_OK]")
                     {
                         Trace.TraceInformation($"Heart beat received from App {this.Identity}; App is healthy");
+                        break;
+                    }
+                    if (string.IsNullOrWhiteSpace(msg)) // this is usually received when the process is connection is closed (e.g. process has existed)
+                    {
+                        _watchProcessHealthCancellationTokenSource.Cancel();
                         break;
                     }
                     Trace.TraceError(

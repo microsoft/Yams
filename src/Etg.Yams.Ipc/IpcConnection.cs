@@ -40,6 +40,8 @@ namespace Etg.Yams.Ipc
 
         public string ConnectionId => _namedPipe.PipeName;
 
+        public bool IsConnected => _namedPipe?.IsConnected?? false;
+
         public void Dispose()
         {
             Disconnect().Wait();
@@ -63,7 +65,7 @@ namespace Etg.Yams.Ipc
         {
             if (!_namedPipe.IsConnected)
             {
-                throw new InvalidOperationException("You must connect first");
+                throw new InvalidOperationException("There is no valid IPC connection");
             }
         }
     }
