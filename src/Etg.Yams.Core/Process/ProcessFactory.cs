@@ -24,13 +24,13 @@ namespace Etg.Yams.Process
                 process = new GracefulShutdownProcessDecorator(identity, _config, process,
                     new IpcConnection(new NamedPipeServerAdapter(pipeName)));
             }
-            if (monitorHealth)
+            if (monitorInitialization)
             {
                 string pipeName = Guid.NewGuid().ToString();
                 process = new HealthProcessDecorator(identity, _config, process,
                     new IpcConnection(new NamedPipeServerAdapter(pipeName)));
             }
-            if (monitorInitialization)
+            if (monitorHealth)
             {
                 string pipeName = Guid.NewGuid().ToString();
                 process = new MonitorInitProcessDecorator(identity, _config, process,

@@ -31,16 +31,16 @@ namespace Etg.Yams.Process
             MonitorProcessHealth();
         }
 
-        public override Task Close()
+        public override async Task Close()
         {
-            StopMonitoringProcessHealth();
-            return base.Close();
+            await StopMonitoringProcessHealth();
+            await base.Close();
         }
 
-        public override Task Kill()
+        public override async Task Kill()
         {
-            StopMonitoringProcessHealth();
-            return base.Kill();
+            await StopMonitoringProcessHealth();
+            await base.Kill();
         }
 
         private void MonitorProcessHealth()
@@ -84,14 +84,19 @@ namespace Etg.Yams.Process
             }
         }
 
-        private void StopMonitoringProcessHealth()
+        private async Task StopMonitoringProcessHealth()
         {
-            if (_watchProcessHealthCancellationTokenSource != null)
+            if (_watchProcessHealthCancellationTokenSource != null && !_watchProcessHealthCancellationTokenSource.IsCancellationRequested)
             {
                 _watchProcessHealthCancellationTokenSource.Cancel();
-                _watchProcessHealthCancellationTokenSource.Dispose();
-                _watchProcessHealthCancellationTokenSource = null;
             }
+            if (_watchProcessHealthTask != null)
+            {
+                await _watchProcessHealthTask;
+            }
+
+            _watchProcessHealthCancellationTokenSource?.Dispose();
+            _watchProcessHealthCancellationTokenSource = null;
         }
     }
 }
