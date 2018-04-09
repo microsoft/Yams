@@ -29,6 +29,8 @@ namespace Etg.Yams.Client
 
         public async Task Connect()
         {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => Trace.TraceError(FormatMessage($"App terminated due to unhandled exception: {e.ExceptionObject}"));
+
             Trace.TraceInformation(FormatMessage($"Connecting IPC connections.."));
             if (_initConnection != null)
             {
