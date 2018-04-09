@@ -76,7 +76,7 @@ namespace Etg.Yams.Test.Application
             await AddApplication(config);
 
             Assert.NotNull(_applicationPool.GetApplication(appIdentity));
-            Assert.Equal("TestProcess.exe foo1 foo2", GetOutput(appIdentity));
+            Assert.Equal("TestProcess.exe foo1 foo2 --AppName test.myapp --AppVersion 1.0.0", GetOutput(appIdentity));
         }
 
         private async Task AddApplication(AppInstallConfig appInstallConfig)

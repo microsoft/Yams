@@ -42,30 +42,6 @@
       <HintPath>..\..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Etg.Yams, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Etg.Yams.1.2.0-rc\lib\net451\Etg.Yams.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Etg.Yams.AzureBlobStorageDeploymentRepository, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Etg.Yams.1.2.0-rc\lib\net451\Etg.Yams.AzureBlobStorageDeploymentRepository.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Etg.Yams.AzureBlobStorageUpdateSession, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Etg.Yams.1.2.0-rc\lib\net451\Etg.Yams.AzureBlobStorageUpdateSession.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Etg.Yams.AzureUtils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Etg.Yams.1.2.0-rc\lib\net451\Etg.Yams.AzureUtils.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Etg.Yams.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Etg.Yams.1.2.0-rc\lib\net451\Etg.Yams.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Etg.Yams.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Etg.Yams.1.2.0-rc\lib\net451\Etg.Yams.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
       <Private>True</Private>
@@ -128,6 +104,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Etg.Yams.Client\Etg.Yams.Client.csproj">
+      <Project>{d4624b9b-67a1-46d5-9468-58995b2720f9}</Project>
+      <Name>Etg.Yams.Client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

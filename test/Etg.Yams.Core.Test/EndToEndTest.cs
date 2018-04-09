@@ -343,7 +343,7 @@ namespace Etg.Yams.Test
             IApplicationPool applicationPool = _yamsDiModule.Container.Resolve<IApplicationPool>();
             Assert.True(applicationPool.HasApplication(appIdentity), $"App {appIdentity} should be running!");
             string processOutput = TestUtils.GetTestApplicationOutput(_applicationsInstallPath, appIdentity, exeName);
-            Assert.Equal($"{exeName}.exe foo1 foo2 --AppName {appIdentity.Id} --AppVersion {appIdentity.Version}", processOutput);
+            Assert.True(processOutput.StartsWith($"{exeName}.exe foo1 foo2"));
         }
 
         private async Task CopyAppBinariesToAppDeploymentDir(string appName, string processName, string version)
