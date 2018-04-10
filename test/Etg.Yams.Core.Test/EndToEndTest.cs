@@ -265,7 +265,7 @@ namespace Etg.Yams.Test
         [Fact]
         public async Task TestApplicationWithMonitoredInitializationTimeout()
         {
-            await CopyAppBinariesToAppDeploymentDir("MonitorInitApp", "MonitorInitProcess", "1.0.0");
+            await CopyAppBinariesToAppDeploymentDir("MonitorInitAppTimeout", "MonitorInitProcess", "1.0.0");
             UploadDeploymentConfig("DeploymentConfigMonitorInitApp.json");
 
             var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
@@ -277,7 +277,7 @@ namespace Etg.Yams.Test
             IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
             await applicationUpdateManager.CheckForUpdates();
 
-            AssertThatApplicationIsNotRunning(new AppIdentity("MonitorInitApp", new SemVersion(1, 0, 0)));
+            AssertThatApplicationIsNotRunning(new AppIdentity("MonitorInitAppTimeout", new SemVersion(1, 0, 0)));
         }
 
         [Fact]
