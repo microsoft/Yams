@@ -162,9 +162,6 @@
     <None Include="Data\EndToEndTest\FullIpcApp\1.0.0\AppConfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\EndToEndTest\MonitorInitAppTimeout\1.0.0\AppConfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Data\EndToEndTest\MonitorInitApp\1.0.0\AppConfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

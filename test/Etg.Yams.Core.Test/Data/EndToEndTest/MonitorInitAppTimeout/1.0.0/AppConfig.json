@@ -1,5 +1,0 @@
-﻿{
-  "ExeName": "MonitorInitProcess.exe",
-  "ExeArgs": "foo1 foo2 2",
-  "MonitorInitialization": true
-}

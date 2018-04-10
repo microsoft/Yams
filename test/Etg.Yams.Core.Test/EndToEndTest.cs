@@ -263,24 +263,6 @@ namespace Etg.Yams.Test
         }
 
         [Fact]
-        public async Task TestApplicationWithMonitoredInitializationTimeout()
-        {
-            await CopyAppBinariesToAppDeploymentDir("MonitorInitAppTimeout", "MonitorInitProcess", "1.0.0");
-            UploadDeploymentConfig("DeploymentConfigMonitorInitApp.json");
-
-            var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
-                    _applicationsInstallPath).SetAppInitTimeout(TimeSpan.FromSeconds(1))
-                .SetShowApplicationProcessWindow(false).Build();
-
-            InitializeYamsService(yamsConfig);
-
-            IApplicationUpdateManager applicationUpdateManager = _yamsDiModule.Container.Resolve<IApplicationUpdateManager>();
-            await applicationUpdateManager.CheckForUpdates();
-
-            AssertThatApplicationIsNotRunning(new AppIdentity("MonitorInitAppTimeout", new SemVersion(1, 0, 0)));
-        }
-
-        [Fact]
         public async Task TestApplicationWithGracefulShutdown()
         {
             await RunGracefulShutdownTest(TimeSpan.FromSeconds(10));
