@@ -19,6 +19,7 @@ using Etg.Yams.Storage.Status;
 
 namespace Etg.Yams.Azure.Storage.Test
 {
+    [Trait("Category", "Integration")]
     public class BlobStorageDeploymentRepositoryTest : IClassFixture<AzureStorageEmulatorTestFixture>
     {
         private const string EmulatorDataConnectionString = "UseDevelopmentStorage=true";

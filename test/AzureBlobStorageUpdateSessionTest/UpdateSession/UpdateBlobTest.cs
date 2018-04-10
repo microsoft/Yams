@@ -11,6 +11,7 @@ using Xunit;
 
 namespace Etg.Yams.Azure.Test.UpdateSession
 {
+    [Trait("Category", "Integration")]
     public class UpdateBlobTest : IClassFixture<AzureStorageEmulatorTestFixture>
     {
         private readonly UpdateBlobFactory _updateBlobFactory;

@@ -7,10 +7,10 @@ using Etg.Yams.AzureTestUtils.Fixtures;
 using Etg.Yams.Utils;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Xunit;
-using System.Text;
 
 namespace Etg.Yams.Azure.Test
 {
+    [Trait("Category", "Integration")]
     public class BlobUtilsTest : IClassFixture<AzureStorageEmulatorTestFixture>
     {
         private readonly CloudBlobClient _blobClient;

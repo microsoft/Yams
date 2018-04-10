@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Etg.Yams.Azure.Test.UpdateSession
 {
+    [Trait("Category", "Integration")]
     public class AzureTableUpdateSessionManagerTests : IClassFixture<AzureStorageEmulatorTestFixture>
     {
         private const string EmulatorConnectionString = "UseDevelopmentStorage=true";
