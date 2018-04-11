@@ -2,6 +2,7 @@ YAMS
 =======
 
 [![Join the chat at https://gitter.im/Microsoft/Yams](https://badges.gitter.im/Microsoft/Yams.svg)](https://gitter.im/Microsoft/Yams?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://nbilal.visualstudio.com/_apis/public/build/definitions/eb41fd10-f489-4844-9d5b-b51369d5274b/1/badge)](https://nbilal.visualstudio.com/_apis/public/build/definitions/eb41fd10-f489-4844-9d5b-b51369d5274b/1/badge)
 
 **YAMS** (Yet Another Microservices Solution) is a library that can be used to deploy and host microservices on premises, in Azure, or on other cloud service platforms. It offers the following features:
 * **Quick deployments** of microservices to any target environment (~1 minute deployments to Azure). 
