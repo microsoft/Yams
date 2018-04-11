@@ -112,14 +112,16 @@ namespace Etg.Yams.Update
             {
                 Trace.TraceError("Failed to perform update; Exception was: {0}", e);
             }
-
-            try
+            finally
             {
-                await UpdateDeploymentStatus();
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError("Failed to update the deployment status; Exception was: {0}", e);
+                try
+                {
+                    await UpdateDeploymentStatus();
+                }
+                catch (Exception e)
+                {
+                    Trace.TraceError("Failed to update the deployment status; Exception was: {0}", e);
+                }
             }
         }
 
