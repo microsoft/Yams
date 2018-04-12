@@ -10,6 +10,7 @@ namespace Etg.Yams.Storage.Config
     {
         public AppDeploymentConfig(AppIdentity appIdentity) : base(appIdentity)
         {
+            TargetClusters = new HashSet<string>();
         }
 
         public AppDeploymentConfig(AppIdentity appIdentity, IEnumerable<string> targetClusters,

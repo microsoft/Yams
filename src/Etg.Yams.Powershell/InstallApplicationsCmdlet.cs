@@ -8,6 +8,7 @@ using Etg.Yams.Azure.Storage;
 using Etg.Yams.Storage;
 using Etg.Yams.Storage.Config;
 using Etg.Yams.Storage.Status;
+using Newtonsoft.Json;
 
 namespace Etg.Yams.Powershell
 {
@@ -48,6 +49,10 @@ namespace Etg.Yams.Powershell
         [Parameter(HelpMessage = "Remove previously deployed version(s) of the app (Defaults to 'true')")]
         public bool RemoveOldVersions { get; set; } = true;
 
+        [Parameter(HelpMessage = "The properties of the clusters; Entries order should correspond to entries in AppsIds. " +
+            "Example: {\"app1Prop1key\":\"app1Prop1Value\", \"app1Prop2Key\":\"app1Prop2Value\"}, {\"app2Prop1key\":\"app2Prop1Value\"}.")]
+        public string[] Properties { get; set; }
+
         protected override void ProcessRecord()
         {
             try
@@ -56,19 +61,19 @@ namespace Etg.Yams.Powershell
                 {
                     throw new ArgumentException(nameof(ConnectionString));
                 }
-                if (ClustersIds.Length != AppsIds.Length)
+                if (ClustersIds?.Length != AppsIds.Length)
                 {
                     throw new ArgumentException(nameof(ClustersIds));
                 }
-                if (Versions.Length != AppsIds.Length)
+                if (Versions?.Length != AppsIds.Length)
                 {
                     throw new ArgumentException(nameof(Versions));
                 }
-                if (BinariesPath != null && BinariesPath.Length != AppsIds.Length)
+                if (BinariesPath?.Length != AppsIds.Length)
                 {
                     throw new ArgumentException(nameof(BinariesPath));
                 }
-                if (AppsIds.Length == 0)
+                if (AppsIds?.Length == 0)
                 {
                     throw new ArgumentException(nameof(AppsIds));
                 }
@@ -128,9 +133,20 @@ namespace Etg.Yams.Powershell
 
                         var newAppIdentity = new AppIdentity(appId, version);
 
-                        if (deploymentConfig.HasApplication(newAppIdentity, clusterId) == false)
+                        if (!deploymentConfig.HasApplication(newAppIdentity, clusterId))
                         {
-                            deploymentConfig = deploymentConfig.AddApplication(newAppIdentity, clusterId);
+                            var appDeploymentConfig = deploymentConfig.HasApplication(newAppIdentity)? deploymentConfig.GetApplicationConfig(newAppIdentity) : new AppDeploymentConfig(newAppIdentity);
+                            appDeploymentConfig = appDeploymentConfig.AddClusterId(clusterId);
+                            if (Properties?.Length > i)
+                            {
+                                var appProperties = JsonConvert.DeserializeObject<Dictionary<string, string>>(Properties[i]);
+                                foreach (var kvp in appProperties)
+                                {
+                                    appDeploymentConfig = appDeploymentConfig.AddProperty(kvp.Key, kvp.Value);
+                                }
+                            }
+
+                            deploymentConfig = deploymentConfig.SetApplicationConfig(appDeploymentConfig);
                         }
                     }
 
