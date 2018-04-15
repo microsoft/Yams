@@ -18,7 +18,7 @@ namespace Etg.Yams
                 yamsConfig.UpdateSessionTtl).UpdateSessionManager;
 
             var deploymentRepository = BlobStorageDeploymentRepository.Create(deploymentRepositoryStorageConnectionString);
-            return new YamsDiModule(yamsConfig, deploymentRepository, deploymentRepository, updateSessionManager).YamsService;
+            return new YamsDiModule(yamsConfig, deploymentRepository, deploymentRepository, deploymentRepository, updateSessionManager).YamsService;
         }
     }
 }

@@ -9,7 +9,7 @@ using Etg.Yams.Utils;
 
 namespace Etg.Yams.Test.Storage
 {
-    public class LocalDeploymentRepository : IDeploymentRepository, IDeploymentStatusReader, IDeploymentStatusWriter
+    public class LocalDeploymentRepository : IDeploymentConfigRepository, IDeploymentRepository, IDeploymentStatusReader, IDeploymentStatusWriter
     {
         private readonly string _path;
         private readonly string _deploymentConfigPath;

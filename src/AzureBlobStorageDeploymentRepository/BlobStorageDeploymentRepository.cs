@@ -15,7 +15,7 @@ using Etg.Yams.Azure.Lease;
 
 namespace Etg.Yams.Azure.Storage
 {
-    public class BlobStorageDeploymentRepository : IDeploymentRepository, IDeploymentStatusReader, IDeploymentStatusWriter
+    public class BlobStorageDeploymentRepository : IDeploymentConfigRepository, IDeploymentRepository, IDeploymentStatusReader, IDeploymentStatusWriter
     {
         public const string ApplicationsRootFolderName = "applications";
         private readonly CloudBlobContainer _blobContainer;

@@ -20,11 +20,13 @@ namespace Etg.Yams
     {
         private readonly IContainer _container;
 
-        public YamsDiModule(YamsConfig config, IDeploymentRepository deploymentRepository,
+        public YamsDiModule(YamsConfig config,
+            IDeploymentConfigRepository deploymentConfigRepository,
+            IDeploymentRepository deploymentRepository,
             IDeploymentStatusWriter deploymentStatusWriter,
             IUpdateSessionManager updateSessionManager)
         {
-            _container = RegisterTypes(config, deploymentRepository, deploymentStatusWriter, 
+            _container = RegisterTypes(config, deploymentConfigRepository, deploymentRepository, deploymentStatusWriter, 
                 updateSessionManager).Build();
         }
 
@@ -37,8 +39,8 @@ namespace Etg.Yams
 
         public IContainer Container => _container;
 
-        public static ContainerBuilder RegisterTypes(YamsConfig config, 
-            IDeploymentRepository deploymentRepository, IDeploymentStatusWriter deploymentStatusWriter,
+        public static ContainerBuilder RegisterTypes(YamsConfig config,
+            IDeploymentConfigRepository deploymentConfigRepository, IDeploymentRepository deploymentRepository, IDeploymentStatusWriter deploymentStatusWriter,
             IUpdateSessionManager updateSessionManager)
         {
             var builder = new ContainerBuilder();
@@ -69,6 +71,7 @@ namespace Etg.Yams
 
             builder.RegisterInstance(updateSessionManager);
 
+            builder.RegisterInstance(deploymentConfigRepository);
             builder.RegisterInstance(deploymentRepository);
             builder.RegisterInstance(deploymentStatusWriter);
 
@@ -189,7 +192,8 @@ namespace Etg.Yams
         private static void RegisterApplicationDeploymentDirectory(ContainerBuilder builder)
         {
             builder.Register<IApplicationDeploymentDirectory>(
-                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentRepository>(),
+                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentConfigRepository>(),
+                c.Resolve<IDeploymentRepository>(),
                 c.Resolve<IAppDeploymentMatcher>())).SingleInstance();
         }
     }

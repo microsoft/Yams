@@ -84,6 +84,7 @@
     <Compile Include="Install\AppInstallConfig.cs" />
     <Compile Include="Storage\Config\IDeploymentConfigSerializer.cs" />
     <Compile Include="Storage\Config\JsonDeploymentConfigSerializer.cs" />
+    <Compile Include="Storage\IDeploymentConfigRepository.cs" />
     <Compile Include="Storage\IDeploymentStatusReader.cs" />
     <Compile Include="Storage\IDeploymentStatusWriter.cs" />
     <Compile Include="Storage\Status\AppDeploymentStatus.cs" />
