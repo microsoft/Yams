@@ -19,13 +19,17 @@ namespace Etg.Yams.NuGet.Storage
     {
         private readonly SourceRepository _sourceRepository;
 
-        public NugetFeedApplicationRepository(string feedUrl = "https://api.nuget.org/v3/index.json")
+        public NugetFeedApplicationRepository(string feedUrl = "https://api.nuget.org/v3/index.json", NugetFeedCredentials credentials = null)
         {
             this.FeedUrl = feedUrl;
 
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
             PackageSource packageSource = new PackageSource(feedUrl);
+
+            if(credentials != null)
+                packageSource.Credentials = new PackageSourceCredential("Yams Host", credentials.Username, credentials.Password, true);
+
             _sourceRepository = new SourceRepository(packageSource, providers);
         }
 
