@@ -224,7 +224,7 @@ namespace Etg.Yams.Azure.Storage.Test
 
         private static void VerifyBinariesExist(string path, string testFileContent)
         {
-            Assert.Equal(1, FileUtils.ListFilesRecursively(path).Count());
+            Assert.Single(FileUtils.ListFilesRecursively(path));
             Assert.Equal(testFileContent, File.ReadAllText(Path.Combine(path, TestAppFileName)));
         }
 

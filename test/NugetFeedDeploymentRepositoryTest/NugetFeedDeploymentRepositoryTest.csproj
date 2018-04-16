@@ -61,6 +61,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Common\Common.csproj">
+      <Project>{3e982150-5b43-44da-8d96-66cf07a9a14c}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\Etg.Yams.Core\Etg.Yams.Core.csproj">
       <Project>{7145E485-34FA-4632-89B0-BD27C96AF69C}</Project>
       <Name>Etg.Yams.Core</Name>

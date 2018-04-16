@@ -1,7 +1,11 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.NuGet.Storage;
+using Etg.Yams.Storage;
+using Etg.Yams.Utils;
 using Xunit;
 
 namespace Etg.Yams.Nuget.Storage.Test
@@ -13,14 +17,14 @@ namespace Etg.Yams.Nuget.Storage.Test
         public async Task TestHasBinaries()
         {
             NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
-            Assert.True(await _applicationRepository.HasApplicationBinaries(new AppIdentity("Xunit", "2.1.0")));
+            Assert.True(await _applicationRepository.HasApplicationBinaries(new AppIdentity("xunit", "2.1.0")));
         }
 
         [Fact]
         public async Task TestHasBinaries_VersionDoesntExist()
         {
             NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
-            Assert.False(await _applicationRepository.HasApplicationBinaries(new AppIdentity("Xunit", "0.0.0-thisversiondoesntexist")));
+            Assert.False(await _applicationRepository.HasApplicationBinaries(new AppIdentity("xunit", "0.0.0-thisversiondoesntexist")));
         }
 
         [Fact]
@@ -28,6 +32,38 @@ namespace Etg.Yams.Nuget.Storage.Test
         {
             NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
             Assert.False(await _applicationRepository.HasApplicationBinaries(new AppIdentity(Guid.NewGuid().ToString(), "1.0.0")));
+        }
+
+        [Fact]
+        public async Task TestDownloadApplicationBinaries()
+        {
+            string localPath = await CreateTestTempDirectory("Nuget_TestDownloadApplicationBinaries");
+            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
+            await _applicationRepository.DownloadApplicationBinaries(new AppIdentity("xunit", "2.1.0"), localPath, ConflictResolutionMode.OverwriteExistingBinaries);
+
+            var files = FileUtils.ListFilesRecursively(localPath);
+
+            Assert.Contains(Path.Combine(localPath, "xunit.2.1.0.nupkg"), files);
+        }
+
+        [Fact]
+        public async Task TestDownloadApplicationBinaries_ThrowsWhenPackageNotFound()
+        {
+            AppIdentity appIdentity = new AppIdentity(Guid.NewGuid().ToString(), "1.0.0");
+            string localPath = await CreateTestTempDirectory("Nuget_TestDownloadApplicationBinaries");
+            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
+
+            BinariesNotFoundException exception = await Assert.ThrowsAsync<BinariesNotFoundException>(() => _applicationRepository.DownloadApplicationBinaries(appIdentity, localPath, ConflictResolutionMode.OverwriteExistingBinaries));
+            Assert.Contains(appIdentity.ToString(), exception.Message);
+            Assert.Contains(_applicationRepository.FeedUrl, exception.Message);
+        }
+
+        private static async Task<string> CreateTestTempDirectory(string testName)
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), testName);
+            await FileUtils.DeleteDirectoryIfAny(tempPath);
+            Directory.CreateDirectory(tempPath);
+            return tempPath;
         }
     }
 }
