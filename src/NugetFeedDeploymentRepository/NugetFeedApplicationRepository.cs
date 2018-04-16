@@ -42,17 +42,18 @@ namespace Etg.Yams.NuGet.Storage
 
         public async Task DownloadApplicationBinaries(AppIdentity appIdentity, string localPath, ConflictResolutionMode conflictResolutionMode)
         {
+            string tempPath = Path.GetTempPath();
             DownloadResource downloadResource = await _sourceRepository.GetResourceAsync<DownloadResource>();
             PackageIdentity packageIdentity = new PackageIdentity(appIdentity.Id, new NuGetVersion(appIdentity.Version.ToString()));
-            PackageDownloadContext downloadContext = new PackageDownloadContext(new SourceCacheContext(), localPath, true);
+            PackageDownloadContext downloadContext = new PackageDownloadContext(new SourceCacheContext(), tempPath, true);
 
-            var result = await downloadResource.GetDownloadResourceResultAsync(packageIdentity, downloadContext, localPath, new TraceLogger(), CancellationToken.None);
+            var result = await downloadResource.GetDownloadResourceResultAsync(packageIdentity, downloadContext, tempPath, new TraceLogger(), CancellationToken.None);
 
             if (result.Status != DownloadResourceResultStatus.Available)
                 throw new BinariesNotFoundException($"NuGet package for application {appIdentity} is not available from feed {this.FeedUrl}");
 
-            using (FileStream outputFile = File.Create(Path.Combine(localPath, packageIdentity.ToString() + ".nupkg")))
-                await result.PackageStream.CopyToAsync(outputFile);
+            NugetPackageExtractor extractor = new NugetPackageExtractor();
+            await extractor.ExtractPackage(result.PackageStream, localPath);
         }
 
         public async Task<bool> HasApplicationBinaries(AppIdentity appIdentity)

@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NugetFeedCredentials.cs" />
+    <Compile Include="NugetPackageExtractor.cs" />
     <Compile Include="TraceLogger.cs" />
     <Compile Include="NugetFeedApplicationRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

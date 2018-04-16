@@ -17,14 +17,14 @@ namespace Etg.Yams.Nuget.Storage.Test
         public async Task TestHasBinaries()
         {
             NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
-            Assert.True(await _applicationRepository.HasApplicationBinaries(new AppIdentity("xunit", "2.1.0")));
+            Assert.True(await _applicationRepository.HasApplicationBinaries(new AppIdentity("jQuery", "3.3.1")));
         }
 
         [Fact]
         public async Task TestHasBinaries_VersionDoesntExist()
         {
             NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
-            Assert.False(await _applicationRepository.HasApplicationBinaries(new AppIdentity("xunit", "0.0.0-thisversiondoesntexist")));
+            Assert.False(await _applicationRepository.HasApplicationBinaries(new AppIdentity("jQuery", "0.0.0-thisversiondoesntexist")));
         }
 
         [Fact]
@@ -39,11 +39,11 @@ namespace Etg.Yams.Nuget.Storage.Test
         {
             string localPath = await CreateTestTempDirectory("Nuget_TestDownloadApplicationBinaries");
             NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
-            await _applicationRepository.DownloadApplicationBinaries(new AppIdentity("xunit", "2.1.0"), localPath, ConflictResolutionMode.OverwriteExistingBinaries);
+            await _applicationRepository.DownloadApplicationBinaries(new AppIdentity("jQuery", "3.3.1"), localPath, ConflictResolutionMode.OverwriteExistingBinaries);
 
             var files = FileUtils.ListFilesRecursively(localPath);
 
-            Assert.Contains(Path.Combine(localPath, "xunit.2.1.0.nupkg"), files);
+            Assert.Contains(Path.Combine(localPath, "Content", "Scripts", "jquery-3.3.1.min.js"), files);
         }
 
         [Fact]
