@@ -35,14 +35,14 @@ namespace Etg.Yams.NuGet.Storage
         {
             DownloadResource downloadResource = await _sourceRepository.GetResourceAsync<DownloadResource>();
             PackageIdentity packageIdentity = new PackageIdentity(appIdentity.Id, new NuGetVersion(appIdentity.Version.ToString()));
-            var result = await downloadResource.GetDownloadResourceResultAsync(packageIdentity, new PackageDownloadContext(new SourceCacheContext()), null, new Logger(), CancellationToken.None);
+            var result = await downloadResource.GetDownloadResourceResultAsync(packageIdentity, new PackageDownloadContext(new SourceCacheContext()), null, new TraceLogger(), CancellationToken.None);
         }
 
         public async Task<bool> HasApplicationBinaries(AppIdentity appIdentity)
         {
             PackageMetadataResource packageMetadataResource = await _sourceRepository.GetResourceAsync<PackageMetadataResource>();
             PackageIdentity packageIdentity = new PackageIdentity(appIdentity.Id, new NuGetVersion(appIdentity.Version.ToString()));
-            IPackageSearchMetadata searchMetadata = await packageMetadataResource.GetMetadataAsync(packageIdentity, new SourceCacheContext(), new Logger(), CancellationToken.None);
+            IPackageSearchMetadata searchMetadata = await packageMetadataResource.GetMetadataAsync(packageIdentity, new SourceCacheContext(), new TraceLogger(), CancellationToken.None);
 
             return searchMetadata?.IsListed ?? false;
         }

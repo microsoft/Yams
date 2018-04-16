@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Etg.Yams.NuGet.Storage
 {
-    public class Logger : ILogger
+    public class TraceLogger : ILogger
     {
         public void Log(LogLevel level, string data)
         {
