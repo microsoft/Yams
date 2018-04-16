@@ -84,7 +84,9 @@
     <Compile Include="Install\AppInstallConfig.cs" />
     <Compile Include="Storage\Config\IDeploymentConfigSerializer.cs" />
     <Compile Include="Storage\Config\JsonDeploymentConfigSerializer.cs" />
+    <Compile Include="Storage\DeploymentRepository.cs" />
     <Compile Include="Storage\IDeploymentConfigRepository.cs" />
+    <Compile Include="Storage\IDeploymentRepository.cs" />
     <Compile Include="Storage\IDeploymentStatusReader.cs" />
     <Compile Include="Storage\IDeploymentStatusWriter.cs" />
     <Compile Include="Storage\Status\AppDeploymentStatus.cs" />
@@ -110,7 +112,7 @@
     <Compile Include="Storage\Config\DeploymentConfig.cs" />
     <Compile Include="Storage\ConflictResolutionMode.cs" />
     <Compile Include="Storage\DuplicateBinariesException.cs" />
-    <Compile Include="Storage\IDeploymentRepository.cs" />
+    <Compile Include="Storage\IApplicationRepository.cs" />
     <Compile Include="Update\ApplicationUpdateManager.cs" />
     <Compile Include="Update\IApplicationUpdateManager.cs" />
     <Compile Include="Update\IUpdateSessionManager.cs" />

@@ -14,11 +14,11 @@ using NuGet.Versioning;
 
 namespace Etg.Yams.NuGet.Storage
 {
-    public class NugetFeedDeploymentRepository : IDeploymentRepository
+    public class NugetFeedApplicationRepository : IApplicationRepository
     {
         private SourceRepository _sourceRepository;
 
-        public NugetFeedDeploymentRepository(string feedUrl = "https://api.nuget.org/v3/index.json")
+        public NugetFeedApplicationRepository(string feedUrl = "https://api.nuget.org/v3/index.json")
         {
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());

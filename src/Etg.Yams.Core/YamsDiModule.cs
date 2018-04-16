@@ -22,7 +22,7 @@ namespace Etg.Yams
 
         public YamsDiModule(YamsConfig config,
             IDeploymentConfigRepository deploymentConfigRepository,
-            IDeploymentRepository deploymentRepository,
+            IApplicationRepository deploymentRepository,
             IDeploymentStatusWriter deploymentStatusWriter,
             IUpdateSessionManager updateSessionManager)
         {
@@ -40,7 +40,7 @@ namespace Etg.Yams
         public IContainer Container => _container;
 
         public static ContainerBuilder RegisterTypes(YamsConfig config,
-            IDeploymentConfigRepository deploymentConfigRepository, IDeploymentRepository deploymentRepository, IDeploymentStatusWriter deploymentStatusWriter,
+            IDeploymentConfigRepository deploymentConfigRepository, IApplicationRepository applicationRepository, IDeploymentStatusWriter deploymentStatusWriter,
             IUpdateSessionManager updateSessionManager)
         {
             var builder = new ContainerBuilder();
@@ -72,7 +72,8 @@ namespace Etg.Yams
             builder.RegisterInstance(updateSessionManager);
 
             builder.RegisterInstance(deploymentConfigRepository);
-            builder.RegisterInstance(deploymentRepository);
+            builder.RegisterInstance(applicationRepository);
+            builder.RegisterInstance(new DeploymentRepository(deploymentConfigRepository, applicationRepository)).As<IDeploymentRepository>();
             builder.RegisterInstance(deploymentStatusWriter);
 
             builder.RegisterType<YamsService>().As<IYamsService>().SingleInstance();
@@ -192,8 +193,7 @@ namespace Etg.Yams
         private static void RegisterApplicationDeploymentDirectory(ContainerBuilder builder)
         {
             builder.Register<IApplicationDeploymentDirectory>(
-                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentConfigRepository>(),
-                c.Resolve<IDeploymentRepository>(),
+                c => new RemoteApplicationDeploymentDirectory(c.Resolve<IDeploymentRepository>(),
                 c.Resolve<IAppDeploymentMatcher>())).SingleInstance();
         }
     }

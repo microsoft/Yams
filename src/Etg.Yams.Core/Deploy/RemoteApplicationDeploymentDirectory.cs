@@ -15,13 +15,11 @@ namespace Etg.Yams.Deploy
     /// </summary>
     public class RemoteApplicationDeploymentDirectory : IApplicationDeploymentDirectory
     {
-        private readonly IDeploymentConfigRepository _deploymentConfigRepository;
         private readonly IDeploymentRepository _deploymentRepository;
         private readonly IAppDeploymentMatcher _appDeploymentMatcher;
 
-        public RemoteApplicationDeploymentDirectory(IDeploymentConfigRepository deploymentConfigRepository, IDeploymentRepository deploymentRepository, IAppDeploymentMatcher appDeploymentMatcher)
+        public RemoteApplicationDeploymentDirectory(IDeploymentRepository deploymentRepository, IAppDeploymentMatcher appDeploymentMatcher)
         {
-            _deploymentConfigRepository = deploymentConfigRepository;
             _deploymentRepository = deploymentRepository;
             _appDeploymentMatcher = appDeploymentMatcher;
         }
@@ -30,7 +28,7 @@ namespace Etg.Yams.Deploy
         {
             var apps = new HashSet<AppDeploymentConfig>();
 
-            DeploymentConfig deploymentConfig = await _deploymentConfigRepository.FetchDeploymentConfig();
+            DeploymentConfig deploymentConfig = await _deploymentRepository.FetchDeploymentConfig();
 
             foreach (AppDeploymentConfig appDeploymentConfig in deploymentConfig.Where(_appDeploymentMatcher.IsMatch))
             {

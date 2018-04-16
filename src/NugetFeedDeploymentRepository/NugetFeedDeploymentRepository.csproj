@@ -96,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TraceLogger.cs" />
-    <Compile Include="NugetFeedDeploymentRepository.cs" />
+    <Compile Include="NugetFeedApplicationRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
