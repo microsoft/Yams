@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.Storage;
+using Etg.Yams.Utils;
+using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
@@ -17,9 +17,11 @@ namespace Etg.Yams.NuGet.Storage
 {
     public class NugetFeedApplicationRepository : IApplicationRepository
     {
+        private const string NugetOrgFeedUrl = "https://api.nuget.org/v3/index.json";
         private readonly SourceRepository _sourceRepository;
+        private readonly ILogger _logger = new TraceLogger();
 
-        public NugetFeedApplicationRepository(string feedUrl = "https://api.nuget.org/v3/index.json", NugetFeedCredentials credentials = null)
+        public NugetFeedApplicationRepository(string feedUrl = NugetOrgFeedUrl, NugetFeedCredentials credentials = null)
         {
             this.FeedUrl = feedUrl;
 
@@ -27,8 +29,10 @@ namespace Etg.Yams.NuGet.Storage
             providers.AddRange(Repository.Provider.GetCoreV3());
             PackageSource packageSource = new PackageSource(feedUrl);
 
-            if(credentials != null)
+            if (credentials != null)
+            {
                 packageSource.Credentials = new PackageSourceCredential("Yams Host", credentials.Username, credentials.Password, true);
+            }
 
             _sourceRepository = new SourceRepository(packageSource, providers);
         }
@@ -42,15 +46,31 @@ namespace Etg.Yams.NuGet.Storage
 
         public async Task DownloadApplicationBinaries(AppIdentity appIdentity, string localPath, ConflictResolutionMode conflictResolutionMode)
         {
+            bool exists = !FileUtils.DirectoryDoesntExistOrEmpty(localPath);
+            if (exists)
+            {
+                if (conflictResolutionMode == ConflictResolutionMode.DoNothingIfBinariesExist)
+                {
+                    return;
+                }
+                if (conflictResolutionMode == ConflictResolutionMode.FailIfBinariesExist)
+                {
+                    throw new DuplicateBinariesException(
+                        $"Cannot download the binaries because the destination directory {localPath} contains files");
+                }
+            }
+
             string tempPath = Path.GetTempPath();
             DownloadResource downloadResource = await _sourceRepository.GetResourceAsync<DownloadResource>();
             PackageIdentity packageIdentity = new PackageIdentity(appIdentity.Id, new NuGetVersion(appIdentity.Version.ToString()));
-            PackageDownloadContext downloadContext = new PackageDownloadContext(new SourceCacheContext(), tempPath, true);
+            PackageDownloadContext downloadContext = new PackageDownloadContext(new SourceCacheContext(), tempPath, directDownload: true);
 
-            var result = await downloadResource.GetDownloadResourceResultAsync(packageIdentity, downloadContext, tempPath, new TraceLogger(), CancellationToken.None);
+            DownloadResourceResult result = await downloadResource.GetDownloadResourceResultAsync(packageIdentity, downloadContext, tempPath, _logger, CancellationToken.None);
 
             if (result.Status != DownloadResourceResultStatus.Available)
+            {
                 throw new BinariesNotFoundException($"NuGet package for application {appIdentity} is not available from feed {this.FeedUrl}");
+            }
 
             NugetPackageExtractor extractor = new NugetPackageExtractor();
             await extractor.ExtractPackage(result.PackageStream, localPath);
@@ -60,7 +80,7 @@ namespace Etg.Yams.NuGet.Storage
         {
             PackageMetadataResource packageMetadataResource = await _sourceRepository.GetResourceAsync<PackageMetadataResource>();
             PackageIdentity packageIdentity = new PackageIdentity(appIdentity.Id, new NuGetVersion(appIdentity.Version.ToString()));
-            IPackageSearchMetadata searchMetadata = await packageMetadataResource.GetMetadataAsync(packageIdentity, new SourceCacheContext(), new TraceLogger(), CancellationToken.None);
+            IPackageSearchMetadata searchMetadata = await packageMetadataResource.GetMetadataAsync(packageIdentity, new SourceCacheContext(), _logger, CancellationToken.None);
 
             return searchMetadata?.IsListed ?? false;
         }

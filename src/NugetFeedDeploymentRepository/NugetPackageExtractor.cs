@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Packaging;
@@ -29,16 +27,18 @@ namespace Etg.Yams.NuGet.Storage
 
     /// <summary>
     /// Extracts package directly to root directory.
+    /// NuGet PackagePathResolver always creates a subdirectory for the package.
     /// </summary>
     class FlatPackagePathResolver : PackagePathResolver
     {
         public FlatPackagePathResolver(string rootDirectory)
-            : base(rootDirectory, false)
+            : base(rootDirectory, useSideBySidePaths: false)
         {
         }
 
         public override string GetPackageDirectoryName(PackageIdentity packageIdentity)
         {
+            // We don't create a directory for the package content but extract it directly to root directory.
             return string.Empty;
         }
 
@@ -49,17 +49,12 @@ namespace Etg.Yams.NuGet.Storage
 
         public new string GetPackageDownloadMarkerFileName(PackageIdentity packageIdentity)
         {
-            var builder = new StringBuilder();
-
-            builder.Append(GetId(packageIdentity));
-            builder.Append(PackagingCoreConstants.PackageDownloadMarkerFileExtension);
-
-            return builder.ToString();
+            return PackagingCoreConstants.PackageDownloadMarkerFileExtension;
         }
 
         public new string GetManifestFileName(PackageIdentity packageIdentity)
         {
-            return GetId(packageIdentity) + PackagingCoreConstants.NuspecExtension;
+            return PackagingCoreConstants.NuspecExtension;
         }
 
         public override string GetInstallPath(PackageIdentity packageIdentity)
@@ -77,11 +72,6 @@ namespace Etg.Yams.NuGet.Storage
         public override string GetInstalledPackageFilePath(PackageIdentity packageIdentity)
         {
             return PackagePathHelper.GetInstalledPackageFilePath(packageIdentity, this);
-        }
-
-        private string GetId(PackageIdentity identity)
-        {
-            return string.Empty;
         }
     }
 }

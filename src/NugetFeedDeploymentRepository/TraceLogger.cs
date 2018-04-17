@@ -1,7 +1,7 @@
-﻿using NuGet.Common;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using NuGet.Common;
 
 namespace Etg.Yams.NuGet.Storage
 {
@@ -31,6 +31,7 @@ namespace Etg.Yams.NuGet.Storage
                     this.LogVerbose(data);
                     break;
 
+                default:
                 case LogLevel.Information:
                     this.LogInformation(data);
                     break;

@@ -10,7 +10,6 @@ using Xunit;
 
 namespace Etg.Yams.Nuget.Storage.Test
 {
-    [Trait("Category", "Integration")]
     public class NugetFeedDeploymentRepositoryTest
     {
         [Fact]

@@ -21,12 +21,11 @@ namespace Etg.Yams
         private readonly IContainer _container;
 
         public YamsDiModule(YamsConfig config,
-            IDeploymentConfigRepository deploymentConfigRepository,
-            IApplicationRepository deploymentRepository,
+            IDeploymentRepository deploymentRepository,
             IDeploymentStatusWriter deploymentStatusWriter,
             IUpdateSessionManager updateSessionManager)
         {
-            _container = RegisterTypes(config, deploymentConfigRepository, deploymentRepository, deploymentStatusWriter, 
+            _container = RegisterTypes(config, deploymentRepository, deploymentStatusWriter, 
                 updateSessionManager).Build();
         }
 
@@ -40,7 +39,7 @@ namespace Etg.Yams
         public IContainer Container => _container;
 
         public static ContainerBuilder RegisterTypes(YamsConfig config,
-            IDeploymentConfigRepository deploymentConfigRepository, IApplicationRepository applicationRepository, IDeploymentStatusWriter deploymentStatusWriter,
+            IDeploymentRepository deploymentRepository, IDeploymentStatusWriter deploymentStatusWriter,
             IUpdateSessionManager updateSessionManager)
         {
             var builder = new ContainerBuilder();
@@ -71,9 +70,7 @@ namespace Etg.Yams
 
             builder.RegisterInstance(updateSessionManager);
 
-            builder.RegisterInstance(deploymentConfigRepository);
-            builder.RegisterInstance(applicationRepository);
-            builder.RegisterInstance(new DeploymentRepository(deploymentConfigRepository, applicationRepository)).As<IDeploymentRepository>();
+            builder.RegisterInstance(deploymentRepository).AsImplementedInterfaces();
             builder.RegisterInstance(deploymentStatusWriter);
 
             builder.RegisterType<YamsService>().As<IYamsService>().SingleInstance();

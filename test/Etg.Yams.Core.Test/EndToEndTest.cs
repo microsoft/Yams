@@ -65,7 +65,7 @@ namespace Etg.Yams.Test
                 new JsonDeploymentConfigSerializer(jsonSerializer),
                 new JsonDeploymentStatusSerializer(jsonSerializer));
             
-            return YamsDiModule.RegisterTypes(yamsConfig, _deploymentRepository, _deploymentRepository, _deploymentRepository, updateSessionManager);
+            return YamsDiModule.RegisterTypes(yamsConfig, _deploymentRepository, _deploymentRepository, updateSessionManager);
         }
 
         private void CopyTestProcessExeToTestApps()
