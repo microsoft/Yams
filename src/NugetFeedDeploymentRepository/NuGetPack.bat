@@ -1,0 +1,1 @@
+nuget pack NugetFeedDeploymentRepository.csproj -IncludeReferencedProjects -Prop Configuration=Release

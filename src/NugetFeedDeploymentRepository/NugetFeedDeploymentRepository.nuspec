@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Etg.Yams.Client.Nuget</id>
+    <version>1.0.0</version>
+    <title>YAMS Client - Nuget extensions</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+	<projectUrl>https://github.com/Microsoft/Yams</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>YAMS Client can be used by YAMS application to take advantage of health monitoring and graceful shutdown features.</description>
+    <copyright>Copyright (c) Microsoft Corporation</copyright>
+  </metadata>
+</package>

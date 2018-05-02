@@ -12,6 +12,9 @@ namespace Etg.Yams
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
 
+            if (connectionString == null)
+                throw new ArgumentNullException(nameof(connectionString));
+
             if (builder is WithConfig x)
             {
                 IUpdateSessionManager updateSessionManager = new AzureStorageUpdateSessionDiModule(

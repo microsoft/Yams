@@ -98,15 +98,19 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NugetFeedDeploymentRepositoryConfigurator.cs" />
     <Compile Include="INugetPackageExtractor.cs" />
     <Compile Include="NugetFeedCredentials.cs" />
-    <Compile Include="NugetFeedDeploymentRepositoryModule.cs" />
     <Compile Include="NugetPackageExtractor.cs" />
     <Compile Include="TraceLogger.cs" />
     <Compile Include="NugetFeedApplicationRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AzureBlobStorageDeploymentRepository\AzureBlobStorageDeploymentRepository.csproj">
+      <Project>{df95a9dc-f6be-4c71-b444-4092b43eb602}</Project>
+      <Name>AzureBlobStorageDeploymentRepository</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{3e982150-5b43-44da-8d96-66cf07a9a14c}</Project>
       <Name>Common</Name>
@@ -118,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="NugetFeedDeploymentRepository.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

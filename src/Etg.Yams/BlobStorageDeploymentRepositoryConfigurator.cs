@@ -11,6 +11,9 @@ namespace Etg.Yams
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
 
+            if (connectionString == null)
+                throw new ArgumentNullException(nameof(connectionString));
+
             if (builder is WithUpdateSessionManager x)
             {
                 var deploymentRepository = BlobStorageDeploymentRepository.Create(connectionString);
