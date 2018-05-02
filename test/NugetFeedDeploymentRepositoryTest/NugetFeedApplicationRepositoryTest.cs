@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Etg.Yams.Application;
 using Etg.Yams.NuGet.Storage;
@@ -15,21 +14,21 @@ namespace Etg.Yams.Nuget.Storage.Test
         [Fact]
         public async Task TestHasBinaries()
         {
-            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
+            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository(new NugetPackageExtractor());
             Assert.True(await _applicationRepository.HasApplicationBinaries(new AppIdentity("jQuery", "3.3.1")));
         }
 
         [Fact]
         public async Task TestHasBinaries_VersionDoesntExist()
         {
-            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
+            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository(new NugetPackageExtractor());
             Assert.False(await _applicationRepository.HasApplicationBinaries(new AppIdentity("jQuery", "0.0.0-thisversiondoesntexist")));
         }
 
         [Fact]
         public async Task TestHasBinaries_PackageDoesntExist()
         {
-            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
+            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository(new NugetPackageExtractor());
             Assert.False(await _applicationRepository.HasApplicationBinaries(new AppIdentity(Guid.NewGuid().ToString(), "1.0.0")));
         }
 
@@ -37,7 +36,7 @@ namespace Etg.Yams.Nuget.Storage.Test
         public async Task TestDownloadApplicationBinaries()
         {
             string localPath = await CreateTestTempDirectory("Nuget_TestDownloadApplicationBinaries");
-            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
+            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository(new NugetPackageExtractor());
             await _applicationRepository.DownloadApplicationBinaries(new AppIdentity("jQuery", "3.3.1"), localPath, ConflictResolutionMode.OverwriteExistingBinaries);
 
             var files = FileUtils.ListFilesRecursively(localPath);
@@ -50,7 +49,7 @@ namespace Etg.Yams.Nuget.Storage.Test
         {
             AppIdentity appIdentity = new AppIdentity(Guid.NewGuid().ToString(), "1.0.0");
             string localPath = await CreateTestTempDirectory("Nuget_TestDownloadApplicationBinaries");
-            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository();
+            NugetFeedApplicationRepository _applicationRepository = new NugetFeedApplicationRepository(new NugetPackageExtractor());
 
             BinariesNotFoundException exception = await Assert.ThrowsAsync<BinariesNotFoundException>(() => _applicationRepository.DownloadApplicationBinaries(appIdentity, localPath, ConflictResolutionMode.OverwriteExistingBinaries));
             Assert.Contains(appIdentity.ToString(), exception.Message);

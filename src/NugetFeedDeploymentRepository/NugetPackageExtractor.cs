@@ -7,7 +7,7 @@ using NuGet.Packaging.PackageExtraction;
 
 namespace Etg.Yams.NuGet.Storage
 {
-    public class NugetPackageExtractor
+    public class NugetPackageExtractor : INugetPackageExtractor
     {
         public async Task ExtractPackage(Stream fileStream, string outputDirectory)
         {

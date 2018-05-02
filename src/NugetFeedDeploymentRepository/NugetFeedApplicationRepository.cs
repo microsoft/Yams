@@ -18,12 +18,14 @@ namespace Etg.Yams.NuGet.Storage
     public class NugetFeedApplicationRepository : IApplicationRepository
     {
         private const string NugetOrgFeedUrl = "https://api.nuget.org/v3/index.json";
+        private readonly INugetPackageExtractor _packageExtractor;
         private readonly SourceRepository _sourceRepository;
         private readonly ILogger _logger = new TraceLogger();
 
-        public NugetFeedApplicationRepository(string feedUrl = NugetOrgFeedUrl, NugetFeedCredentials credentials = null)
+        public NugetFeedApplicationRepository(INugetPackageExtractor packageExtractor, string feedUrl = NugetOrgFeedUrl, NugetFeedCredentials credentials = null)
         {
             this.FeedUrl = feedUrl;
+            _packageExtractor = packageExtractor;
 
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
@@ -37,7 +39,7 @@ namespace Etg.Yams.NuGet.Storage
             _sourceRepository = new SourceRepository(packageSource, providers);
         }
 
-        public string FeedUrl { get; private set; }
+        public string FeedUrl { get; }
 
         public Task DeleteApplicationBinaries(AppIdentity appIdentity)
         {
@@ -72,8 +74,7 @@ namespace Etg.Yams.NuGet.Storage
                 throw new BinariesNotFoundException($"NuGet package for application {appIdentity} is not available from feed {this.FeedUrl}");
             }
 
-            NugetPackageExtractor extractor = new NugetPackageExtractor();
-            await extractor.ExtractPackage(result.PackageStream, localPath);
+            await _packageExtractor.ExtractPackage(result.PackageStream, localPath);
         }
 
         public async Task<bool> HasApplicationBinaries(AppIdentity appIdentity)

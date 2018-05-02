@@ -31,9 +31,16 @@ namespace Etg.Yams.Host
                 .Build();
 
             string storageConnectionString = "UseDevelopmentStorage=true";
-            var yamsService = YamsServiceFactory.Create(yamsConfig,
-                deploymentRepositoryStorageConnectionString: storageConnectionString,
-                updateSessionStorageConnectionString: storageConnectionString);
+
+            //var yamsService = YamsServiceFactory.Create(yamsConfig,
+            //    deploymentRepositoryStorageConnectionString: storageConnectionString,
+            //    updateSessionStorageConnectionString: storageConnectionString);
+
+            var yamsService = YamsServiceBuilder
+                .WithConfig(yamsConfig)
+                .UsingAzureTableUpdateSessionManager(storageConnectionString)
+                .UsingBlobStorageDeploymentRepository(storageConnectionString)
+                .Build();
 
             try
             {

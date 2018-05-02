@@ -35,9 +35,8 @@
       <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Semver, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Semver.2.0.4\lib\netstandard1.1\Semver.dll</HintPath>
@@ -67,6 +66,13 @@
     <Compile Include="Application\IApplicationConfigSymbolResolver.cs" />
     <Compile Include="Application\IApplicationFactory.cs" />
     <Compile Include="Application\IApplicationPool.cs" />
+    <Compile Include="Configuration\IFluentInterface.cs" />
+    <Compile Include="Configuration\IWithDeploymentRepository.cs" />
+    <Compile Include="Configuration\IWithUpdateSessionManager.cs" />
+    <Compile Include="Configuration\IWithConfig.cs" />
+    <Compile Include="Configuration\WithDeploymentRepository.cs" />
+    <Compile Include="Configuration\WithUpdateSessionManager.cs" />
+    <Compile Include="Configuration\WithConfig.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Deploy\AndDeploymentMatcher.cs" />
     <Compile Include="Deploy\ClusterIdDeploymentMatcher.cs" />
