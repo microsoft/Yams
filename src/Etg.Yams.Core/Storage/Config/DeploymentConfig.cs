@@ -76,6 +76,13 @@ namespace Etg.Yams.Storage.Config
             return appIds;
         }
 
+        public IEnumerable<string> ListClusters()
+        {
+            var clusterIds = new HashSet<string>();
+            clusterIds.UnionWith(_apps.Values.SelectMany(config => config.TargetClusters));
+            return clusterIds;
+        }
+
         public IEnumerable<string> ListClusters(string appId)
         {
             var clusterIds = new HashSet<string>();

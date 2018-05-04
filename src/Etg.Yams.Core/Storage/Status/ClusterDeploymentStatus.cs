@@ -1,10 +1,11 @@
 ﻿using Etg.Yams.Application;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Etg.Yams.Storage.Status
 {
-    public class ClusterDeploymentStatus
+    public class ClusterDeploymentStatus : IEnumerable<AppDeploymentStatus>
     {
         readonly Dictionary<string, InstanceDeploymentStatus> _instances = new Dictionary<string, InstanceDeploymentStatus>();
 
@@ -37,6 +38,16 @@ namespace Etg.Yams.Storage.Status
         public IEnumerable<AppDeploymentStatus> ListAll()
         {
             return _instances.Values.SelectMany(instance => instance.Applications);
+        }
+
+        public IEnumerator<AppDeploymentStatus> GetEnumerator()
+        {
+            return ListAll().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

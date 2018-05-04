@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="ConnectDeploymentRepositoryCmdlet.cs" />
     <Compile Include="GetDeploymentConfigCmdlet.cs" />
+    <Compile Include="GetDeploymentStatusCmdlet.cs" />
     <Compile Include="InstallApplicationsCmdlet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SetDeploymentConfigCmdlet.cs" />

@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 
 namespace Etg.Yams.Powershell
 {
+
     [Cmdlet(VerbsLifecycle.Install, "Applications")]
     [OutputType(typeof(DeploymentConfig))]
     public class InstallApplicationsCmdlet : Cmdlet
@@ -36,7 +37,7 @@ namespace Etg.Yams.Powershell
 
         [Parameter(HelpMessage = "Waits until the deployment status has been updated, " +
                                  "which indicates that the corresponding apps have been started")]
-        public bool WaitForDeploymentsToComplete { get; set; }
+        public SwitchParameter WaitForDeploymentsToComplete { get; set; }
 
         [Parameter(HelpMessage = "Defines the behaviour when the binaries to upload already exist." +
                                  "The Default behaviour is to do nothing")]
@@ -44,10 +45,10 @@ namespace Etg.Yams.Powershell
 
         [Parameter(HelpMessage = "Indicates whether the DeploymentConfig.json should be uploaded" +
                                  "which will trigger deployment")]
-        public bool Deploy { get; set; } = true;
+        public SwitchParameter Deploy { get; set; } = true;
 
         [Parameter(HelpMessage = "Remove previously deployed version(s) of the app (Defaults to 'true')")]
-        public bool RemoveOldVersions { get; set; } = true;
+        public SwitchParameter RemoveOldVersions { get; set; } = true;
 
         [Parameter(HelpMessage = "The properties of the clusters; Entries order should correspond to entries in AppsIds. " +
             "Example: {\"app1Prop1key\":\"app1Prop1Value\", \"app1Prop2Key\":\"app1Prop2Value\"}, {\"app2Prop1key\":\"app2Prop1Value\"}.")]
@@ -221,6 +222,10 @@ namespace Etg.Yams.Powershell
                     waitForDeploymentsProgressRecord.RecordType = ProgressRecordType.Completed;
                     WriteProgress(waitForDeploymentsProgressRecord);
                 }
+            }
+            catch (ArgumentException argException)
+            {
+                ThrowTerminatingError(new ErrorRecord(argException, "0", ErrorCategory.InvalidArgument, null));
             }
             catch (Exception e)
             {
