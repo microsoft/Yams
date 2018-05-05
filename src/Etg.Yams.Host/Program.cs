@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Etg.Yams.Azure.Storage;
+using Etg.Yams.Azure.UpdateSession;
+using Etg.Yams.Update;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -36,11 +39,17 @@ namespace Etg.Yams.Host
             //    deploymentRepositoryStorageConnectionString: storageConnectionString,
             //    updateSessionStorageConnectionString: storageConnectionString);
 
-            var yamsService = YamsServiceBuilder
-                .WithConfig(yamsConfig)
-                .UsingAzureTableUpdateSessionManager(storageConnectionString)
-                .UsingBlobStorageDeploymentRepository(storageConnectionString)
-                .Build();
+            IUpdateSessionManager updateSessionManager = new AzureStorageUpdateSessionDiModule(
+               yamsConfig.SuperClusterId,
+               yamsConfig.ClusterId,
+               yamsConfig.InstanceId,
+               yamsConfig.InstanceUpdateDomain,
+               storageConnectionString,
+               yamsConfig.UpdateSessionTtl).UpdateSessionManager;
+
+            BlobStorageDeploymentRepository deploymentRepository = BlobStorageDeploymentRepository.Create(storageConnectionString);
+
+            var yamsService = YamsServiceFactory.Create(yamsConfig, deploymentRepository, deploymentRepository, updateSessionManager);
 
             try
             {

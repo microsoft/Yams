@@ -98,7 +98,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NugetFeedDeploymentRepositoryConfigurator.cs" />
     <Compile Include="INugetPackageExtractor.cs" />
     <Compile Include="NugetFeedCredentials.cs" />
     <Compile Include="NugetPackageExtractor.cs" />

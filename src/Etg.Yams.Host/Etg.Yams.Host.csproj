@@ -49,6 +49,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AzureBlobStorageDeploymentRepository\AzureBlobStorageDeploymentRepository.csproj">
+      <Project>{DF95A9DC-F6BE-4C71-B444-4092B43EB602}</Project>
+      <Name>AzureBlobStorageDeploymentRepository</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AzureBlobStorageUpdateSession\AzureBlobStorageUpdateSession.csproj">
+      <Project>{894B7986-5AA4-42A7-8EB0-6DFD1F604505}</Project>
+      <Name>AzureBlobStorageUpdateSession</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Etg.Yams.Core\Etg.Yams.Core.csproj">
       <Project>{7145e485-34fa-4632-89b0-bd27c96af69c}</Project>
       <Name>Etg.Yams.Core</Name>

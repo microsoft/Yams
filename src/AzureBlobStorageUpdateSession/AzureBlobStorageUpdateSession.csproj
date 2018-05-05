@@ -74,7 +74,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UpdateSession\AzureTableUpdateSessionManager.cs" />
     <Compile Include="UpdateSession\AzureStorageUpdateSessionDiModule.cs" />
-    <Compile Include="UpdateSession\AzureTableUpdateSessionManagerConfigurator.cs" />
     <Compile Include="UpdateSession\IUpdateBlob.cs" />
     <Compile Include="UpdateSession\IUpdateBlobFactory.cs" />
     <Compile Include="UpdateSession\IUpdateSessionTable.cs" />

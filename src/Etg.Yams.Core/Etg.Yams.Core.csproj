@@ -66,13 +66,6 @@
     <Compile Include="Application\IApplicationConfigSymbolResolver.cs" />
     <Compile Include="Application\IApplicationFactory.cs" />
     <Compile Include="Application\IApplicationPool.cs" />
-    <Compile Include="Configuration\IFluentInterface.cs" />
-    <Compile Include="Configuration\IWithDeploymentRepository.cs" />
-    <Compile Include="Configuration\IWithUpdateSessionManager.cs" />
-    <Compile Include="Configuration\IWithConfig.cs" />
-    <Compile Include="Configuration\WithDeploymentRepository.cs" />
-    <Compile Include="Configuration\WithUpdateSessionManager.cs" />
-    <Compile Include="Configuration\WithConfig.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Deploy\AndDeploymentMatcher.cs" />
     <Compile Include="Deploy\ClusterIdDeploymentMatcher.cs" />

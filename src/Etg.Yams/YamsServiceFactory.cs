@@ -1,5 +1,6 @@
 ﻿using Etg.Yams.Azure.Storage;
 using Etg.Yams.Azure.UpdateSession;
+using Etg.Yams.Storage;
 using Etg.Yams.Update;
 
 namespace Etg.Yams
@@ -19,6 +20,14 @@ namespace Etg.Yams
 
             var deploymentRepository = BlobStorageDeploymentRepository.Create(deploymentRepositoryStorageConnectionString);
             return new YamsDiModule(yamsConfig, deploymentRepository, deploymentRepository, updateSessionManager).YamsService;
+        }
+
+        public static IYamsService Create(YamsConfig yamsConfig, 
+            IDeploymentRepository deploymentRepository,
+            IDeploymentStatusWriter deploymentStatusWriter,
+            IUpdateSessionManager updateSessionManager)
+        {
+            return new YamsDiModule(yamsConfig, deploymentRepository, deploymentStatusWriter, updateSessionManager).YamsService;
         }
     }
 }

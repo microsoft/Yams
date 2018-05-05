@@ -66,10 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AzureTableUpdateSessionManagerConfigurator.cs" />
-    <Compile Include="BlobStorageDeploymentRepositoryConfigurator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="YamsServiceBuilder.cs" />
     <Compile Include="YamsServiceFactory.cs" />
   </ItemGroup>
   <ItemGroup>
