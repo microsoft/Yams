@@ -26,24 +26,36 @@ namespace Etg.Yams.Install
 
         public async Task Install(AppInstallConfig appInstallConfig)
         {
+            AppIdentity appIdentity = appInstallConfig.AppIdentity;
+            Trace.TraceInformation($"Installing application {appIdentity}");
             IApplication application =
-                await _applicationFactory.CreateApplication(appInstallConfig, GetApplicationAbsolutePath(appInstallConfig.AppIdentity));
+                await _applicationFactory.CreateApplication(appInstallConfig, 
+                GetApplicationAbsolutePath(appInstallConfig.AppIdentity));
             try
             {
                 await _applicationPool.AddApplication(application);
-                
+                Trace.TraceInformation($"Application {appIdentity} installed");
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 await DeleteAppBinaries(appInstallConfig.AppIdentity);
-                throw;
+                throw new Exception($"Failed to install application {appIdentity}", e);
             }
         }
 
         public async Task UnInstall(AppIdentity appIdentity)
         {
-            await _applicationPool.RemoveApplication(appIdentity);
-            await DeleteAppBinaries(appIdentity);
+            try
+            {
+                Trace.TraceInformation($"Uninstalling application {appIdentity}");
+                await _applicationPool.RemoveApplication(appIdentity);
+                await DeleteAppBinaries(appIdentity);
+                Trace.TraceInformation($"Application {appIdentity} uninstalled");
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to uninstall application {appIdentity}", e);
+            }
         }
 
         public async Task<bool> Update(IEnumerable<AppIdentity> applicationsToRemove, IEnumerable<AppInstallConfig> applicationsToDeploy)
