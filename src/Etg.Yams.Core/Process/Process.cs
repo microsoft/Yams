@@ -2,7 +2,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
@@ -65,6 +66,15 @@ namespace Etg.Yams.Process
                 if (!_showProcessWindow)
                 {
                     _process.StartInfo.UseShellExecute = false;
+
+                    // If initialization installed something (such as nodejs) that modifies the machine path, the path wouldn't be found on the first run after imaging. 
+                    // Therefore we merge the current machine path into the process path.
+                    // This only works with UseShellExecute = false, UseShellExecute = true won't pass the process environment and creates a new one
+                    var processPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process).TrimEnd(';');
+                    var machinePath = Environment.ExpandEnvironmentVariables(Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine).TrimEnd(';'));
+                    var missing = machinePath.Split(';').Where(path => !string.IsNullOrEmpty(path)).Except(processPath.Split(';'));
+                    string mergedPath = missing.Aggregate(new StringBuilder(processPath), (result, next) => result.Append(';').Append(next)).Append(';').ToString();
+                    _process.StartInfo.EnvironmentVariables["PATH"] = mergedPath;
                 }
 
                 if (!_process.Start())
