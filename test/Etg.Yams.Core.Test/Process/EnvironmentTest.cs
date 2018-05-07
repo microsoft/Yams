@@ -74,7 +74,7 @@ namespace Etg.Yams.Test.Process
 
             // Check result
             string mergedPath = EnvironmentUtils.MergePath(processPath, modifiedMachinePath);
-            Assert.True(mergedPath.Contains(processPath.First()));
+            Assert.True(mergedPath.Contains(splitProcessPath.First()));
             Assert.True(mergedPath.Contains(expandedProgramFolder));
         }
     }
