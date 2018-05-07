@@ -1,5 +1,6 @@
 ﻿using Etg.Yams.Application;
 using Etg.Yams.Ipc;
+using Etg.Yams.Os;
 using System;
 
 namespace Etg.Yams.Process
@@ -7,16 +8,18 @@ namespace Etg.Yams.Process
     public class ProcessFactory : IProcessFactory
     {
         private readonly YamsConfig _config;
+        private readonly ISystem system;
 
-        public ProcessFactory(YamsConfig config)
+        public ProcessFactory(YamsConfig config, ISystem system)
         {
             _config = config;
+            this.system = system;
         }
 
         public IProcess CreateProcess(AppIdentity identity, string exePath, bool monitorInitialization, bool monitorHealth,
             bool gracefulShutdown)
         {
-            IProcess process = new Process(identity, exePath, _config.ShowApplicationProcessWindow);
+            IProcess process = new Process(identity, exePath, _config.UseShellExecute, system);
 
             if (monitorInitialization)
             {

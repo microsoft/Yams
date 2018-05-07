@@ -1,8 +1,11 @@
 ﻿using Etg.Yams.Application;
+using Etg.Yams.Os;
+using Etg.Yams.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
@@ -14,7 +17,8 @@ namespace Etg.Yams.Process
     {
         private readonly AppIdentity _identity;
         private readonly string _exePath;
-        private readonly bool _showProcessWindow;
+        private readonly bool _useShellExecute;
+        private readonly ISystem system;
         private System.Diagnostics.Process _process;
         private bool _isRunning = false;
 
@@ -32,11 +36,12 @@ namespace Etg.Yams.Process
 
         public event EventHandler<ProcessExitedArgs> Exited;
 
-        public Process(AppIdentity identity, string exePath, bool showProcessWindow)
+        public Process(AppIdentity identity, string exePath, bool useShellExecute, ISystem system)
         {
             _identity = identity;
             _exePath = exePath;
-            _showProcessWindow = showProcessWindow;
+            _useShellExecute = useShellExecute;
+            this.system = system;
         }
 
         public async Task Start(string args)
@@ -52,7 +57,7 @@ namespace Etg.Yams.Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        UseShellExecute = true,
+                        UseShellExecute = _useShellExecute,
                         FileName = _exePath,
                         WorkingDirectory = new FileInfo(_exePath).Directory.FullName,
                         WindowStyle = ProcessWindowStyle.Normal,
@@ -62,9 +67,9 @@ namespace Etg.Yams.Process
                 };
                 _process.Exited += ProcessExited;
 
-                if (!_showProcessWindow)
+                if (!_useShellExecute)
                 {
-                    _process.StartInfo.UseShellExecute = false;
+                    _process.StartInfo.EnvironmentVariables["PATH"] = system.GetPathEnvironmentVariable();
                 }
 
                 if (!_process.Start())

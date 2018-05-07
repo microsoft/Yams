@@ -75,6 +75,9 @@
     <Compile Include="Deploy\PropertiesDeploymentMatcher.cs" />
     <Compile Include="Deploy\RemoteApplicationDeploymentDirectory.cs" />
     <Compile Include="IYamsService.cs" />
+    <Compile Include="Os\ISystem.cs" />
+    <Compile Include="Os\System.cs" />
+    <Compile Include="Os\SystemExtensions.cs" />
     <Compile Include="Process\AbstractProcessDecorator.cs" />
     <Compile Include="Process\GracefullShutdownProcessDecorator.cs" />
     <Compile Include="Process\IProcessInfo.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="Storage\Status\IDeploymentStatusSerializer.cs" />
     <Compile Include="Storage\Status\InstanceDeploymentStatus.cs" />
     <Compile Include="Storage\Status\JsonDeploymentStatusSerializer.cs" />
+    <Compile Include="Utils\EnvironmentUtils.cs" />
     <Compile Include="YamsDiModule.cs" />
     <Compile Include="Download\ApplicationDownloader.cs" />
     <Compile Include="Download\IApplicationDownloader.cs" />

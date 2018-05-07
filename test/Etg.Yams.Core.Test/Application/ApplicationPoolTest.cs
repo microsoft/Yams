@@ -42,11 +42,11 @@ namespace Etg.Yams.Test.Application
             }
 
             YamsConfig config = new YamsConfigBuilder("clusterId", "1", "instanceId", "C:\\")
-                .SetShowApplicationProcessWindow(false).SetApplicationRestartCount(0).Build();
+                .SetUseShellExecute(false).SetApplicationRestartCount(0).Build();
             ApplicationFactory =
                 new ConfigurableApplicationFactory(new ApplicationConfigParser(
                     new ApplicationConfigSymbolResolver(ClusterId, InstanceId), new JsonSerializer(new DiagnosticsTraceWriter())),
-                    new ProcessFactory(config), new ProcessStopper(0));
+                    new ProcessFactory(config, new Os.System()), new ProcessStopper(0));
         }
     }
 

@@ -114,6 +114,7 @@
     <Compile Include="Stubs\ApplicationPoolStub.cs" />
     <Compile Include="Stubs\ApplicationStub.cs" />
     <Compile Include="Stubs\ProcessStub.cs" />
+    <Compile Include="System\SystemExtensionsTest.cs" />
     <Compile Include="Update\ApplicationUpdateManagerTest.cs" />
     <Compile Include="Utils\AssertUtils.cs" />
     <Compile Include="Utils\TestUtils.cs" />

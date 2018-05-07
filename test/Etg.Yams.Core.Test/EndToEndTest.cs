@@ -113,7 +113,7 @@ namespace Etg.Yams.Test
             const string ClusterId = "clusterId1";
             const string InstanceId = "instanceId";
             var yamsConfig = new YamsConfigBuilder(ClusterId, "1", InstanceId,
-                _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
+                _applicationsInstallPath).SetUseShellExecute(false).Build();
 
             InitializeYamsService(yamsConfig);
 
@@ -176,7 +176,7 @@ namespace Etg.Yams.Test
         {
             UploadDeploymentConfig("DeploymentConfigWithProperties.json");
             var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
-                _applicationsInstallPath).SetShowApplicationProcessWindow(false)
+                _applicationsInstallPath).SetUseShellExecute(false)
                 .AddClusterProperty("NodeType", "Test")
                 .AddClusterProperty("Region", "East").Build();
 
@@ -231,7 +231,7 @@ namespace Etg.Yams.Test
             var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
                     _applicationsInstallPath)
                 .SetAppHeartBeatTimeout(heartBeatTimeout)
-                .SetShowApplicationProcessWindow(false).Build();
+                .SetUseShellExecute(false).Build();
 
             InitializeYamsService(yamsConfig);
 
@@ -252,7 +252,7 @@ namespace Etg.Yams.Test
 
             var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
                 _applicationsInstallPath).SetAppInitTimeout(TimeSpan.FromSeconds(10))
-                .SetShowApplicationProcessWindow(false).Build();
+                .SetUseShellExecute(false).Build();
 
             InitializeYamsService(yamsConfig);
 
@@ -281,7 +281,7 @@ namespace Etg.Yams.Test
 
             var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
                     _applicationsInstallPath).SetAppGracefulShutdownTimeout(gracefulShutdownTimeout)
-                .SetShowApplicationProcessWindow(false).Build();
+                .SetUseShellExecute(false).Build();
 
             InitializeYamsService(yamsConfig);
 
@@ -301,7 +301,7 @@ namespace Etg.Yams.Test
             UploadDeploymentConfig("DeploymentConfigFullIpcApp.json");
 
             var yamsConfig = new YamsConfigBuilder("clusterId1", "1", "instanceId",
-                    _applicationsInstallPath).SetShowApplicationProcessWindow(false).Build();
+                    _applicationsInstallPath).SetUseShellExecute(false).Build();
 
             InitializeYamsService(yamsConfig);
 
