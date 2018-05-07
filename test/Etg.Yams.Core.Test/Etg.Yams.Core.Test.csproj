@@ -67,10 +67,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.PowerShell.5.ReferenceAssemblies.1.1.0\lib\net4\System.Management.Automation.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Spatial, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Spatial.5.7.0\lib\net40\System.Spatial.dll</HintPath>
       <Private>True</Private>
@@ -106,7 +102,6 @@
     <Compile Include="Client\YamsProcessArgsParserTest.cs" />
     <Compile Include="EndToEndTest.cs" />
     <Compile Include="Install\ApplicationInstallerTest.cs" />
-    <Compile Include="Process\EnvironmentTest.cs" />
     <Compile Include="Process\GracefulShutdownProcessDecoratorTest.cs" />
     <Compile Include="Process\ProcessStopperTest.cs" />
     <Compile Include="Process\ProcessTest.cs" />
@@ -119,6 +114,7 @@
     <Compile Include="Stubs\ApplicationPoolStub.cs" />
     <Compile Include="Stubs\ApplicationStub.cs" />
     <Compile Include="Stubs\ProcessStub.cs" />
+    <Compile Include="System\SystemExtensionsTest.cs" />
     <Compile Include="Update\ApplicationUpdateManagerTest.cs" />
     <Compile Include="Utils\AssertUtils.cs" />
     <Compile Include="Utils\TestUtils.cs" />

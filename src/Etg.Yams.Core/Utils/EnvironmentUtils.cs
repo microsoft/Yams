@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Etg.Yams.Utils
 {
@@ -22,8 +20,7 @@ namespace Etg.Yams.Utils
         {
             var splitProcessPath = SplitPath(processPath);
             var splitMachinePath = SplitPath(machinePath);
-            var missingPath = splitMachinePath.Except(splitProcessPath);
-            var mergedPath = splitProcessPath.Union(missingPath);
+            var mergedPath = splitProcessPath.Union(splitMachinePath);
             return string.Join(";", mergedPath) + ";";
         }
     }

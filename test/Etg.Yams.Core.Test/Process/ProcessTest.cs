@@ -41,7 +41,7 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestIsRunning()
         {
-            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingProcessIdentity, _fixture.HangingExePath, false);
+            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingProcessIdentity, _fixture.HangingExePath, false, new Os.System());
             Assert.False(hangingProcess.IsRunning);
             await hangingProcess.Start(string.Empty);
             Assert.True(hangingProcess.IsRunning);
@@ -53,7 +53,7 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestThatProcessCannotBeStartedMoreThanOnce()
         {
-            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingProcessIdentity, _fixture.HangingExePath, false);
+            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingProcessIdentity, _fixture.HangingExePath, false, new Os.System());
             await hangingProcess.Start(string.Empty);
             Assert.True(hangingProcess.IsRunning);
 
@@ -65,7 +65,7 @@ namespace Etg.Yams.Test.Process
         [Fact]
         public async Task TestReleaseResources()
         {
-            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingProcessIdentity, _fixture.HangingExePath, false);
+            IProcess hangingProcess = new Yams.Process.Process(_fixture.HangingProcessIdentity, _fixture.HangingExePath, false, new Os.System());
             await hangingProcess.ReleaseResources(); // should do nothing
             await hangingProcess.Start(string.Empty);
             Assert.True(hangingProcess.IsRunning);
@@ -79,7 +79,7 @@ namespace Etg.Yams.Test.Process
         [Fact(Skip = "For some reason this test is flaky on CI builds. Disabling for now..")]
         public async Task TestThatExitedEventIsFired()
         {
-            IProcess suicidalProcess = new Yams.Process.Process(_fixture.SuicidalProcessIdentity, _fixture.SuicidalExePath, false);
+            IProcess suicidalProcess = new Yams.Process.Process(_fixture.SuicidalProcessIdentity, _fixture.SuicidalExePath, false, new Os.System());
             bool exitedFired = false;
             suicidalProcess.Exited += (sender, args) =>
             {
@@ -95,7 +95,7 @@ namespace Etg.Yams.Test.Process
         public async Task TestProperties()
         {
             const string exeArgs = "arggg";
-            IProcess suicidalProcess = new Yams.Process.Process(_fixture.SuicidalProcessIdentity, _fixture.SuicidalExePath, false);
+            IProcess suicidalProcess = new Yams.Process.Process(_fixture.SuicidalProcessIdentity, _fixture.SuicidalExePath, false, new Os.System());
             await suicidalProcess.Start(exeArgs);
             Assert.Equal(_fixture.SuicidalExePath, suicidalProcess.ExePath);
             Assert.Equal($"{exeArgs} --AppName {_fixture.SuicidalProcessIdentity.Id} --AppVersion {_fixture.SuicidalProcessIdentity.Version}", suicidalProcess.ExeArgs);

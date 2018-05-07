@@ -75,6 +75,9 @@
     <Compile Include="Deploy\PropertiesDeploymentMatcher.cs" />
     <Compile Include="Deploy\RemoteApplicationDeploymentDirectory.cs" />
     <Compile Include="IYamsService.cs" />
+    <Compile Include="Os\ISystem.cs" />
+    <Compile Include="Os\System.cs" />
+    <Compile Include="Os\SystemExtensions.cs" />
     <Compile Include="Process\AbstractProcessDecorator.cs" />
     <Compile Include="Process\GracefullShutdownProcessDecorator.cs" />
     <Compile Include="Process\IProcessInfo.cs" />

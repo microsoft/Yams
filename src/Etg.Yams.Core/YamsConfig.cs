@@ -90,12 +90,6 @@ namespace Etg.Yams
         /// <summary>
         /// Whether the process is started with UseShellExecute or not
         /// </summary>
-        [Obsolete("ShowApplicationProcessWindow is obsolete; use UseShellExecute")]
-        public bool ShowApplicationProcessWindow { get => this.UseShellExecute; private set => this.UseShellExecute = value; }
-
-        /// <summary>
-        /// Whether the process is started with UseShellExecute or not
-        /// </summary>
         public bool UseShellExecute { get; private set; }
 
         /// <summary>

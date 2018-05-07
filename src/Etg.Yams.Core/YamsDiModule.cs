@@ -10,6 +10,7 @@ using Etg.Yams.Watcher;
 using Autofac;
 using Etg.Yams.Json;
 using Newtonsoft.Json.Serialization;
+using Etg.Yams.Os;
 
 namespace Etg.Yams
 {
@@ -79,6 +80,7 @@ namespace Etg.Yams
             builder.RegisterType<DiagnosticsTraceWriter>().As<ITraceWriter>().SingleInstance();
             builder.RegisterType<JsonSerializer>().As<IJsonSerializer>().SingleInstance();
 
+            builder.RegisterType<Os.System>().As<ISystem>().SingleInstance();
 
             return builder;
         }
@@ -177,7 +179,8 @@ namespace Etg.Yams
             builder.Register<IProcessFactory>(c =>
                 {
                     var config = c.Resolve<YamsConfig>();
-                    return new ProcessFactory(config);
+                    ISystem system = c.Resolve<ISystem>();
+                    return new ProcessFactory(config, system);
                 }).SingleInstance();
         }
 

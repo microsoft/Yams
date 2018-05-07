@@ -46,7 +46,7 @@ namespace Etg.Yams.Test.Application
             ApplicationFactory =
                 new ConfigurableApplicationFactory(new ApplicationConfigParser(
                     new ApplicationConfigSymbolResolver(ClusterId, InstanceId), new JsonSerializer(new DiagnosticsTraceWriter())),
-                    new ProcessFactory(config), new ProcessStopper(0));
+                    new ProcessFactory(config, new Os.System()), new ProcessStopper(0));
         }
     }
 

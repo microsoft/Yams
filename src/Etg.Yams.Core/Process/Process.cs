@@ -1,4 +1,5 @@
 ﻿using Etg.Yams.Application;
+using Etg.Yams.Os;
 using Etg.Yams.Utils;
 using System;
 using System.Diagnostics;
@@ -17,6 +18,7 @@ namespace Etg.Yams.Process
         private readonly AppIdentity _identity;
         private readonly string _exePath;
         private readonly bool _useShellExecute;
+        private readonly ISystem system;
         private System.Diagnostics.Process _process;
         private bool _isRunning = false;
 
@@ -34,11 +36,12 @@ namespace Etg.Yams.Process
 
         public event EventHandler<ProcessExitedArgs> Exited;
 
-        public Process(AppIdentity identity, string exePath, bool useShellExecute)
+        public Process(AppIdentity identity, string exePath, bool useShellExecute, ISystem system)
         {
             _identity = identity;
             _exePath = exePath;
             _useShellExecute = useShellExecute;
+            this.system = system;
         }
 
         public async Task Start(string args)
@@ -66,13 +69,7 @@ namespace Etg.Yams.Process
 
                 if (!_useShellExecute)
                 {
-                    // If initialization installed something (such as nodejs) that modifies the machine path, the path wouldn't be found on the first run after imaging. 
-                    // Therefore we merge the current machine path into the process path.
-                    // This only works with UseShellExecute = false, UseShellExecute = true won't pass the process environment and creates a new one
-                    var processPath = EnvironmentUtils.GetPath(EnvironmentVariableTarget.Process);
-                    var machinePath = EnvironmentUtils.GetPath(EnvironmentVariableTarget.Machine);
-                    var mergedPath = EnvironmentUtils.MergePath(processPath, machinePath);
-                    _process.StartInfo.EnvironmentVariables["PATH"] = mergedPath;
+                    _process.StartInfo.EnvironmentVariables["PATH"] = system.GetPathEnvironmentVariable();
                 }
 
                 if (!_process.Start())
