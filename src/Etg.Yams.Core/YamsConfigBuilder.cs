@@ -16,7 +16,7 @@ namespace Etg.Yams
             _checkForUpdatesPeriodInSeconds = 10;
             _applicationRestartCount = 3;
             _processWaitForExitInSeconds = 5;
-            _showApplicationProcessWindow = true;
+            _useShellExecute = true;
             _gracefulShutdownMessageTimeout = TimeSpan.FromSeconds(30);
             _appGracefulShutdownTimeout = TimeSpan.FromSeconds(60);
             _appHeartBeatTimeout = TimeSpan.FromSeconds(60);
@@ -54,9 +54,16 @@ namespace Etg.Yams
             return this;
         }
 
+        [Obsolete("SetShowApplicationProcessWindow is obsolete, use SetUseShellExecute (which is equivalent)")]
         public YamsConfigBuilder SetShowApplicationProcessWindow(bool value)
         {
-            _showApplicationProcessWindow = value;
+            _useShellExecute = value;
+            return this;
+        }
+
+        public YamsConfigBuilder SetUseShellExecute(bool value)
+        {
+            _useShellExecute = value;
             return this;
         }
 
@@ -113,7 +120,7 @@ namespace Etg.Yams
                 _checkForUpdatesPeriodInSeconds,
                 _applicationRestartCount,
                 _processWaitForExitInSeconds,
-                _showApplicationProcessWindow,
+                _useShellExecute,
                 _gracefulShutdownMessageTimeout,
                 _appGracefulShutdownTimeout,
                 _appHeartBeatTimeout,
@@ -131,7 +138,7 @@ namespace Etg.Yams
         private int _checkForUpdatesPeriodInSeconds;
         private int _applicationRestartCount;
         private int _processWaitForExitInSeconds;
-        private bool _showApplicationProcessWindow;
+        private bool _useShellExecute;
         private TimeSpan _gracefulShutdownMessageTimeout;
         private TimeSpan _appGracefulShutdownTimeout;
         private TimeSpan _appHeartBeatTimeout;

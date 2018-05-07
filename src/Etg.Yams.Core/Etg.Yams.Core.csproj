@@ -92,6 +92,7 @@
     <Compile Include="Storage\Status\IDeploymentStatusSerializer.cs" />
     <Compile Include="Storage\Status\InstanceDeploymentStatus.cs" />
     <Compile Include="Storage\Status\JsonDeploymentStatusSerializer.cs" />
+    <Compile Include="Utils\EnvironmentUtils.cs" />
     <Compile Include="YamsDiModule.cs" />
     <Compile Include="Download\ApplicationDownloader.cs" />
     <Compile Include="Download\IApplicationDownloader.cs" />

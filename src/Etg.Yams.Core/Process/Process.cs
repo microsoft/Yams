@@ -1,4 +1,5 @@
 ﻿using Etg.Yams.Application;
+using Etg.Yams.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -15,7 +16,7 @@ namespace Etg.Yams.Process
     {
         private readonly AppIdentity _identity;
         private readonly string _exePath;
-        private readonly bool _showProcessWindow;
+        private readonly bool _useShellExecute;
         private System.Diagnostics.Process _process;
         private bool _isRunning = false;
 
@@ -33,11 +34,11 @@ namespace Etg.Yams.Process
 
         public event EventHandler<ProcessExitedArgs> Exited;
 
-        public Process(AppIdentity identity, string exePath, bool showProcessWindow)
+        public Process(AppIdentity identity, string exePath, bool useShellExecute)
         {
             _identity = identity;
             _exePath = exePath;
-            _showProcessWindow = showProcessWindow;
+            _useShellExecute = useShellExecute;
         }
 
         public async Task Start(string args)
@@ -53,7 +54,7 @@ namespace Etg.Yams.Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        UseShellExecute = true,
+                        UseShellExecute = _useShellExecute,
                         FileName = _exePath,
                         WorkingDirectory = new FileInfo(_exePath).Directory.FullName,
                         WindowStyle = ProcessWindowStyle.Normal,
@@ -63,17 +64,14 @@ namespace Etg.Yams.Process
                 };
                 _process.Exited += ProcessExited;
 
-                if (!_showProcessWindow)
+                if (!_useShellExecute)
                 {
-                    _process.StartInfo.UseShellExecute = false;
-
                     // If initialization installed something (such as nodejs) that modifies the machine path, the path wouldn't be found on the first run after imaging. 
                     // Therefore we merge the current machine path into the process path.
                     // This only works with UseShellExecute = false, UseShellExecute = true won't pass the process environment and creates a new one
-                    var processPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process).TrimEnd(';');
-                    var machinePath = Environment.ExpandEnvironmentVariables(Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine).TrimEnd(';'));
-                    var missing = machinePath.Split(';').Where(path => !string.IsNullOrEmpty(path)).Except(processPath.Split(';'));
-                    string mergedPath = missing.Aggregate(new StringBuilder(processPath), (result, next) => result.Append(';').Append(next)).Append(';').ToString();
+                    var processPath = EnvironmentUtils.GetPath(EnvironmentVariableTarget.Process);
+                    var machinePath = EnvironmentUtils.GetPath(EnvironmentVariableTarget.Machine);
+                    var mergedPath = EnvironmentUtils.MergePath(processPath, machinePath);
                     _process.StartInfo.EnvironmentVariables["PATH"] = mergedPath;
                 }
 

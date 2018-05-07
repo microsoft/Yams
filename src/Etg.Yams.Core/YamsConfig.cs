@@ -17,7 +17,7 @@ namespace Etg.Yams
             int checkForUpdatesPeriodInSeconds,
             int applicationRestartCount,
             int processWaitForExitInSeconds,
-            bool showApplicationProcessWindow,
+            bool useShellExecute,
             TimeSpan gracefulShutdownMessageTimeout,
             TimeSpan appGracefulShutdownTimeout,
             TimeSpan appHeartBeatTimeout,
@@ -34,7 +34,7 @@ namespace Etg.Yams
             CheckForUpdatesPeriodInSeconds = checkForUpdatesPeriodInSeconds;
             ApplicationRestartCount = applicationRestartCount;
             ProcessWaitForExitInSeconds = processWaitForExitInSeconds;
-            ShowApplicationProcessWindow = showApplicationProcessWindow;
+            UseShellExecute = useShellExecute;
             GracefulShutdownMessageTimeout = gracefulShutdownMessageTimeout;
             AppGracefulShutdownTimeout = appGracefulShutdownTimeout;
             AppHeartBeatTimeout = appHeartBeatTimeout;
@@ -88,9 +88,15 @@ namespace Etg.Yams
         public int ProcessWaitForExitInSeconds { get; private set; }
 
         /// <summary>
-        /// Whether a console window should be shown or not
+        /// Whether the process is started with UseShellExecute or not
         /// </summary>
-        public bool ShowApplicationProcessWindow { get; private set; }
+        [Obsolete("ShowApplicationProcessWindow is obsolete; use UseShellExecute")]
+        public bool ShowApplicationProcessWindow { get => this.UseShellExecute; private set => this.UseShellExecute = value; }
+
+        /// <summary>
+        /// Whether the process is started with UseShellExecute or not
+        /// </summary>
+        public bool UseShellExecute { get; private set; }
 
         /// <summary>
         /// How long Yams should wait for the app to receive the graceful exit message
