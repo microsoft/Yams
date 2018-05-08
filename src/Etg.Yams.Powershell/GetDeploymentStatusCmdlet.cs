@@ -19,9 +19,9 @@ namespace Etg.Yams.Powershell
         public string ClusterId { get; set; }
 
         [Parameter(Mandatory = false, 
-            HelpMessage = "Allow one to only show app that have been active within the last ActiveAgo seconds. " +
+            HelpMessage = "Allow one to only show app that have been active within the last ActiveSince seconds. " +
             "Default is 5 minutes")]
-        public int ActiveAgo { get; set; } = 300;
+        public int ActiveSince { get; set; } = int.MaxValue;
 
         protected override void ProcessRecord()
         {
@@ -65,7 +65,7 @@ namespace Etg.Yams.Powershell
         private DeploymentStatus GetClusterDeploymentStatus(BlobStorageDeploymentRepository deploymentRepository, 
             string clusterId)
         {
-            var apps = deploymentRepository.FetchClusterDeploymentStatus(clusterId, ttlSeconds: ActiveAgo).Result;
+            var apps = deploymentRepository.FetchClusterDeploymentStatus(clusterId, ttlSeconds: ActiveSince).Result;
             return new DeploymentStatus(apps);
         }
 
@@ -77,7 +77,7 @@ namespace Etg.Yams.Powershell
 
             foreach (string clusterId in clustersIds)
             {
-                var clusterStatus = deploymentRepository.FetchClusterDeploymentStatus(clusterId, ttlSeconds: ActiveAgo).Result;
+                var clusterStatus = deploymentRepository.FetchClusterDeploymentStatus(clusterId, ttlSeconds: ActiveSince).Result;
                 apps.AddRange(clusterStatus.ListAll());
             }
             return new DeploymentStatus(apps);
