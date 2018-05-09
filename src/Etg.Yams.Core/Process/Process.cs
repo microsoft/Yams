@@ -1,11 +1,8 @@
 ﻿using Etg.Yams.Application;
 using Etg.Yams.Os;
-using Etg.Yams.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
@@ -72,6 +69,7 @@ namespace Etg.Yams.Process
                     _process.StartInfo.EnvironmentVariables["PATH"] = system.GetPathEnvironmentVariable();
                 }
 
+                Trace.TraceInformation($"Starting Process with ExePath {_exePath}, arguments: {ExeArgs}");
                 if (!_process.Start())
                 {
                     await ReleaseResources();
@@ -80,6 +78,7 @@ namespace Etg.Yams.Process
                 }
 
                 _isRunning = true;
+                Trace.TraceInformation($"Process started: ExePath {_exePath}, arguments: {ExeArgs}");
             });
         }
 

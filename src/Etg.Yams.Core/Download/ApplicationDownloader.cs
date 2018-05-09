@@ -25,6 +25,7 @@ namespace Etg.Yams.Download
 
         public async Task DownloadApplication(AppIdentity appIdentity)
         {
+            Trace.TraceInformation($"Downloading application {appIdentity}");
             try
             {
                 string destPath = Path.Combine(_applicationRootPath,
@@ -32,6 +33,7 @@ namespace Etg.Yams.Download
                 await
                     _deploymentRepository.DownloadApplicationBinaries(appIdentity, destPath,
                         ConflictResolutionMode.OverwriteExistingBinaries);
+                Trace.TraceInformation($"Application {appIdentity} downloaded");
             }
             catch (BinariesNotFoundException)
             {

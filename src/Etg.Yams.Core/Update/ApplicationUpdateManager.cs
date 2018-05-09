@@ -110,41 +110,44 @@ namespace Etg.Yams.Update
             }
             catch (Exception e)
             {
-                Trace.TraceError("Failed to perform update; Exception was: {0}", e);
+                Trace.TraceError("Failed to perform update; Exception: {0}", e);
             }
             finally
             {
-                try
-                {
-                    await UpdateDeploymentStatus();
-                }
-                catch (Exception e)
-                {
-                    Trace.TraceError("Failed to update the deployment status; Exception was: {0}", e);
-                }
+                await UpdateDeploymentStatus();
             }
         }
 
         private async Task UpdateDeploymentStatus()
         {
-            DateTime utcNow = DateTime.UtcNow;
-            var instanceDeploymentStatus = new InstanceDeploymentStatus();
-            foreach (IApplication app in _applicationPool.Applications)
+            try
             {
-                var appDeploymentStatus = new AppDeploymentStatus(app.Identity, _clusterId, _instanceId, utcNow);
-                instanceDeploymentStatus.SetAppDeploymentStatus(appDeploymentStatus);
+                DateTime utcNow = DateTime.UtcNow;
+                var instanceDeploymentStatus = new InstanceDeploymentStatus();
+                foreach (IApplication app in _applicationPool.Applications)
+                {
+                    var appDeploymentStatus = new AppDeploymentStatus(app.Identity, _clusterId, _instanceId, utcNow);
+                    instanceDeploymentStatus.SetAppDeploymentStatus(appDeploymentStatus);
+                }
+                await _deploymentStatusWriter.PublishInstanceDeploymentStatus(_clusterId, _instanceId, instanceDeploymentStatus);
+                Trace.TraceInformation("DeploymentStatus updated");
             }
-            await _deploymentStatusWriter.PublishInstanceDeploymentStatus(_clusterId, _instanceId, instanceDeploymentStatus);
+            catch (Exception e)
+            {
+                Trace.TraceError("Failed to update the deployment status; Exception: {0}", e);
+            }
         }
 
-        private Task DownloadApplications(IEnumerable<AppDeploymentConfig> appDeployments)
+        private async Task DownloadApplications(IEnumerable<AppDeploymentConfig> appDeployments)
         {
+            Trace.TraceInformation("Downloading applications");
             List<Task> tasks = new List<Task>();
             foreach (AppDeploymentConfig appDeploymentConfig in appDeployments)
             {
                 tasks.Add(_applicationDownloader.DownloadApplication(appDeploymentConfig.AppIdentity));
             }
-            return Task.WhenAll(tasks);
+            await Task.WhenAll(tasks);
+            Trace.TraceInformation("Download applications complete");
         }
 
         private IEnumerable<AppIdentity> FindApplicationsToRemove(IEnumerable<AppIdentity> runningApplications, IEnumerable<AppDeploymentConfig> applicationDeployments)
