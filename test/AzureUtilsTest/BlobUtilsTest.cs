@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,6 +42,38 @@ namespace Etg.Yams.Azure.Test
 
             // Then verify that the hierachy on the local file system matches the one in the blob directory
             VerifyThatAllFilesAreThere(relativePathSet, "\\");
+
+            // get the modified data of d1/b1
+            string d1b1Path = Path.Combine(appPath, "d1", "b1");
+            DateTime d1b1WriteTime = File.GetLastWriteTimeUtc(d1b1Path);
+
+            // delete and modify some files to make sure that they will be download
+            File.Delete(Path.Combine(appPath, "b1"));
+            File.Delete(Path.Combine(appPath, "d1", "b2"));
+
+            // modify a file to make sure it'll be replaced
+            string b2FilePath = Path.Combine(appPath, "b2");
+            DateTime b2WriteTime = File.GetLastWriteTimeUtc(b2FilePath);
+            File.WriteAllText(b2FilePath, "blabla");
+            Assert.Equal("blabla", File.ReadAllText(b2FilePath));
+
+            await BlobUtils.DownloadBlobDirectory(root, appPath);
+            VerifyThatAllFilesAreThere(relativePathSet, "\\");
+            string newFileContent = File.ReadAllText(b2FilePath);
+            Assert.Equal(d1b1WriteTime, File.GetLastWriteTimeUtc(d1b1Path));
+            Assert.NotEqual(b2WriteTime, File.GetLastWriteTimeUtc(b2FilePath));
+        }
+
+        private static ISet<string> ListFilesPath(string appPath)
+        {
+            ISet<string> relativePathSet = new HashSet<string>();
+            foreach (var path in FileUtils.ListFilesRecursively(appPath))
+            {
+                var relPath = FileUtils.GetRelativePath(appPath, path);
+                relativePathSet.Add(relPath);
+            }
+
+            return relativePathSet;
         }
 
         [Fact]

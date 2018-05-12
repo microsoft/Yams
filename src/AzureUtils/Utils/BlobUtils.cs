@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Etg.Yams.Utils;
 using Microsoft.WindowsAzure.Storage;
@@ -10,36 +12,49 @@ namespace Etg.Yams.Azure.Utils
 {
     public static class BlobUtils
     {
-        public static Task DownloadBlobDirectory(CloudBlobDirectory blobDirectory, string destPath)
+        public static async Task DownloadBlobDirectory(CloudBlobDirectory blobDirectory, string destPath)
         {
-            return DownloadBlobs((dynamic) blobDirectory, destPath);
-        }
-
-        public static Task DownloadBlobContainer(CloudBlobContainer blobContainer, string destPath)
-        {
-            return DownloadBlobs((dynamic) blobContainer, destPath);
-        }
-
-        private static async Task DownloadBlobs(dynamic blobDirectory, string destPath)
-        {
-            await FileUtils.DeleteDirectoryIfAny(destPath);
-            await FileUtils.CreateDirectory(destPath);
+            if (!Directory.Exists(destPath))
+            {
+                await FileUtils.CreateDirectory(destPath);
+            }
 
             IEnumerable<IListBlobItem> blobs = await ListBlobsFlat(blobDirectory);
             var tasks = new List<Task>();
-            foreach (var blobItem in blobs)
+
+            using (var md5 = new MD5CryptoServiceProvider())
             {
-                var blob = (CloudBlockBlob) blobItem;
-                await blob.FetchAttributesAsync();
-                var localPathBlob = Path.Combine(destPath, GetLocalRelativePath(blob, blobDirectory));
-                string dirPath = Path.GetDirectoryName(localPathBlob);
-                if (!Directory.Exists(dirPath))
+                foreach (var blobItem in blobs)
                 {
-                    Directory.CreateDirectory(dirPath);
+                    var blob = (CloudBlockBlob)blobItem;
+                    await blob.FetchAttributesAsync();
+                    string relativePath = GetLocalRelativePath(blob, blobDirectory);
+                    var localFilePath = Path.Combine(destPath, relativePath);
+                    string dirPath = Path.GetDirectoryName(localFilePath);
+                    if (!Directory.Exists(dirPath))
+                    {
+                        Directory.CreateDirectory(dirPath);
+                    }
+                    if (File.Exists(localFilePath))
+                    {
+                        string hash = ComputeMd5Hash(md5, localFilePath);
+                        if (hash == blob.Properties.ContentMD5)
+                        {
+                            continue;
+                        }
+                    }
+                    tasks.Add(blob.DownloadToFileAsync(localFilePath, FileMode.Create));
                 }
-                tasks.Add(blob.DownloadToFileAsync(localPathBlob, FileMode.Create));
             }
             await Task.WhenAll(tasks);
+        }
+
+        private static string ComputeMd5Hash(MD5CryptoServiceProvider md5, string localFilePath)
+        {
+            using (var stream = new FileStream(localFilePath, FileMode.Open, FileAccess.Read))
+            {
+                return Convert.ToBase64String(md5.ComputeHash(stream));
+            }
         }
 
         private static Task<IEnumerable<IListBlobItem>> ListBlobsFlat(dynamic blobDirectory,
