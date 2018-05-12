@@ -40,7 +40,7 @@ applications
 Depending on what kind of storage provider is being used, these could be folders in a blob- or file-system-based deployment storage provider, columns in a relational database table, etc.
 
 The `DeploymentConfig.json` file contains information about what application should be deployed and where. It has the following structure:
-```
+```json
 {
     "Applications":
     [
@@ -70,16 +70,18 @@ When a Yams cluster is deployed to a cloud service, each instance in the cluster
 2. **An application is removed**
 3. **An application is updated**
 
+Note that the operations described below can be performed using Yams Powershell interface. Yams Powerhsell cmdlets are available [here](../src/Etg.Yams.Powershell) and can be downloaded using the NuGet package [Etg.Yams.Powershell](https://www.nuget.org/packages/Etg.Yams.Powershell/).
+
 ### Adding an application
 This occurs when a new application or a new version of an application is added to the `DeploymentConfig.json` file. Each Yams instance downloads the app's binaries to the VM where it's running and starts the application using the exe available with the binaries. In fact, each Yams application (i.e. microservice) contains an `AppConfig.json` file that describes how the application can be started. The `AppConfig.json` file has the following structure:
-```
+```json
 {
     "ExeName": "Foo.exe",
     "ExeArgs": "--appName=${Id} --arg2 10"
 }
 ```
 
-Notice the ${Id} symbol in the ExeArgs which will be substituted with the actual id of the application at runtime. Other available symbols are:
+Notice the ${Id} variable in the ExeArgs which will be substituted with the actual id of the application at runtime. Other available variables are:
 
 * ${Version}
 * ${Version.Major}
@@ -88,7 +90,52 @@ Notice the ${Id} symbol in the ExeArgs which will be substituted with the actual
 * ${ClusterId}: the Yams cluster id.
 * ${InstanceId}: the current VM instance id.
 
-Note that Yams also support running multiple versions of the same app side-by-side. Please see the [Deploy and Host an App in YAMS tutorial](Deploy&Host_an_App_in_YAMS.md) to learn more about this feature.
+You can also pass custom variables to Yams using two ways:
+1. Add properties to your cluster at startup:
+
+```csharp
+            YamsConfig yamsConfig = new YamsConfigBuilder(
+                // mandatory configs
+                clusterId: clusterId,
+                instanceUpdateDomain: RoleEnvironment.CurrentRoleInstance.UpdateDomain.ToString(),
+                instanceId: RoleEnvironment.CurrentRoleInstance.Id,
+                applicationInstallDirectory: RoleEnvironment.GetLocalResource("LocalStoreDirectory").RootPath)
+                // optional configs
+                .AddClusterProperty("EnvironmentName", RoleEnvironment.GetConfigurationSettingValue("EnvironmentName"))
+                .AddClusterProperty("DeploymentId", GetDeploymentId())
+                .Build();
+```
+Properties added using `AddClusterProperty` will be available to all apps. The drawback of this approach is that it requires a cluster restart to add new properties. The second approach below only requires modifying the `DeploymentConfig.json`.
+
+2. Add cluster properties to your app in the `DeploymentConfig.json` (this can be done using `Install-Applications` Powershell cmdlet):
+
+```json
+{
+    "Applications":
+    [
+        {
+            "Id": "app1",
+            "Version": "1.0.0",
+            "TargetClusters": [ "YAMS_CLUSTER_ID" ],
+            "Properties":
+            {
+                "EnvironmentName": "Dev"
+            }            
+        },  
+        {
+            "Id": "app2",
+            "Version": "1.0.1",
+            "TargetClusters": [ "YAMS_CLUSTER_ID", "YAMS_CLUSTER_ID_OTHER" ],
+            "Properties":
+            {
+                "EnvironmentName": "Dev"
+            }               
+        },
+    ]
+}
+```
+
+Note that Yams supports running multiple versions of the same app side-by-side. Please see the [Deploy and Host an App in YAMS tutorial](Deploy&Host_an_App_in_YAMS.md) to learn more about this feature.
 
 ### Removing an application
 This occurs when an application or a version of an application is removed from the the `DeploymentConfig.json` file. Each Yams instance terminates the process associated with the application.
@@ -164,6 +211,12 @@ The above instance status confirms that the listed applications are currently ru
 In addition to providing information about the status of the cluster, the deployment status blob can be used to monitor the health of YAMS nodes.
 
 Another main use case of the deployment status feature is to allow continueous deployment tools (e.g. VSTS) to ensure that the new version of a given application is up and running before finishing the deployment.
+
+The deployment status can be accessed using Powershell as follows:
+
+```powershell
+Get-DeploymentStatus -ConnectionString "MyConnectionString"
+```
 
 ## Health monitoring of applications and graceful shutdown
 
