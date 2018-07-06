@@ -80,7 +80,6 @@
     <Compile Include="Os\SystemExtensions.cs" />
     <Compile Include="Process\AbstractProcessDecorator.cs" />
     <Compile Include="Process\GracefullShutdownProcessDecorator.cs" />
-    <Compile Include="Process\IProcessInfo.cs" />
     <Compile Include="Process\MonitorInitProcessDecorator.cs" />
     <Compile Include="Process\HealthProcessDecorator.cs" />
     <Compile Include="Storage\Config\AppDeploymentConfig.cs" />

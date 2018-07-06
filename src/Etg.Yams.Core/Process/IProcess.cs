@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Etg.Yams.Process
 {
-    public interface IProcess : IProcessInfo, IDisposable
+    public interface IProcess : IDisposable
     {
         Task Start(string args);
 
@@ -18,18 +18,17 @@ namespace Etg.Yams.Process
         bool IsRunning { get; }
 
         event EventHandler<ProcessExitedArgs> Exited;
+
+        string ExePath { get; }
     }
 
     public class ProcessExitedArgs : EventArgs
     {
-        public ProcessExitedArgs(IProcessInfo processInfo, string message)
+        public ProcessExitedArgs(string message)
         {
-            ProcessInfo = processInfo;
             Message = message;
         }
 
         public string Message { get; private set; }
-
-        public IProcessInfo ProcessInfo { get; private set; }
     }
 }

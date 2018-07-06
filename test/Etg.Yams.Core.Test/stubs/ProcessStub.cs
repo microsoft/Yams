@@ -71,7 +71,7 @@ namespace Etg.Yams.Test.stubs
         {
             var failedEvent = Exited;
             if (failedEvent == null) return;
-            failedEvent(this, new ProcessExitedArgs(this, "process Exited event raised from stub"));
+            failedEvent(this, new ProcessExitedArgs("process Exited event raised from stub"));
         }
 
         public event EventHandler<ProcessExitedArgs> Exited;

@@ -119,7 +119,7 @@ namespace Etg.Yams.Process
             }
             string msg = $"{_identity} The process {_exePath} has exited with exit code {_process.ExitCode}";
             Trace.TraceInformation(msg);
-            handler(this, new ProcessExitedArgs(this, msg));
+            handler(this, new ProcessExitedArgs(msg));
         }
 
         public async Task ReleaseResources()

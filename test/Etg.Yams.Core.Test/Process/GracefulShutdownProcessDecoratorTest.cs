@@ -16,7 +16,7 @@ namespace Etg.Yams.Test.Process
             IIpcConnection connection = new StubIIpcConnection()
                 .SendMessage(message =>
                 {
-                    process.Exited_Raise(process, new ProcessExitedArgs(process, ""));
+                    process.Exited_Raise(process, new ProcessExitedArgs(""));
                     return Task.CompletedTask;
                 })
                 .Disconnect(() => Task.CompletedTask);

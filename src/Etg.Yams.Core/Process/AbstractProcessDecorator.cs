@@ -19,7 +19,6 @@ namespace Etg.Yams.Process
 
         public AppIdentity Identity { get; }
         public string ExePath => _process.ExePath;
-        public string ExeArgs => _process.ExeArgs;
         public bool HasExited => _process.HasExited;
         public bool IsRunning => _process.IsRunning;
 

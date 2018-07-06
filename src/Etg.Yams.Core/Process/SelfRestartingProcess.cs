@@ -30,7 +30,7 @@ namespace Etg.Yams.Process
 
         public Task Start(string args)
         {
-            _process.Exited += ExitedTryRestart;
+            _process.Exited += (s, e) => ExitedTryRestart(s, e, args);
             _stopped = false;
             return _process.Start(args);
         }
@@ -62,7 +62,7 @@ namespace Etg.Yams.Process
             get { return _restartCount;}
         }
 
-        protected async void ExitedTryRestart(object sender, ProcessExitedArgs args)
+        protected async void ExitedTryRestart(object sender, ProcessExitedArgs args, string exeArgs)
         {
             // _stopped indicates if the process has been manually stopped; in which case, it should not be restarted.
             if (_stopped) return;
@@ -77,7 +77,7 @@ namespace Etg.Yams.Process
             {
                 try
                 {
-                    await _process.Start(ExeArgs);
+                    await _process.Start(exeArgs);
                     ++_restartCount;
                 }
                 catch (Exception)
@@ -92,17 +92,12 @@ namespace Etg.Yams.Process
             Trace.TraceWarning(format, args);
             var failedEvent = Exited;
             if (failedEvent == null) return;
-            failedEvent(this, new ProcessExitedArgs(this, string.Format(format, args)));
+            failedEvent(this, new ProcessExitedArgs(string.Format(format, args)));
         }
 
         public string ExePath
         {
             get { return _process.ExePath; }
-        }
-
-        public string ExeArgs
-        {
-            get { return _process.ExeArgs; }
         }
 
         public void Dispose()

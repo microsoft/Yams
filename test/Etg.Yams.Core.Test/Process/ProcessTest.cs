@@ -98,7 +98,6 @@ namespace Etg.Yams.Test.Process
             IProcess suicidalProcess = new Yams.Process.Process(_fixture.SuicidalProcessIdentity, _fixture.SuicidalExePath, false, new Os.System());
             await suicidalProcess.Start(exeArgs);
             Assert.Equal(_fixture.SuicidalExePath, suicidalProcess.ExePath);
-            Assert.Equal($"{exeArgs} --AppName {_fixture.SuicidalProcessIdentity.Id} --AppVersion {_fixture.SuicidalProcessIdentity.Version}", suicidalProcess.ExeArgs);
         }
     }
 }

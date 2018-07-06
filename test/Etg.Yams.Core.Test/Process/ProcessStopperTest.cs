@@ -24,7 +24,6 @@ namespace Etg.Yams.Test.Process
                 })
                 .HasExited_Get(() => hasExited)
                 .ExePath_Get(() => "exePath")
-                .ExeArgs_Get(() => "exeArgs")
                 .ReleaseResources(() =>
                 {
                     resourcesReleased = true;
@@ -53,7 +52,6 @@ namespace Etg.Yams.Test.Process
                 })
                 .HasExited_Get(() => hasExited)
                 .ExePath_Get(() => "exePath")
-                .ExeArgs_Get(() => "exeArgs")
                 .ReleaseResources(() =>
                 {
                     resourcesReleased = true;
@@ -78,8 +76,7 @@ namespace Etg.Yams.Test.Process
                     throw new Exception("Process would not die!");
                 })
                 .HasExited_Get(() => false)
-                .ExePath_Get(() => "exePath")
-                .ExeArgs_Get(() => "exeArgs");
+                .ExePath_Get(() => "exePath");
 
             IProcessStopper processStopper = new ProcessStopper(0);
             processStopper.StopProcess(process);
